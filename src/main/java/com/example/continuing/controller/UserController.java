@@ -47,4 +47,20 @@ public class UserController {
 		}
 		return mv;
 	}
+	
+	@GetMapping("/setting") // "/User/setting"
+	public ModelAndView setting(ModelAndView mv) {
+		mv.setViewName("setting");
+		return mv;
+	}
+	
+	@GetMapping("/User/delete")
+	public String deleteUser() {
+		Integer id = (Integer)session.getAttribute("user_id");
+		usersRepository.deleteById(id);
+		// セッション情報をクリアする
+		session.invalidate();
+		return "redirect:/Meeting/list/all";
+	}
+	
 }
