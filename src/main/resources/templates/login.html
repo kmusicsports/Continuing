@@ -52,11 +52,11 @@
                                 <form th:action="@{/User/login}" method="post" class="user" th:object="${loginData}">
                                     <div class="form-group col-10 ms-auto me-auto">
                                         <input type="email" class="form-control mb-3" aria-describedby="emailHelp"
-                                            placeholder="メールアドレス" name="email" th:value="*{email}">
+                                            placeholder="メールアドレス" name="email" th:value="*{email}" required>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
                                         <input type="password" class="form-control mb-5" placeholder="パスワード"
-                                          name="password" th:value="*{password}">
+                                          name="password" th:value="*{password}" required>
                                     </div>
                                     <div class="text-center mb-5">
                                         <button type="submit" class="btn btn-primary ps-5 pe-5">
