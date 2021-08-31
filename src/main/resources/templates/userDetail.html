@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" th:object="${user}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,8 +9,8 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
-    <!-- <title>ユーザー詳細 - Continuing</title> -->
-    <title>マイページ - Continuing</title>
+    <title th:unless="${session.user_id == user.id}">ユーザー詳細 - Continuing</title>
+    <title th:if="${session.user_id == user.id}">マイページ - Continuing</title>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -64,20 +64,15 @@
             <button type="button" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100">
                     <img src="https://picsum.photos/20" alt="Avatar" class="avatar">
-                    <a href="#" class="text-reset fs-4 mt-2 ms-3">山田太郎</a>
+                    <a href="#" class="text-reset fs-4 mt-2 ms-3" th:text="*{name}"></a>
                     <div class="badge bg-info fs-6 m-3">
-                        <span>1</span>日継続!
+                        <span th:text="*{continuous_days}"></span>日継続!
                     </div>
-                    <!-- <input type="submit" value="フォロー" class="btn btn-outline-primary ms-auto me-2"> -->
+                    <input type="submit" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:unless="${session.user_id == user.id}">
                     <!-- <input type="submit" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2"> -->
-                    <input type="submit" value="プロフィールを編集" class="btn btn-outline-dark mt-2 ms-auto me-2">
+                    <input type="submit" value="プロフィールを編集" class="btn btn-outline-dark mt-2 ms-auto me-2" th:if="${session.user_id == user.id}">
                 </div>
-                <p class="ms-5 me-5 mt-2">
-                    プロフィールメッセージです。
-                    プロフィールメッセージです。
-                    プロフィールメッセージです。
-                    プロフィールメッセージです。
-                </p>
+                <p class="ms-5 me-5 mt-2" th:text="${user.profile_message}"></p>
                 <small>
                     <a th:href="@{/User/list/follows}" class="hide-text me-2"><span>?</span>フォロー</a>
                     <a th:href="@{/User/list/followers}" class="hide-text"><span>?</span>フォロワー</a>
