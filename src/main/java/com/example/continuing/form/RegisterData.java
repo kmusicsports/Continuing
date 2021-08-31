@@ -19,7 +19,13 @@ public class RegisterData {
 	public Users toEntity() {
 		Date date= new Date();
         Timestamp timestamp = new Timestamp(date.getTime());
-        Users user = new Users(null, this.name, this.email, this.password, null, null, null, timestamp, timestamp);
+        Users user = new Users();
+        user.setName(name);
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setContinuous_days(0);
+        user.setCreated_at(timestamp);
+        user.setUpdated_at(timestamp);
 		return user;
 	}
 }
