@@ -26,11 +26,11 @@ public class LoginService {
 			flag = false;
 		}
 		
-		if(!registerData.getPassword1().equals(registerData.getPassword2())) {
+		if(!registerData.getPassword().equals(registerData.getPasswordAgain())) {
 			// パスワード不一致
 			System.out.println("Error: パスワードが一致しません");
-			registerData.setPassword1(null);
-			registerData.setPassword2(null);
+			registerData.setPassword(null);
+			registerData.setPasswordAgain(null);
 			flag = false;
 		}
 		

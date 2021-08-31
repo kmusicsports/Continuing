@@ -12,14 +12,14 @@ public class RegisterData {
 
 	private String name;
 	private String email;
-	private String password1;
-	private String password2;
+	private String password;
+	private String passwordAgain;
 	private boolean checked;
 	
 	public Users toEntity() {
 		Date date= new Date();
         Timestamp timestamp = new Timestamp(date.getTime());
-        Users user = new Users(null, this.name, this.email, this.password1, null, null, null, timestamp, timestamp);
+        Users user = new Users(null, this.name, this.email, this.password, null, null, null, timestamp, timestamp);
 		return user;
 	}
 }
