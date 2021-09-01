@@ -63,21 +63,21 @@
         <form th:action="@{/User/updateForm}">
             <button type="button" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100">
-                    <div th:unless="*{profile_image} == null">
-                        <img th:src="*{profile_image}" alt="プロフィール画像" class="avatar">
+                    <div th:unless="*{profileImage} == null">
+                        <img th:src="*{profileImage}" alt="プロフィール画像" class="avatar">
                     </div>
-                    <div th:if="*{profile_image} == null">
+                    <div th:if="*{profileImage} == null">
                         <span class="avatar btn btn-light"></span>
                     </div>
                     <a href="#" class="text-reset fs-4 mt-2 ms-3" th:text="*{name}"></a>
                     <div class="badge bg-info fs-6 m-3">
-                        <span th:text="*{continuous_days}"></span>日継続!
+                        <span th:text="*{continuousDays}"></span>日継続!
                     </div>
                     <input type="submit" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:unless="${session.user_id == user.id}">
                     <!-- <input type="submit" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2"> -->
                     <input type="submit" value="プロフィールを編集" class="btn btn-outline-dark mt-2 ms-auto me-2" th:if="${session.user_id == user.id}">
                 </div>
-                <p class="ms-5 me-5 mt-2" th:text="${user.profile_message}"></p>
+                <p class="ms-5 me-5 mt-2" th:text="${user.profileMessage}"></p>
                 <small>
                     <a th:href="@{/User/list/follows}" class="hide-text me-2"><span>?</span>フォロー</a>
                     <a th:href="@{/User/list/followers}" class="hide-text"><span>?</span>フォロワー</a>

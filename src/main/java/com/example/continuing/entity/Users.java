@@ -31,17 +31,17 @@ public class Users {
 	private String password;
 	
 	@Column(name = "profile_image")
-	private String profile_image;
+	private String profileImage;
 	
 	@Column(name = "profile_message")
-	private String profile_message;
+	private String profileMessage;
 	
 	@Column(name = "continuous_days")
-	private Integer continuous_days;
+	private Integer continuousDays;
 	
 	@Column(name = "created_at")
-	private Timestamp created_at;
+	private Timestamp createdAt;
 	
 	@Column(name = "updated_at")
-	private Timestamp updated_at;
+	private Timestamp updatedAt;
 }

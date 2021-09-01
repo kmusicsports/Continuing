@@ -21,11 +21,11 @@ public class UserService {
 	public boolean isValid(ProfileData profileData, Users oldData) {
 		Boolean answer = true;
 		
-		if(!profileData.getNew_password().equals(profileData.getNew_password_again())) {
+		if(!profileData.getNewPassword().equals(profileData.getNewPasswordAgain())) {
 			// パスワード不一致
 			System.out.println("Error: パスワードが一致しません");
-			profileData.setNew_password(null);
-			profileData.setNew_password_again(null);
+			profileData.setNewPassword(null);
+			profileData.setNewPasswordAgain(null);
 			answer = false;
 		}
 		

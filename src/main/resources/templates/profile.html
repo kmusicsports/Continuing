@@ -62,10 +62,10 @@
                             <div class="p-5">
                                 <div class="text-center mb-3">
                                     <h2 class="mb-5">プロフィール</h2>
-                                    <div th:unless="*{profile_image} == null">
-  			                                <img th:src="*{profile_image}" alt="プロフィール画像" class="avatar mb-3">
+                                    <div th:unless="*{profileImage} == null">
+  			                                <img th:src="*{profileImage}" alt="プロフィール画像" class="avatar mb-3">
                                     </div>
-                                    <div th:if="*{profile_image} == null">
+                                    <div th:if="*{profileImage} == null">
                                         <span class="avatar btn btn-light mb-3"></span>
                                     </div>
                                 </div>
@@ -74,8 +74,8 @@
                                         <input type="file" class="form-control" name="file" placeholder="写真をアップロードする" required>
                                     </div>
                                     <div class="text-center">
-                                        <button type="submit" th:formaction="@{/User/profile_image/delete}" class="btn btn-outline-danger me-3">画像を削除</button>                                    	                                    
-                                        <button type="submit" th:formaction="@{/User/profile_image/upload}" class="btn btn-secondary">画像を変更</button>
+                                        <button type="submit" th:formaction="@{/User/profileImage/delete}" class="btn btn-outline-danger me-3">画像を削除</button>                                    	                                    
+                                        <button type="submit" th:formaction="@{/User/profileImage/upload}" class="btn btn-secondary">画像を変更</button>
                                     </div>
                                 </form>
                                 <hr>
@@ -88,14 +88,14 @@
                                         <input type="email" class="form-control mb-3" name="email" th:value="*{email}" placeholder="メールアドレス">
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto mb-3">
-                                        <textarea class="form-control" th:field="*{profile_message}"  placeholder="プロフィールメッセージ"></textarea>
+                                        <textarea class="form-control" th:field="*{profileMessage}" placeholder="プロフィールメッセージ"></textarea>
                                     </div>
                                     <label class="ms-5 mb-1">※パスワードを変更する場合のみ記入してください</label>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="password" class="form-control mb-3" name="new_password" th:value="*{new_password}" placeholder="新しいパスワード">
+                                        <input type="password" class="form-control mb-3" name="newPassword" th:value="*{newPassword}" placeholder="新しいパスワード">
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="password" class="form-control mb-5" name="new_password_again" th:value="*{new_password_again}" placeholder="新しいパスワードの確認">
+                                        <input type="password" class="form-control mb-5" name="newPasswordAgain" th:value="*{newPasswordAgain}" placeholder="新しいパスワードの確認">
                                     </div>
                                     <div class="text-center">
                                         <a th:href="@{/User/mypage}" class="btn btn-outline-secondary ps-5 pe-5">戻る</a>
