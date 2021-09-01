@@ -7,11 +7,13 @@ import javax.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.ProfileData;
 import com.example.continuing.repository.UsersRepository;
+import com.example.continuing.service.UserService;
 
 import lombok.AllArgsConstructor;
 
@@ -21,6 +23,7 @@ public class UserController {
 
 	private final UsersRepository usersRepository;
 	private final HttpSession session;
+	private final UserService userService;
 	
 	@GetMapping("/User/{id}")
 	public ModelAndView showUserDetail(ModelAndView mv, @PathVariable(name = "id") int id) {
@@ -71,6 +74,28 @@ public class UserController {
 		mv.setViewName("profile");
 		mv.addObject("profileData", new ProfileData(user));
 		return mv;
+	}
+	
+	@PostMapping("/User/update")
+	public String updateProfile(ProfileData profileData) {
+		Integer id = (Integer)session.getAttribute("user_id");
+		if(id == null) {
+			System.out.println("Error: ログインし直してください");
+			return "redirect:/User/showLogin";
+		} else {
+			Users oldData = usersRepository.findById(id).get();
+			// エラーチェック
+			boolean isValid = userService.isValid(profileData, oldData); 
+			if(isValid) {
+				// エラーなし -> 更新
+				Users user = profileData.toEntity(oldData);
+				usersRepository.saveAndFlush(user);
+				return "redirect:/User/mypage";
+			} else {
+				
+				return "redirect:/User/updateForm";
+			}			
+		}
 	}
 	
 }
