@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.example.continuing.entity.Users;
+import com.example.continuing.form.ProfileData;
 import com.example.continuing.repository.UsersRepository;
 
 import lombok.AllArgsConstructor;
@@ -61,6 +62,15 @@ public class UserController {
 		// セッション情報をクリアする
 		session.invalidate();
 		return "redirect:/Meeting/list/all";
+	}
+	
+	@GetMapping("/User/updateForm")
+	public ModelAndView updateProfileForm(ModelAndView mv) {
+		Integer id = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(id).get();
+		mv.setViewName("profile");
+		mv.addObject("profileData", new ProfileData(user));
+		return mv;
 	}
 	
 }
