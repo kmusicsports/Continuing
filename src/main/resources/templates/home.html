@@ -315,7 +315,12 @@
                 <form th:action="@{/}" method="get">
                     <button type="submit" th:formaction="@{/User/__${user.id}__}" class="list-group-item list-group-item-action">
                         <div class="d-flex w-100">
-                            <img src="https://picsum.photos/20" alt="Avatar" class="avatar">
+                            <div th:unless="${user.profile_image} == null">
+                                <img th:src="${user.profile_image}" alt="プロフィール画像" class="avatar">
+                            </div>
+                            <div th:if="${user.profile_image} == null">
+                                <span class="avatar btn btn-light"></span>
+                            </div>
                             <a th:href="@{/User/detail}" class="text-reset fs-4 mt-2 ms-3" th:text="${user.name}"></a>
                             <!-- <input type="submit" value="フォロー" class="btn btn-outline-primary ms-auto me-2"> -->
                             <input type="submit" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2">
