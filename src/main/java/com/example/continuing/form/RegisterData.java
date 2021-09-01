@@ -23,9 +23,9 @@ public class RegisterData {
         user.setName(name);
         user.setEmail(email);
         user.setPassword(password);
-        user.setContinuous_days(0);
-        user.setCreated_at(timestamp);
-        user.setUpdated_at(timestamp);
+        user.setContinuousDays(0);
+        user.setCreatedAt(timestamp);
+        user.setUpdatedAt(timestamp);
 		return user;
 	}
 }
