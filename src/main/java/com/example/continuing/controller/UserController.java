@@ -123,4 +123,22 @@ public class UserController {
 		}
     }
 	
+	@PostMapping("/User/profileImage/delete")
+	public String deleteProfileImage() {
+		Integer id = (Integer)session.getAttribute("user_id");
+		if(id == null) {
+			System.out.println("Error: ログインし直してください");
+			return "redirect:/User/showLogin";
+		} else {
+			Users user = usersRepository.findById(id).get();
+			String profile_image = user.getProfileImage();
+			if(profile_image != null) {
+				storageService.deleteFile(profile_image);
+			}
+			user.setProfileImage(null);
+			usersRepository.saveAndFlush(user);
+			return "redirect:/User/updateForm";			
+		}
+    }
+	
 }
