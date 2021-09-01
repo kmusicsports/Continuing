@@ -63,7 +63,12 @@
         <form th:action="@{/User/updateForm}">
             <button type="button" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100">
-                    <img src="https://picsum.photos/20" alt="Avatar" class="avatar">
+                    <div th:unless="*{profile_image} == null">
+                        <img th:src="*{profile_image}" alt="プロフィール画像" class="avatar">
+                    </div>
+                    <div th:if="*{profile_image} == null">
+                        <span class="avatar btn btn-light"></span>
+                    </div>
                     <a href="#" class="text-reset fs-4 mt-2 ms-3" th:text="*{name}"></a>
                     <div class="badge bg-info fs-6 m-3">
                         <span th:text="*{continuous_days}"></span>日継続!
