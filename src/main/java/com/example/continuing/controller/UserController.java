@@ -1,5 +1,6 @@
 package com.example.continuing.controller;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
@@ -15,6 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.ProfileData;
 import com.example.continuing.repository.UsersRepository;
+import com.example.continuing.service.FollowService;
 import com.example.continuing.service.StorageService;
 import com.example.continuing.service.UserService;
 
@@ -28,13 +30,17 @@ public class UserController {
 	private final HttpSession session;
 	private final UserService userService;
 	private final StorageService storageService;
+	private final FollowService followService;
 	
 	@GetMapping("/User/{id}")
 	public ModelAndView showUserDetail(ModelAndView mv, @PathVariable(name = "id") int id) {
 		Optional<Users> user = usersRepository.findById(id);
 		if(user.isPresent()) {
+			Integer userId = (Integer)session.getAttribute("user_id");
+			List<Integer> followeeIdList = followService.getFolloweeIdList(userId);
 			mv.setViewName("userDetail");
 			mv.addObject("user", user.get());
+			mv.addObject("followeeIdList", followeeIdList);
 		} else {
 			System.out.println("存在しないユーザーです");
 			mv.setViewName("redirect:/Meeting/list/all");
