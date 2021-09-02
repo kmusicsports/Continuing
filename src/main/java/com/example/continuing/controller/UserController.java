@@ -15,6 +15,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.ProfileData;
+import com.example.continuing.repository.FollowsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.StorageService;
@@ -31,6 +32,7 @@ public class UserController {
 	private final UserService userService;
 	private final StorageService storageService;
 	private final FollowService followService;
+	private final FollowsRepository followsRepository; 
 	
 	@GetMapping("/User/{id}")
 	public ModelAndView showUserDetail(ModelAndView mv, @PathVariable(name = "id") int id) {
@@ -71,6 +73,8 @@ public class UserController {
 	@GetMapping("/User/delete")
 	public String deleteUser() {
 		Integer id = (Integer)session.getAttribute("user_id");
+		followsRepository.deleteByFollowerId(id);
+		followsRepository.deleteByFolloweeId(id);
 		usersRepository.deleteById(id);
 		// セッション情報をクリアする
 		session.invalidate();
