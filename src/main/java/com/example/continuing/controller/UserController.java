@@ -34,15 +34,17 @@ public class UserController {
 	private final FollowService followService;
 	private final FollowsRepository followsRepository; 
 	
-	@GetMapping("/User/{id}")
-	public ModelAndView showUserDetail(ModelAndView mv, @PathVariable(name = "id") int id) {
-		Optional<Users> user = usersRepository.findById(id);
+	@GetMapping("/User/{user_id}")
+	public ModelAndView showUserDetail(ModelAndView mv, @PathVariable(name = "user_id") int userId) {
+		Optional<Users> user = usersRepository.findById(userId);
 		if(user.isPresent()) {
-			Integer userId = (Integer)session.getAttribute("user_id");
-			List<Integer> followeeIdList = followService.getFolloweeIdList(userId);
+			List<Users> followsList = followService.getFollowsList(userId);
+			List<Users> followersList = followService.getFollowersList(userId);
+			
 			mv.setViewName("userDetail");
-			mv.addObject("user", user.get());
-			mv.addObject("followeeIdList", followeeIdList);
+			mv.addObject("user", user.get());		
+			mv.addObject("followsList", followsList);
+			mv.addObject("followersList", followersList);
 		} else {
 			System.out.println("存在しないユーザーです");
 			mv.setViewName("redirect:/Meeting/list/all");
@@ -54,12 +56,17 @@ public class UserController {
 	public ModelAndView showMyPage(ModelAndView mv) {
 		Integer id = (Integer)session.getAttribute("user_id");
 		if(id == null) {
-			mv.setViewName("redirect:/User/showLogin");
 			System.out.println("Error: ログインし直してください");
+			mv.setViewName("redirect:/User/showLogin");
 		} else {
-			Users user = usersRepository.findById(id).get();
+			Users user = usersRepository.findById(id).get();			
+			List<Users> followsList = followService.getFollowsList(id);
+			List<Users> followersList = followService.getFollowersList(id);
+			
 			mv.setViewName("userDetail");
-			mv.addObject("user", user);			
+			mv.addObject("user", user);
+			mv.addObject("followsList", followsList);
+			mv.addObject("followersList", followersList);
 		}
 		return mv;
 	}
