@@ -6,7 +6,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.continuing.entity.Follows;
+import com.example.continuing.entity.Users;
 import com.example.continuing.repository.FollowsRepository;
+import com.example.continuing.repository.UsersRepository;
 
 import lombok.AllArgsConstructor;
 
@@ -15,17 +17,34 @@ import lombok.AllArgsConstructor;
 public class FollowService {
 	
 	private final FollowsRepository followsRepository;
-
-	// フォローしているユーザーアカウントのidリストを返す
-	public List<Integer> getFolloweeIdList(Integer followerId) {
-		List<Integer> followeeIdList = new ArrayList<>();
-		if (followerId != null) {
-			List<Follows> followList = followsRepository.findByFollowerId(followerId);
+	private final UsersRepository usersRepository;
+	
+	// フォロー中のユーザーアカウントのリストを返す
+	public List<Users> getFollowsList(Integer followerId) {
+		List<Users> followsList = new ArrayList<>();
+		List<Follows> followList = followsRepository.findByFollowerId(followerId);
+		if(!followList.isEmpty()) {
 			for(Follows follow : followList) {
-				followeeIdList.add(follow.getFolloweeId());
-			}
+				Users user = usersRepository.findById(follow.getFolloweeId()).get();
+				followsList.add(user);
+			}			
 		}
-		return followeeIdList;
+		
+		return followsList;
+	}
+	
+	// フォロー中のユーザーアカウントのリストを返す
+	public List<Users> getFollowersList(Integer followeeId) {
+		List<Users> followersList = new ArrayList<>();
+		List<Follows> followList = followsRepository.findByFolloweeId(followeeId);
+		if(!followList.isEmpty()) {
+			for(Follows follow : followList) {
+				Users user = usersRepository.findById(follow.getFollowerId()).get();
+				followersList.add(user);
+			}			
+		}
+		
+		return followersList;
 	}
 	
 }

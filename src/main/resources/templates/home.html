@@ -319,7 +319,7 @@
                             <div th:if="${user.profileImage} == null">
                                 <span class="avatar btn btn-light"></span>
                             </div>
-                            <a th:href="@{/User/detail}" class="text-reset fs-4 mt-2 ms-3" th:text="${user.name}"></a>
+                            <a th:href="@{/User/__${user.id}__}" class="text-reset fs-4 mt-2 ms-3" th:text="${user.name}"></a>
                             <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(followeeIdList, user.id)}">
                             <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(followeeIdList, user.id) && session.user_id != user.id}">
                         </div>
