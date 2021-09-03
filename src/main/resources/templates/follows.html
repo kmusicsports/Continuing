@@ -63,12 +63,12 @@
 
     <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link fs-5" id="pills-follows-tab" data-bs-toggle="pill" data-bs-target="#pills-follows" type="button" role="tab" aria-controls="pills-follow" aria-selected="false">
+            <button class="nav-link fs-5" id="pills-follows-tab" data-bs-toggle="pill" data-bs-target="#pills-follows" type="button" role="tab" aria-controls="pills-follow">
                 フォロー中
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fs-5 active" id="pills-followers-tab" data-bs-toggle="pill" data-bs-target="#pills-followers" type="button" role="tab" aria-controls="pills-follower" aria-selected="true">
+            <button class="nav-link fs-5" id="pills-followers-tab" data-bs-toggle="pill" data-bs-target="#pills-followers" type="button" role="tab" aria-controls="pills-follower">
                 フォロワー
             </button>
         </li>
@@ -76,47 +76,44 @@
     <hr class="mt-0">
     <div class="tab-content" id="pills-tabContent">
         <div class="tab-pane fade" id="pills-follows" role="tabpanel" aria-labelledby="pills-follows-tab">            
-            <div class="list-group">
-                <form th:action="@{/}">
-                    <button type="submit" th:formaction="@{/User/detail}" class="list-group-item list-group-item-action">
+            <div class="list-group" th:each="user : ${followsList}">
+                <form th:action="@{/}" method="get">
+                    <button type="submit" th:formaction="@{/User/__${user.id}__}" class="list-group-item list-group-item-action btn-send">
                         <div class="d-flex w-100">
-                            <img src="https://picsum.photos/20" alt="Avatar" class="avatar">
-                            <a th:href="@{/User/detail}"" class="text-reset fs-4 mt-2 ms-3">山田太郎</a>
-                            <!-- <input type="submit" value="フォロー" class="btn btn-outline-primary ms-auto me-2"> -->
-                            <input type="submit" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2">
+                            <div th:unless="${user.profileImage} == null">
+                                <img th:src="${user.profileImage}" alt="プロフィール画像" class="avatar">
+                            </div>
+                            <div th:if="${user.profileImage} == null">
+                                <span class="avatar btn btn-light"></span>
+                            </div>
+                            <a th:href="@{/User/__${user.id}__}" class="text-reset fs-4 mt-2 ms-3" th:text="${user.name}"></a>
+                            <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2">
                         </div>
-                        <p class="ms-5 me-5 mt-2">
-                            プロフィールメッセージです。
-                            プロフィールメッセージです。
-                            プロフィールメッセージです。
-                            プロフィールメッセージです。
-                        </p>
+                        <p class="ms-5 me-5 mt-2" th:text="${user.profileMessage}"></p>
                     </button>
                 </form>
             </div>
-            follows
         </div>
 
-        <div class="tab-pane fade show active" id="pills-followers" role="tabpanel" aria-labelledby="pills-followers-tab">
-            <div class="list-group">
-                <form th:action="@{/}">
-                    <button type="submit" th:formaction="@{/User/detail}" class="list-group-item list-group-item-action">
+        <div class="tab-pane fade" id="pills-followers" role="tabpanel" aria-labelledby="pills-followers-tab">
+            <div class="list-group" th:each="user : ${followersList}">
+                <form th:action="@{/}" method="get">
+                    <button type="submit" th:formaction="@{/User/__${user.id}__}" class="list-group-item list-group-item-action btn-send">
                         <div class="d-flex w-100">
-                            <img src="https://picsum.photos/20" alt="Avatar" class="avatar">
-                            <a th:href="@{/User/detail}" class="text-reset fs-4 mt-2 ms-3">山田太郎</a>
-                            <!-- <input type="submit" value="フォロー" class="btn btn-outline-primary ms-auto me-2"> -->
-                            <input type="submit" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2">
+                            <div th:unless="${user.profileImage} == null">
+                                <img th:src="${user.profileImage}" alt="プロフィール画像" class="avatar">
+                            </div>
+                            <div th:if="${user.profileImage} == null">
+                                <span class="avatar btn btn-light"></span>
+                            </div>
+                            <a th:href="@{/User/__${user.id}__}" class="text-reset fs-4 mt-2 ms-3" th:text="${user.name}"></a>
+                            <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(followsList, user)}">
+                            <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(followsList, user) && session.user_id != user.id}">
                         </div>
-                        <p class="ms-5 me-5 mt-2">
-                            プロフィールメッセージです。
-                            プロフィールメッセージです。
-                            プロフィールメッセージです。
-                            プロフィールメッセージです。
-                        </p>
+                        <p class="ms-5 me-5 mt-2" th:text="${user.profileMessage}"></p>
                     </button>
                 </form>
             </div>
-            followers
         </div>
 
     </div>
@@ -130,6 +127,9 @@
     <!-- Option 2: Separate Popper and Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js" integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/" crossorigin="anonymous"></script>
-
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" th:src="@{/js/follows.js}"></script>
 </body>
 </html>

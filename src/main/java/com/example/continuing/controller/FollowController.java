@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.example.continuing.entity.Follows;
+import com.example.continuing.entity.Users;
 import com.example.continuing.repository.FollowsRepository;
+import com.example.continuing.service.FollowService;
 
 import lombok.AllArgsConstructor;
 
@@ -21,6 +23,7 @@ public class FollowController {
 	
 	private final HttpSession session;
 	private final FollowsRepository followsRepository;
+	private final FollowService followService;
 
 	@GetMapping("/User/follow/{followee_id}")
 	public String follow(@PathVariable(name = "followee_id") int followeeId, HttpServletRequest request) {
@@ -54,15 +57,13 @@ public class FollowController {
 		}
 	}
 	
-	@GetMapping("/User/list/follows")
-	public ModelAndView showUserFollows(ModelAndView mv) {
+	@GetMapping("/User/{user_id}/list/follows")
+	public ModelAndView showUserFollows(@PathVariable(name = "user_id") int userId, ModelAndView mv) {
+		List<Users> followsList = followService.getFollowsList(userId);
+		List<Users> followersList = followService.getFollowersList(userId);
 		mv.setViewName("follows");
-		return mv;
-	}
-	
-	@GetMapping("/User/list/followers")
-	public ModelAndView showUserFollowers(ModelAndView mv) {
-		mv.setViewName("follows");
+		mv.addObject("followsList", followsList);
+		mv.addObject("followersList", followersList);
 		return mv;
 	}
 }
