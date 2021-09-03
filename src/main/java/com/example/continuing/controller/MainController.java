@@ -23,14 +23,14 @@ public class MainController {
 	private final HttpSession session;
 	private final FollowService followService;
 	
-	@GetMapping("/Meeting/list/all") // "/home"
+	@GetMapping("/Meeting/list/all") // "/"
 	public ModelAndView showHome(ModelAndView mv) {
 		List<Users> userList = usersRepository.findAll();
 		Integer userId = (Integer)session.getAttribute("user_id");
-		List<Integer> followeeIdList = followService.getFolloweeIdList(userId);
+		List<Users> followsList = followService.getFollowsList(userId);
 		mv.setViewName("home");
 		mv.addObject("userList", userList);
-		mv.addObject("followeeIdList", followeeIdList);
+		mv.addObject("followsList", followsList);
 		return mv;
 	}
 }
