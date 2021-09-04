@@ -17,16 +17,22 @@
     border-color: lightgray;
 }
 
-.card-title {
-    overflow: hidden;
-    white-space: nowrap;
+#nav-dropdown {
+	width: 64px;
+	border-radius: 0.5rem;
 }
 
-p {
+#nav-dropdown, p, .text-reset {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+h5 {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
 
 .hide-text {
     color: lightgray;
