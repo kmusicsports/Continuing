@@ -25,14 +25,14 @@ public class LoginController {
 	private final HttpSession session;
 	private final LoginService loginService;
 
-	@GetMapping("/User/showLogin")
+	@GetMapping("/showLogin")
 	public ModelAndView showLogin(ModelAndView mv) {
 		mv.setViewName("login");
 		mv.addObject("loginData", new LoginData());
 		return mv;
 	}
 	
-	@PostMapping("/User/login")
+	@PostMapping("/login")
 	public ModelAndView login(LoginData loginData, ModelAndView mv) {
 		Optional<Users> someUser = usersRepository.findByEmail(loginData.getEmail());
     	someUser
@@ -42,43 +42,47 @@ public class LoginController {
     			// パスワードが正しいか？
     			if (loginData.getPassword().equals(user.getPassword())) {
     				session.setAttribute("user_id", user.getId());
-    				mv.setViewName("redirect:/Meeting/list/all");
+    				session.setAttribute("user_name", user.getName());
+    				mv.setViewName("redirect:/home");
+    			} else {
+    				System.out.println("パスワードが違います。");
+        			mv.setViewName("redirect:/showLogin");
     			}
     		}, () -> {
     			// userが存在しない
-    			mv.setViewName("redirect:/User/showLogin");
+    			System.out.println("ユーザーアカウントが見つかりませんでした。");
+    			mv.setViewName("redirect:/showLogin");
     		});
     	return mv;
 	}
 	
-	@GetMapping("/User/logout")
+	@GetMapping("/logout")
 	public String logout() {
 		// セッション情報をクリアする
 		session.invalidate();
-		return "redirect:/User/showLogin";
+		return "redirect:/showLogin";
 	}
-
-	@GetMapping("/User/showRegister")
+	
+	@GetMapping("/showRegister")
 	public ModelAndView showRegister(ModelAndView mv) {
 		mv.setViewName("register");
 		mv.addObject("registerData", new RegisterData());
 		return mv;
 	}
 	
-	@PostMapping("/User/regist")
+	@PostMapping("/regist")
 	public ModelAndView regist(RegisterData registerData, ModelAndView mv) {
-
 		// エラーチェック
 		boolean isValid = loginService.isValid(registerData);
 		if(isValid) {
 			// ユーザー新規登録
 			Users newUser = registerData.toEntity();
 			usersRepository.saveAndFlush(newUser);
-			mv.setViewName("redirect:/User/showLogin");
 			System.out.println("ユーザーアカウントが正常に登録されました。");
+			mv.setViewName("redirect:/showLogin");
 		} else {
-			mv.setViewName("register");
 			registerData.setChecked(false);
+			mv.setViewName("register");
 			mv.addObject("registerData", registerData);
 		}
 		return mv;

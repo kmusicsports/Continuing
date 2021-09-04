@@ -1,5 +1,7 @@
 package com.example.continuing.common;
 
+import javax.servlet.http.HttpServletRequest;
+
 public class Utils {
 
 	/**
@@ -38,5 +40,11 @@ public class Utils {
             }
         }
         return true;
+    }
+    
+    public static String getHeaderPath(HttpServletRequest request) {
+    	String header = request.getHeader("REFERER");
+		String headerPath = header.substring(header.indexOf("/", 10));
+		return headerPath;
     }
 }

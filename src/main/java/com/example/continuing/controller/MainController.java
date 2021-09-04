@@ -26,18 +26,23 @@ public class MainController {
 	private final FollowService followService;
 	private final TopicsRepository topicsRepository;
 	
-	@GetMapping("/Meeting/list/all") // "/"
+	@GetMapping("/")
+	public String showHome() {
+		return "redirect:/home";
+	}
+	
+	@GetMapping("/home")
 	public ModelAndView showHome(ModelAndView mv) {
 		List<Users> userList = usersRepository.findAll();
 		
 		Integer userId = (Integer)session.getAttribute("user_id");
-		List<Users> followsList = followService.getFollowsList(userId);
+		List<Users> myFollowsList = followService.getFollowsList(userId);
 		
 		List<Topics> topicList = topicsRepository.findAll();
 		
 		mv.setViewName("home");
 		mv.addObject("userList", userList);
-		mv.addObject("followsList", followsList);
+		mv.addObject("myFollowsList", myFollowsList);
 		mv.addObject("topicList", topicList);
 		return mv;
 	}
