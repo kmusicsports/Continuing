@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <nav th:fragment="navbar_area" class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold fs-3 text-secondary" th:href="@{/home}">Continuing</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <form class="d-flex ms-auto">
+                    <input class="form-control me-2" type="search" placeholder="キーワード検索">
+                </form>
+                <div th:if="${session.user_id == null}">
+                    <ul class="navbar-nav mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" th:href="@{/showLogin}">ログイン</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/showRegister}">新規登録</a>
+                        </li>
+                    </ul>
+                </div>
+                <div th:unless="${session.user_id == null}">
+                    <ul class="navbar-nav mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link ms-2 me-2" aria-current="page" th:href="@{/Meeting/createForm}">
+                                <i class="fas fa-plus"></i>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <button type="button" class="btn btn-secondary dropdown-toggle" id="nav-dropdown" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" th:text="${session.user_name}"></button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                                <li><a class="dropdown-item" th:href="@{/User/mypage}">マイページ</a></li>
+                                <li><a class="dropdown-item" th:href="@{/Meeting/list/mine/today}">今日参加予定のミーティング</a></li>
+                                <li><a class="dropdown-item" th:href="@{/User/setting}">設定</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" th:href="@{/logout}">ログアウト</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+</body>
+</html>
