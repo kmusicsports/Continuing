@@ -41,37 +41,36 @@ public class UserController {
 			List<Users> followsList = followService.getFollowsList(userId);
 			List<Users> followersList = followService.getFollowersList(userId);
 			
+			Integer myId = (Integer)session.getAttribute("user_id");
+			List<Users> myFollowsList = followService.getFollowsList(myId);
 			mv.setViewName("userDetail");
 			mv.addObject("user", user.get());		
 			mv.addObject("followsList", followsList);
 			mv.addObject("followersList", followersList);
+			mv.addObject("myFollowsList", myFollowsList);
 		} else {
 			System.out.println("存在しないユーザーです");
-			mv.setViewName("redirect:/Meeting/list/all");
+			mv.setViewName("redirect:/home");
 		}
 		return mv;
 	}
 	
 	@GetMapping("/User/mypage")
 	public ModelAndView showMyPage(ModelAndView mv) {
-		Integer id = (Integer)session.getAttribute("user_id");
-		if(id == null) {
-			System.out.println("Error: ログインし直してください");
-			mv.setViewName("redirect:/User/showLogin");
-		} else {
-			Users user = usersRepository.findById(id).get();			
-			List<Users> followsList = followService.getFollowsList(id);
-			List<Users> followersList = followService.getFollowersList(id);
-			
-			mv.setViewName("userDetail");
-			mv.addObject("user", user);
-			mv.addObject("followsList", followsList);
-			mv.addObject("followersList", followersList);
-		}
+		Integer userId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(userId).get();			
+		List<Users> followsList = followService.getFollowsList(userId);
+		List<Users> followersList = followService.getFollowersList(userId);
+		
+		mv.setViewName("userDetail");
+		mv.addObject("user", user);
+		mv.addObject("followsList", followsList);
+		mv.addObject("followersList", followersList);
+		mv.addObject("myFollowsList", followsList);
 		return mv;
 	}
 	
-	@GetMapping("/setting") // "/User/setting"
+	@GetMapping("/User/setting")
 	public ModelAndView setting(ModelAndView mv) {
 		mv.setViewName("setting");
 		return mv;
@@ -79,19 +78,20 @@ public class UserController {
 	
 	@GetMapping("/User/delete")
 	public String deleteUser() {
-		Integer id = (Integer)session.getAttribute("user_id");
-		followsRepository.deleteByFollowerId(id);
-		followsRepository.deleteByFolloweeId(id);
-		usersRepository.deleteById(id);
+		Integer userId = (Integer)session.getAttribute("user_id");
+		followsRepository.deleteByFollowerId(userId);
+		followsRepository.deleteByFolloweeId(userId);
+		usersRepository.deleteById(userId);		
 		// セッション情報をクリアする
 		session.invalidate();
-		return "redirect:/Meeting/list/all";
+		return "redirect:/home";
 	}
+	
 	
 	@GetMapping("/User/updateForm")
 	public ModelAndView updateProfileForm(ModelAndView mv) {
-		Integer id = (Integer)session.getAttribute("user_id");
-		Users user = usersRepository.findById(id).get();
+		Integer userId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(userId).get();
 		mv.setViewName("profile");
 		mv.addObject("profileData", new ProfileData(user));
 		return mv;
@@ -99,12 +99,12 @@ public class UserController {
 	
 	@PostMapping("/User/update")
 	public String updateProfile(ProfileData profileData) {
-		Integer id = (Integer)session.getAttribute("user_id");
-		if(id == null) {
+		Integer userId = (Integer)session.getAttribute("user_id");
+		if(userId == null) {
 			System.out.println("Error: ログインし直してください");
 			return "redirect:/User/showLogin";
 		} else {
-			Users oldData = usersRepository.findById(id).get();
+			Users oldData = usersRepository.findById(userId).get();
 			// エラーチェック
 			boolean isValid = userService.isValid(profileData, oldData); 
 			if(isValid) {
@@ -121,41 +121,37 @@ public class UserController {
 	
 	@PostMapping("/User/profileImage/upload")
 	public String uploadProfileImage(@RequestParam(value = "file") MultipartFile file) {
-		Integer id = (Integer)session.getAttribute("user_id");
-		if(id == null) {
-			System.out.println("Error: ログインし直してください");
-			return "redirect:/User/showLogin";
-		} else {
-			Users user = usersRepository.findById(id).get();
-			// 既にプロフィール画像があれば、それをS3から削除する
-			String oldProfileImage = user.getProfileImage();
-			if(oldProfileImage != null) {
-				storageService.deleteFile(oldProfileImage);
-			}
-			// アップロード & 変更
-			String profile_image = storageService.uploadFile(file);
-			user.setProfileImage(profile_image);
-			usersRepository.saveAndFlush(user);
-			return "redirect:/User/updateForm";			
+		Integer userId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(userId).get();
+		// 既にプロフィール画像があれば、それをS3から削除する
+		String oldProfileImage = user.getProfileImage();
+		if(oldProfileImage != null) {
+			storageService.deleteFile(oldProfileImage);
 		}
+		// アップロード & 変更
+		String profile_image = storageService.uploadFile(file);
+		user.setProfileImage(profile_image);
+		usersRepository.saveAndFlush(user);
+		return "redirect:/User/updateForm";
     }
 	
 	@PostMapping("/User/profileImage/delete")
 	public String deleteProfileImage() {
 		Integer id = (Integer)session.getAttribute("user_id");
-		if(id == null) {
-			System.out.println("Error: ログインし直してください");
-			return "redirect:/User/showLogin";
-		} else {
-			Users user = usersRepository.findById(id).get();
-			String profile_image = user.getProfileImage();
-			if(profile_image != null) {
-				storageService.deleteFile(profile_image);
-			}
-			user.setProfileImage(null);
-			usersRepository.saveAndFlush(user);
-			return "redirect:/User/updateForm";			
+		Users user = usersRepository.findById(id).get();
+		String profile_image = user.getProfileImage();
+		if(profile_image != null) {
+			storageService.deleteFile(profile_image);
 		}
+		user.setProfileImage(null);
+		usersRepository.saveAndFlush(user);
+		return "redirect:/User/updateForm";
     }
+
+	@GetMapping("/User/list/ranking")
+	public ModelAndView showUserRanking(ModelAndView mv) {
+		mv.setViewName("userRanking");
+		return mv;
+	}
 	
 }
