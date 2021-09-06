@@ -28,112 +28,89 @@
                                 <div class="text-center">
                                     <h2 class="mb-4">ミーティング</h2>
                                 </div>
-                                <form class="user">
+                                <form th:action="@{/}" method="post" th:object="${meetingData}">
                                     <div class="mb-3 row">
                                         <label class="col-sm-2 col-form-label">トピック</label>
                                         <div class="col-sm-10">
-                                            <select class="form-select">
-                                                <option selected>Open this select menu</option>
-                                                <option value="1">One</option>
-                                                <option value="2">Two</option>
-                                                <option value="3">Three</option>
+                                            <select class="form-select" name="topicName">
+                                                <option value="0" th:field="*{topicName}">選択してください</option>
+                                                <option th:each="topic : ${topicList}" th:value="${topic.name}" th:text="${topic.name}" th:field="*{topicName}" th:selected="${topicName == topic.name ? 'true' : 'flase'}"></option>
                                             </select>
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
                                         <label class="col-sm-2 col-form-label">説明</label>
                                         <div class="col-sm-10">
-                                            <textarea class="form-control" rows="3"></textarea>
+                                            <textarea class="form-control" rows="3" name="agenda" th:value="*{agenda}" required></textarea>
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
                                         <label class="col-sm-2 col-form-label">パスワード</label>
                                         <div class="col-sm-10">
-                                            <input type="password" class="form-control">
+                                            <input type="password" class="form-control" name="password" th:value="*{password}" required>
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
                                         <label class="col-sm-2 col-form-label">パスワードの確認</label>
                                         <div class="col-sm-10">
-                                            <input type="password" class="form-control mt-2">
+                                            <input type="password" class="form-control" name="passwordAgain" th:value="*{passwordAgain}" required>
                                         </div>
                                     </div>
-                                    <div class="mb-3">
-                                        <span class="me-5">作成タイプ</span>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input ms-1" type="radio" name="inlineRadioOptions" value="option1">
-                                            <label class="form-check-label">今すぐ開始</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions" value="option2">
-                                            <label class="form-check-label">日時指定</label>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3">
-                                        <span class="me-5">人数 　　</span>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input ms-1" type="radio" name="inlineRadioOptions" value="option1">
-                                            <label class="form-check-label">1対1 　　</label>
-                                        </div>
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="inlineRadioOptions" value="option2">
-                                            <label class="form-check-label">複数(～40分)</label>
+                                    <div class="mb-3 row">
+                                        <span class="col-sm-2 col-form-label">人数 　　</span>
+                                        <div class="col-sm-10 mt-2">
+		                                        <div class="form-check form-check-inline">
+		                                            <input class="form-check-input" type="radio" value="1" th:field="*{numberPeople}">
+		                                            <label class="form-check-label">1対1 　　</label>
+		                                        </div>
+		                                        <div class="form-check form-check-inline">
+		                                            <input class="form-check-input" type="radio" value="2" th:field="*{numberPeople}">
+		                                            <label class="form-check-label">複数(～40分)</label>
+		                                        </div>                                        
                                         </div>
                                     </div>
-
-                                    <!-- <div class="mt-5 mb-5 row">
-                                        <label class="col-sm-2 col-form-label">ミーティング時間（0.5ずつ）</label>
-                                        <div class="col-8 mt-2">
-                                            <input type="number" class="form-control" min="0.5" max="30.0" step="0.5" placeholder="1.5">
-                                        </div>
-                                        <label class="col-2 mt-3">時間</label>
-                                    </div> -->
-                                    <div class="mt-5 mb-5 row">
-                                        <label class="col-sm-2 col-form-label">ミーティング時間</label>
-                                        <div class="col-8">
-                                            <select class="form-select" aria-label="Default select example">
-                                                <option selected>Open this select menu</option>
-                                                <option value="1">10</option>
-                                                <option value="2">20</option>
-                                                <option value="3">30</option>
-                                                <option value="3">40</option>
-                                            </select>
-                                        </div>
-                                        <label class="col-2 mt-2">分</label>
-                                    </div>
-                                    <!-- <div>
+                                    <div class="mb-3 row">
                                         <div class="input-group date mb-3" id="datePicker" data-target-input="nearest">
-                                            <label class="pt-1 pr-2 me-2">日付</label>
-                                            <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#datePicker"/>
-                                            <div class="input-group-append" data-target="#datePicker" data-toggle="datetimepicker">
-                                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                            <label class="col-sm-2 col-12 col-form-label">日付</label>
+                                            <div class="col-sm-10 col-12 d-flex">
+		                                            <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#datePicker" name="date" th:value="*{date}" required>
+		                                            <div class="input-group-append" data-target="#datePicker" data-toggle="datetimepicker">
+		                                                <div class="input-group-text"><i class="fa fa-calendar pt-1 pb-1"></i></div>
+		                                            </div>                                            
                                             </div>
                                         </div>
-                                        <div class="input-group date mb-3" id="timePicker1" data-target-input="nearest">
-                                            <label class="pt-1 pr-2 me-2">時間</label>
-                                            <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#timePicker1"/>
-                                            <div class="input-group-text" data-target="#timePicker1" data-toggle="datetimepicker">
-                                                <i class="fa fa-clock"></i>
+                                    </div>
+                                    <div class="mb-3 row">
+                                        <div class="input-group date mb-3" id="startTimePicker" data-target-input="nearest">
+                                            <label class="col-sm-2 col-12 col-form-label">開始時刻</label>
+                                            <div class="col-sm-10 col-12 d-flex">
+		                                            <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#startTimePicker" name="startTime" th:value="*{startTime}" required>
+		                                            <div class="input-group-text" data-target="#startTimePicker" data-toggle="datetimepicker">
+		                                                <i class="fa fa-clock"></i>
+		                                            </div>
                                             </div>
                                         </div>
-                                        <div class="input-group date mb-4" id="timePicker2" data-target-input="nearest">
-                                            <label class="pt-1 pr-2 me-2">　　～</label>
-                                            <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#timePicker2"/>
-                                            <div class="input-group-text" data-target="#timePicker2" data-toggle="datetimepicker">
-                                                <i class="fa fa-clock"></i>
+                                   </div>
+                                   <div class="mb-3 row">
+                                        <div class="input-group date mb-3" id="endTimePicker" data-target-input="nearest">
+                                            <label class="col-sm-2 col-12 col-form-label">終了時刻</label>
+                                            <div class="col-sm-10 col-12 d-flex">
+                                                <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#endTimePicker" name="endTime" th:value="*{endTime}" required>
+                                                <div class="input-group-text" data-target="#endTimePicker" data-toggle="datetimepicker">
+                                                    <i class="fa fa-clock"></i>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div> -->
-
+                                   </div>
                                     <div class="text-center">
-                                        <a href="#" class="btn btn-primary ps-5 pe-5">
+                                        <button type="submit" th:formaction="@{/Meeting/create}" class="btn btn-primary ps-5 pe-5">
                                             作成する
-                                        </a>
+                                        </button>
                                     </div>
                                     <!-- <div class="text-center">
-                                        <a href="#" class="btn btn-primary ps-5 pe-5">
+                                        <button type="submit" th:formaction="@{/Meeting/update}" class="btn btn-primary ps-5 pe-5">
                                             変更する
-                                        </a>
+                                        </button>
                                     </div> -->
                                 </form>
                             </div>
@@ -162,8 +139,8 @@
     <script>
         $(function () {
             $('#datePicker').datetimepicker({locale: 'ja', dayViewHeaderFormat: 'YYYY年M月' ,format: 'YYYY/MM/DD'});
-            $('#timePicker1').datetimepicker({locale: 'ja', format: 'HH:mm'});
-            $('#timePicker2').datetimepicker({locale: 'ja', format: 'HH:mm'});
+            $('#startTimePicker').datetimepicker({locale: 'ja', format: 'HH:mm'});
+            $('#endTimePicker').datetimepicker({locale: 'ja', format: 'HH:mm'});
         });
     </script>
 </body>
