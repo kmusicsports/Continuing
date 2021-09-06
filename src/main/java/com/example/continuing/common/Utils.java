@@ -67,4 +67,10 @@ public class Utils {
     	return dateString;
     }
     
+    public static int stringToInt(String time) {
+    	int hour = Integer.valueOf(time.charAt(0) + time.charAt(1));
+    	int minute = Integer.valueOf(time.charAt(3) + time.charAt(4));
+    	return hour * 60 + minute;
+    }
+    
 }
