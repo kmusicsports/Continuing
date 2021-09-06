@@ -1,5 +1,10 @@
 package com.example.continuing.common;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
 import javax.servlet.http.HttpServletRequest;
 
 public class Utils {
@@ -47,4 +52,19 @@ public class Utils {
 		String headerPath = header.substring(header.indexOf("/", 10));
 		return headerPath;
     }
+    
+    public static String changeTimeZone(String dateString) {
+    	try {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+			Date date = sdf.parse(dateString);
+			sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+			dateString = sdf.format(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+    	
+    	return dateString;
+    }
+    
 }
