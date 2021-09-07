@@ -60,7 +60,7 @@ public class CreateMeetingController {
 	@PostMapping("/Meeting/create")
 	public void createRedirect(MeetingData meetingData, HttpServletResponse response) {
 		// エラーチェック
-		boolean isValid = meetingService.isValid(meetingData);
+		boolean isValid = meetingService.isValid(meetingData, true);
 		if(isValid) {
 			System.out.println("---create meeting api request");
 			System.out.println("--Zoom 会議作成");

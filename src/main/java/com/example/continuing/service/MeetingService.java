@@ -12,7 +12,7 @@ import com.example.continuing.form.MeetingData;
 public class MeetingService {
 
 	// ミーティングフォーム用のチェック
-	public boolean isValid(MeetingData meetingData) {
+	public boolean isValid(MeetingData meetingData, boolean isCreate) {
 		Boolean answer = true;
 		
 		if(meetingData.getTopicName().equals("0")) {
@@ -43,12 +43,12 @@ public class MeetingService {
 		}
 		
 		String date = meetingData.getDate().replace("/", "-");
-		LocalDate today = LocalDate.now();
         LocalDate localeDate = null;
         try {
+        	LocalDate today = LocalDate.now();
             // parseできればyyyy-mm-dd形式とみなす
         	localeDate = LocalDate.parse(date);
-            if (localeDate.isBefore(today)) {
+            if (isCreate && localeDate.isBefore(today)) {
                 // 過去日付なのでfalse
             	System.out.println("今日以降の日付を入力してください");
                 answer =  false;
