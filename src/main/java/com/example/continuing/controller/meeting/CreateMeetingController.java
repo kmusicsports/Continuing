@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.example.continuing.dto.MeetingDto;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Topics;
 import com.example.continuing.form.MeetingData;
@@ -38,7 +37,7 @@ public class CreateMeetingController {
 	private final MeetingService meetingService;
 	private final HttpSession session;
 	private final MeetingsRepository meetingsRepository;
-	private MeetingDto meetingDto = new MeetingDto(); 
+	private MeetingData meetingData = new MeetingData(); 
 	private ZoomApiIntegration zoomApiIntegration;
 
 	@Autowired
@@ -65,7 +64,7 @@ public class CreateMeetingController {
 		if(isValid) {
 			System.out.println("---create meeting api request");
 			System.out.println("--Zoom 会議作成");
-			meetingDto = meetingData.toDto();
+			this.meetingData = meetingData;
 			
 			// 会議作成状態に設定
 			ZoomDetails.setZOOM_STATE("zoom_create");
@@ -85,9 +84,9 @@ public class CreateMeetingController {
 	@RequestMapping(value = "/create/meeting/redirect", method = { RequestMethod.GET, RequestMethod.POST })
 	public ModelAndView createMeeting(@RequestParam String code, @RequestParam String state, ModelAndView mv) throws IOException {
 		try {
-			System.out.println("会議作成　成功");
+			System.out.println("会議を作成しました");
 			OAuth2AccessToken oauthToken = zoomApiIntegration.getAccessToken(session, code, state);
-			String apiResult = zoomApiIntegration.createMeeting(oauthToken, meetingDto);
+			String apiResult = zoomApiIntegration.createMeeting(oauthToken, meetingData.toDto());
 			System.out.println("apiResult: " + apiResult);
 			
 			// Json 配列から Json Objectに変換
@@ -96,15 +95,15 @@ public class CreateMeetingController {
 			System.out.println("JsonObject result: " + jsonObject);
 			
 			Integer userId = (Integer)session.getAttribute("user_id");
-			Meetings meeting = new Meetings(jsonObject, userId, meetingDto.getNumberPeople());
+			Meetings meeting = meetingData.toEntity(jsonObject, userId);
 			meetingsRepository.saveAndFlush(meeting);
 			
 			mv.setViewName("redirect:/User/mypage");
 //			mv.setViewName("redirect:/Meeting/" + meeting.getId());
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.out.println("会議の作成に失敗しました");
 			mv.setViewName("redirect:/User/mypage");
-//			mv.setViewName("redirect:/User/mypage");
 		} 
 		return mv;
 	}
