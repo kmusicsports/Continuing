@@ -3,19 +3,14 @@ package com.example.continuing.common;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 
 public class Utils {
+	
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
-	/**
-     * 引数が全角SPACEだけで構成されていればtrueを返す
-     * 
-     * @param s チェック対象
-     * @return true:全角SPACEのみ, "", null false:左記以外
-     */
-    public static boolean isAllDoubleSpace(String s) {
+	public static boolean isAllDoubleSpace(String s) {
         if (s == null || s.equals("")) {
             return true;
         }
@@ -28,19 +23,13 @@ public class Utils {
         return true;
     }
 
-    /**
-     * 引数が"" or 半角SPACE/TABだけで構成されているならtrueを返す
-     * 
-     * @param s チェック対象
-     * @return true:半角SPACE/TABのみ or "", null, false:左記以外
-     */
     public static boolean isBlank(String s) {
         if (s == null || s.equals("")) {
             return true;
         }
 
         for (int i = 0; i < s.length(); i++) {
-            if (s.charAt(i) != ' ' && s.charAt(i) != '\t') {// 半角SPACE
+            if (s.charAt(i) != ' ' && s.charAt(i) != '\t') { // 半角SPACE
                 return false;
             }
         }
@@ -53,24 +42,24 @@ public class Utils {
 		return headerPath;
     }
     
-    public static String changeTimeZone(String dateString) {
-    	try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-			Date date = sdf.parse(dateString);
-			sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-			dateString = sdf.format(date);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-    	
-    	return dateString;
-    }
-    
-    public static int stringToInt(String time) {
+    public static int string2Int(String time) {
     	int hour = Integer.valueOf(time.charAt(0) + time.charAt(1));
     	int minute = Integer.valueOf(time.charAt(3) + time.charAt(4));
     	return hour * 60 + minute;
     }
     
+    public static Date str2date(String s) {
+    	Date date = null;
+        try {
+            long ms = sdf.parse(s).getTime();
+            // yyyy-MM-ddで解釈できた場合
+            date = new Date(ms);
+
+        } catch (ParseException e) {
+            // 変換できなかった場合
+            // date は null のまま
+        }
+        
+        return date;
+    }
 }
