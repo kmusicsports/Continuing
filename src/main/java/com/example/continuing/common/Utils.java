@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 public class Utils {
 	
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	private static final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
 
 	public static boolean isAllDoubleSpace(String s) {
         if (s == null || s.equals("")) {
@@ -61,5 +62,14 @@ public class Utils {
         }
         
         return date;
+    }
+    
+    public static boolean checkTimeFormat(String s) {
+        try {
+            stf.parse(s).getTime();
+            return true;
+        } catch (ParseException e) {
+            return false;
+        }
     }
 }
