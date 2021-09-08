@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -22,8 +24,9 @@ public class Meetings {
 	@Column(name = "id")
 	private Integer id;
 	
-	@Column(name = "host_id")
-	private Integer hostId;
+	@ManyToOne
+    @JoinColumn(name = "host_id")
+	private Users host;
 	
 	@Column(name = "number_people")
     private Integer numberPeople;

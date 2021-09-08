@@ -19,9 +19,11 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Topics;
+import com.example.continuing.entity.Users;
 import com.example.continuing.form.MeetingData;
 import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.TopicsRepository;
+import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.MeetingService;
 import com.example.continuing.zoom.ZoomApiIntegration;
 import com.example.continuing.zoom.ZoomDetails;
@@ -39,6 +41,7 @@ public class CreateMeetingController {
 	private final MeetingsRepository meetingsRepository;
 	private MeetingData meetingData = new MeetingData(); 
 	private ZoomApiIntegration zoomApiIntegration;
+	private final UsersRepository usersRepository;
 
 	@Autowired
 	private void setZoomApiIntegration(ZoomApiIntegration zoomApiIntegration) {
@@ -60,7 +63,7 @@ public class CreateMeetingController {
 	@PostMapping("/Meeting/create")
 	public void createRedirect(MeetingData meetingData, HttpServletResponse response) {
 		// エラーチェック
-		boolean isValid = meetingService.isValid(meetingData);
+		boolean isValid = meetingService.isValid(meetingData, true);
 		if(isValid) {
 			System.out.println("---create meeting api request");
 			System.out.println("--Zoom 会議作成");
@@ -95,7 +98,8 @@ public class CreateMeetingController {
 			System.out.println("JsonObject result: " + jsonObject);
 			
 			Integer userId = (Integer)session.getAttribute("user_id");
-			Meetings meeting = meetingData.toEntity(jsonObject, userId);
+			Users user = usersRepository.findById(userId).get();
+			Meetings meeting = meetingData.toEntity(jsonObject, user);
 			meetingsRepository.saveAndFlush(meeting);
 			
 			mv.setViewName("redirect:/User/mypage");
