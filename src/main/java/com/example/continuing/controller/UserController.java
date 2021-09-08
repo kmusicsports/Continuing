@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.ProfileData;
 import com.example.continuing.repository.FollowsRepository;
+import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.StorageService;
@@ -33,6 +35,7 @@ public class UserController {
 	private final StorageService storageService;
 	private final FollowService followService;
 	private final FollowsRepository followsRepository; 
+	private final MeetingsRepository meetingsRepository;
 	
 	@GetMapping("/User/{user_id}")
 	public ModelAndView showUserDetail(ModelAndView mv, @PathVariable(name = "user_id") int userId) {
@@ -40,6 +43,7 @@ public class UserController {
 		if(user.isPresent()) {
 			List<Users> followsList = followService.getFollowsList(userId);
 			List<Users> followersList = followService.getFollowersList(userId);
+			List<Meetings> meetingList = meetingsRepository.findByHost(user.get());
 			
 			Integer myId = (Integer)session.getAttribute("user_id");
 			List<Users> myFollowsList = followService.getFollowsList(myId);
@@ -48,6 +52,7 @@ public class UserController {
 			mv.addObject("followsList", followsList);
 			mv.addObject("followersList", followersList);
 			mv.addObject("myFollowsList", myFollowsList);
+			mv.addObject("meetingList", meetingList);
 		} else {
 			System.out.println("存在しないユーザーです");
 			mv.setViewName("redirect:/home");
@@ -61,12 +66,14 @@ public class UserController {
 		Users user = usersRepository.findById(userId).get();			
 		List<Users> followsList = followService.getFollowsList(userId);
 		List<Users> followersList = followService.getFollowersList(userId);
+		List<Meetings> meetingList = meetingsRepository.findByHost(user);
 		
 		mv.setViewName("userDetail");
 		mv.addObject("user", user);
 		mv.addObject("followsList", followsList);
 		mv.addObject("followersList", followersList);
 		mv.addObject("myFollowsList", followsList);
+		mv.addObject("meetingList", meetingList);
 		return mv;
 	}
 	

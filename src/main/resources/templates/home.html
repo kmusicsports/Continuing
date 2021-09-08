@@ -81,38 +81,51 @@
                 </div>
             </div>
 
-            <p class="text-end me-2">該当: 全 <span>5</span> 件(全 <span>1</span> ページ)</p>
+            <p class="text-end me-2">
+              <span th:text="|該当: 全 ${#lists.size(meetingList)} 中|"></span>
+              <span th:text="|${#lists.size(meetingList) * meetingPage.getNumber() + 1 / meetingPage.getTotalPages()} 件|"></span>
+            </p>
             
             <div class="list-group">
                 <form th:action="@{/}">
-                    <button type="submit" th:formaction="@{/Meeting/detail}" class="list-group-item list-group-item-action">
+                    <button type="submit" th:formaction="@{/Meeting/__${meeting.id}__}" class="list-group-item list-group-item-action" th:each="meeting : ${meetingList}">
                         <div class="d-flex w-100">
-                            <img src="https://picsum.photos/20" alt="Avatar" class="avatar">
-                            <a th:href="@{/User/detail}" class="text-reset fs-4 mt-2 ms-3">山田太郎</a>
+                            <div th:unless="${meeting.host.profileImage} == null">
+                                <img th:src="${meeting.host.profileImage}" alt="プロフィール画像" class="avatar">
+                            </div>
+                            <div th:if="${meeting.host.profileImage} == null">
+                                <span class="avatar btn btn-light"></span>
+                            </div>
+                            <a th:href="@{/User/__${meeting.host.id}__}" class="text-reset fs-4 mt-2 ms-2" th:text="${meeting.host.name}">山田太郎</a>
                             <!-- <input type="submit" value="参加予約" class="btn btn-outline-primary mt-2 ms-auto me-2"> -->
                             <!-- <input type="submit" value="予約済み" class="btn btn-primary mt-2 ms-auto me-2"> -->
-                            <div class="mt-2 ms-auto me-2">
+                            <!-- <span class="text-danger ms-auto">受付終了</span> -->
+                            <div class="mt-2 ms-auto me-2" th:if="${session.user_id == meeting.host.Id}">
                                 <a th:href="@{/Meeting/updateForm}" class="btn btn-outline-dark me-2">編集</a>
                                 <a href="#" class="btn btn-outline-danger" data-toggle="modal" data-target="#deletionConfirmationModal">削除</a>
                             </div>
-                            <!-- <span class="text-danger ms-auto">受付終了</span> -->
                         </div>
                         <table class="table">
                             <tr>
                                 <th>トピック</th>
-                                <td>勉強会</td>
+                                <td th:text="${meeting.topic}"></td>
                             </tr>
                             <tr>
                                 <th>説明　　</th>
-                                <td>開始15分は朝食や各自のモーニングルーティンをする時間にしています。</td>
+                                <td th:text="${meeting.agenda}"></td>
                             </tr>
                             <tr>
                                 <th>人数　　</th>
-                                <td>１対１</td>
+                                <td th:if="${meeting.numberPeople == 1}">１対１</td>
+                                <td th:if="${meeting.numberPeople == 2}">複数</td>
                             </tr>
                             <tr>
-                                <th>日時　　</th>
-                                <td>9:00 ～ 12:00</td>
+                                <th>日付　　</th>
+                                <td th:text="${#dates.format(meeting.date, 'yyyy/MM/dd')}"></td>
+                            </tr>
+                            <tr>
+                                <th>時間　　</th>
+                                <td><span th:text="${meeting.startTime}"></span>～<span th:text="${meeting.endTime}"></span></td>
                             </tr>
                         </table>
                     </button>
@@ -139,17 +152,24 @@
             </div>
 
             <nav>
-                <ul class="pagination justify-content-center mt-5">
-                    <li class="page-item disabled">
-                        <a class="page-link" href="#">
+                <ul class="pagination justify-content-center mt-5" th:if="${meetingList != null && #lists.size(meetingList) != 0}">
+                    <li class="page-item" th:classappend="${meetingPage.isFirst() ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/home/(page = ${meetingPage.getNumber() - 1})}">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
-                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                    <li class="page-item"><a class="page-link" href="#">2</a></li>
-                    <li class="page-item"><a class="page-link" href="#">3</a></li>
-                    <li class="page-item">
-                        <a class="page-link" href="#">
+                    <li th:each="i : ${#numbers.sequence(meetingPage.getNumber() - 2 < 0 ? 0 : meetingPage.getNumber() - 2, meetingPage.getNumber() + 2 > meetingPage.getTotalPages() - 1 ? meetingPage.getTotalPages() - 1 : meetingPage.getNumber() + 2)}">
+                        <a class="page-link" th:if="${i != meetingPage.getNumber()}" th:href="@{/home/(page = ${i})}" th:text="${i + 1}"></a>
+                        <span class="page-link text-reset" th:if="${i == meetingPage.getNumber()}" th:text="${i + 1}"></span>
+                    </li>
+                    <li class="page-item disabled" th:unless="${meetingPage.isLast()}">
+                        <a class="page-link">...</a>
+                    </li>
+                    <li class="page-item disabled" th:unless="${meetingPage.isLast()}">
+                        <a class="page-link" th:text="${meetingPage.getTotalPages()}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${meetingPage.isLast() ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/home/(page = ${meetingPage.getNumber() + 1})}">
                             <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>
