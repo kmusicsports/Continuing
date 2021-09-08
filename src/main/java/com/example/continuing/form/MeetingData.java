@@ -8,6 +8,7 @@ import org.json.simple.JSONObject;
 import com.example.continuing.common.Utils;
 import com.example.continuing.dto.MeetingDto;
 import com.example.continuing.entity.Meetings;
+import com.example.continuing.entity.Users;
 
 import lombok.Data;
 
@@ -37,9 +38,9 @@ public class MeetingData {
 		return meetingDto;
 	}
 	
-	public Meetings toEntity(JSONObject jsonObject, Integer uesrId) {
+	public Meetings toEntity(JSONObject jsonObject, Users uesr) {
 		Meetings meeting = new Meetings();
-		meeting.setHostId(uesrId);
+		meeting.setHost(uesr);
 		meeting.setNumberPeople(numberPeople);
 		meeting.setMeetingId(jsonObject.get("id").toString());
 		meeting.setUuid(jsonObject.get("uuid").toString());
