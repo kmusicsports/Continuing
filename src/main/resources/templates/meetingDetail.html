@@ -16,56 +16,69 @@
 
     <div class="list-group">
         <form th:action="@{/}">
-            <button type="button" class="list-group-item list-group-item-action">
+            <button type="button" class="list-group-item list-group-item-action" th:object="${meeting}">
                 <div class="d-flex w-100">
-                    <img src="https://picsum.photos/20" alt="Avatar" class="avatar">
-                    <a th:href="@{/User/detail}" class="text-reset fs-4 mt-2 ms-3">山田太郎</a>
+                    <div th:unless="${meeting.host.profileImage} == null">
+                        <img th:src="${meeting.host.profileImage}" alt="プロフィール画像" class="avatar">
+                    </div>
+                    <div th:if="${meeting.host.profileImage} == null">
+                        <span class="avatar btn btn-light"></span>
+                    </div>
+                    <a th:href="@{/User/__${meeting.host.id}__}" class="text-reset fs-4 mt-2 ms-2" th:text="${meeting.host.name}">山田太郎</a>
                     <!-- <input type="submit" value="参加予約" class="btn btn-outline-primary mt-2 ms-auto me-2"> -->
                     <!-- <input type="submit" value="予約済み" class="btn btn-primary mt-2 ms-auto me-2"> -->
-                    <!-- <div class="mt-2 ms-auto me-2">
+                    <!-- <span class="text-danger ms-auto">受付終了</span> -->
+                    <div class="mt-2 ms-auto me-2" th:if="${session.user_id == meeting.host.Id}">
                         <a th:href="@{/Meeting/updateForm}" class="btn btn-outline-dark me-2">編集</a>
                         <a href="#" class="btn btn-outline-danger" data-toggle="modal" data-target="#deletionConfirmationModal">削除</a>
-                    </div> -->
-                    <span class="text-danger ms-auto">受付終了</span>
+                    </div>
                 </div>
                 <table class="table">
                     <tr>
                         <th>トピック</th>
-                        <td>勉強会</td>
+                        <td th:text="${meeting.topic}"></td>
                     </tr>
                     <tr>
-                        <th>説明　　</th>
-                        <td>開始15分は朝食や各自のモーニングルーティンをする時間にしています。</td>
+                        <th>説明</th>
+                        <td th:text="${meeting.agenda}"></td>
                     </tr>
                     <tr>
-                        <th>人数　　</th>
-                        <td>１対１</td>
+                        <th>人数</th>
+                        <td th:if="${meeting.numberPeople == 1}">１対１</td>
+                        <td th:if="${meeting.numberPeople == 2}">複数</td>
                     </tr>
                     <tr>
-                        <th>日時　　</th>
-                        <td>9:00 ～ 12:00</td>
+                        <th>日付</th>
+                        <td th:text="${#dates.format(meeting.date, 'yyyy/MM/dd')}"></td>
                     </tr>
                     <tr>
-                        <th>URL</th>
-                        <td>
-                            <span href="#" class="hide-text">参加予約すると表示されます。</span>
-                            <!-- <a href="https://www.google.com/search?q=avatar+list+html&rlz=1C1SQJL_jaJP843JP843&sxsrf=AOaemvL8eR_SAc-FtyQfMiSgrUB_kcqNgg%3A1629785561136&ei=2Y0kYbDcB4z90gSqiq3oCw&oq=avatar+list+html&gs_lcp=Cgdnd3Mtd2l6EAMyBAgAEB46BAgjECc6BwgAEIAEEAQ6CAgAEIAEELEDOgUIABCABDoECAAQQzoHCAAQsQMQQzoHCCMQsQIQJzoECAAQCjoHCAAQsQMQCjoECAAQDToGCAAQChAeOgQIABATOggIABAIEAQQHjoGCAAQBRAeOgYIABAIEB5KBAhBGABQ68EQWL3REWDL1RFoAHAAeACAAYsCiAGxFZIBBjAuMTYuMpgBAKABAcABAQ&sclient=gws-wiz&ved=0ahUKEwjwrLmrgMnyAhWMvpQKHSpFC70Q4dUDCA8&uact=5">
-                                https://zoom.us/dammy
-                            </a> -->
+                        <th>時間</th>
+                        <td><span th:text="${meeting.startTime}"></span>～<span th:text="${meeting.endTime}"></span></td>
+                    </tr>
+                    <tr>
+                        <th>
+                            <span th:if="${session.user_id == meeting.host.Id}">開始</span>
+                            <span th:unless="${session.user_id == meeting.host.Id}">参加</span>
+                            URL
+                        </th>
+                        <td class="meeting-url">
+                            <!-- <span class="hide-text">参加予約すると表示されます。</span> -->
+                            <a th:if="${session.user_id == meeting.host.Id}" th:href="${meeting.startUrl}" th:text="${meeting.startUrl}" target="_blank" rel="noopener noreferrer"></a>
+                            <a th:unless="${session.user_id == meeting.host.Id}" th:href="${meeting.joinUrl}" th:text="${meeting.joinUrl}" target="_blank" rel="noopener noreferrer"></a>
                         </td>
                     </tr>
                     <tr>
                         <th>パスワード</th>
                         <td>
-                            <span href="#" class="hide-text">参加予約すると表示されます。</span>
-                            <!-- <span>password</span> -->
+                            <!-- <span class="hide-text">参加予約すると表示されます。</span> -->
+                            <span th:text="${meeting.password}"></span>
                         </td>
                     </tr>
                 </table>
             </button>
 
             <!-- deletionConfirmationModal -->
-            <!-- <div class="modal fade" id="deletionConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deletionConfirmationModalLabel" aria-hidden="true">
+            <div class="modal fade" id="deletionConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deletionConfirmationModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -80,7 +93,7 @@
                         </div>
                     </div>
                 </div>
-            </div> -->
+            </div>
 
         </form>
 
