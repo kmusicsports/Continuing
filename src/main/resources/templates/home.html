@@ -87,7 +87,7 @@
             </p>
             
             <div class="list-group">
-                <form th:action="@{/}">
+                <form th:action="@{/}" method="get">
                     <button type="submit" th:formaction="@{/Meeting/__${meeting.id}__}" class="list-group-item list-group-item-action" th:each="meeting : ${meetingList}">
                         <div class="d-flex w-100">
                             <div th:unless="${meeting.host.profileImage} == null">
@@ -97,9 +97,13 @@
                                 <span class="avatar btn btn-light"></span>
                             </div>
                             <a th:href="@{/User/__${meeting.host.id}__}" class="text-reset fs-4 mt-2 ms-2" th:text="${meeting.host.name}">山田太郎</a>
-                            <!-- <input type="submit" value="参加予約" class="btn btn-outline-primary mt-2 ms-auto me-2"> -->
-                            <!-- <input type="submit" value="予約済み" class="btn btn-primary mt-2 ms-auto me-2"> -->
-                            <!-- <span class="text-danger ms-auto">受付終了</span> -->
+                            <div class="ms-auto mt-2 me-2" th:if="${session.user_id != meeting.host.id}">
+		                            <input type="submit" th:formaction="@{/Meeting/leave/__${meeting.id}__}" value="予約済み" class="btn btn-primary" th:if="${#lists.contains(myJoinMeetingList, meeting)}">
+		                            <div th:unless="${#lists.contains(myJoinMeetingList, meeting)}">
+				                            <input type="submit" th:formaction="@{/Meeting/join/__${meeting.id}__}" value="参加予約" class="btn btn-outline-primary" th:unless="${meeting.numberPeople == 1 && #lists.size(meeting.joinList) == 1}">
+				                            <span class="text-danger" th:if="${meeting.numberPeople == 1 && #lists.size(meeting.joinList) == 1}">受付終了</span>                            		                            
+		                            </div>
+                            </div>
                             <div class="mt-2 ms-auto me-2" th:if="${session.user_id == meeting.host.Id}">
                                 <a th:href="@{/Meeting/updateForm}" class="btn btn-outline-dark me-2">編集</a>
                                 <a href="#" class="btn btn-outline-danger" data-toggle="modal" data-target="#deletionConfirmationModal">削除</a>
