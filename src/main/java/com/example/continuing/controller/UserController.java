@@ -1,5 +1,6 @@
 package com.example.continuing.controller;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.example.continuing.comparator.MeetingsComparator;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.ProfileData;
@@ -20,6 +22,7 @@ import com.example.continuing.repository.FollowsRepository;
 import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
+import com.example.continuing.service.JoinService;
 import com.example.continuing.service.StorageService;
 import com.example.continuing.service.UserService;
 
@@ -36,6 +39,7 @@ public class UserController {
 	private final FollowService followService;
 	private final FollowsRepository followsRepository; 
 	private final MeetingsRepository meetingsRepository;
+	private final JoinService joinService;
 	
 	@GetMapping("/User/{user_id}")
 	public ModelAndView showUserDetail(ModelAndView mv, @PathVariable(name = "user_id") int userId) {
@@ -43,16 +47,23 @@ public class UserController {
 		if(user.isPresent()) {
 			List<Users> followsList = followService.getFollowsList(userId);
 			List<Users> followersList = followService.getFollowersList(userId);
+			
 			List<Meetings> meetingList = meetingsRepository.findByHost(user.get());
+			List<Meetings> joinMeetingList = joinService.getJoinMeetingList(userId);
+			meetingList.addAll(joinMeetingList);
+			Collections.sort(meetingList, new MeetingsComparator());
 			
 			Integer myId = (Integer)session.getAttribute("user_id");
 			List<Users> myFollowsList = followService.getFollowsList(myId);
+			List<Meetings> myJoinMeetingList = joinService.getJoinMeetingList(myId);
+			
 			mv.setViewName("userDetail");
 			mv.addObject("user", user.get());		
 			mv.addObject("followsList", followsList);
 			mv.addObject("followersList", followersList);
 			mv.addObject("myFollowsList", myFollowsList);
 			mv.addObject("meetingList", meetingList);
+			mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		} else {
 			System.out.println("存在しないユーザーです");
 			mv.setViewName("redirect:/home");
@@ -66,7 +77,11 @@ public class UserController {
 		Users user = usersRepository.findById(userId).get();			
 		List<Users> followsList = followService.getFollowsList(userId);
 		List<Users> followersList = followService.getFollowersList(userId);
+		
 		List<Meetings> meetingList = meetingsRepository.findByHost(user);
+		List<Meetings> joinMeetingList = joinService.getJoinMeetingList(userId);
+		meetingList.addAll(joinMeetingList);
+		Collections.sort(meetingList, new MeetingsComparator());
 		
 		mv.setViewName("userDetail");
 		mv.addObject("user", user);
@@ -74,6 +89,7 @@ public class UserController {
 		mv.addObject("followersList", followersList);
 		mv.addObject("myFollowsList", followsList);
 		mv.addObject("meetingList", meetingList);
+		mv.addObject("myJoinMeetingList", joinMeetingList);
 		return mv;
 	}
 	
