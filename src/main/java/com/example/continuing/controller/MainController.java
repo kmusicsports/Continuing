@@ -19,6 +19,7 @@ import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.TopicsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
+import com.example.continuing.service.JoinService;
 
 import lombok.AllArgsConstructor;
 
@@ -31,6 +32,7 @@ public class MainController {
 	private final FollowService followService;
 	private final TopicsRepository topicsRepository;
 	private final MeetingsRepository meetingsRepository;
+	private final JoinService joinService;
 	
 	@GetMapping("/")
 	public String showHome() {
@@ -42,18 +44,19 @@ public class MainController {
 			@PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
 		Page<Meetings> meetingPage = meetingsRepository.findAll(pageable);
 		List<Users> userList = usersRepository.findAll();
+		List<Topics> topicList = topicsRepository.findAll();
 		
 		Integer userId = (Integer)session.getAttribute("user_id");
 		List<Users> myFollowsList = followService.getFollowsList(userId);
-		
-		List<Topics> topicList = topicsRepository.findAll();
+		List<Meetings> myJoinMeetingList = joinService.getJoinMeetingList(userId);
 		
 		mv.setViewName("home");
 		mv.addObject("meetingPage", meetingPage);
 		mv.addObject("meetingList", meetingPage.getContent());
 		mv.addObject("userList", userList);
-		mv.addObject("myFollowsList", myFollowsList);
 		mv.addObject("topicList", topicList);
+		mv.addObject("myFollowsList", myFollowsList);
+		mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		return mv;
 	}
 }

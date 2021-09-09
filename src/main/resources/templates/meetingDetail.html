@@ -25,9 +25,13 @@
                         <span class="avatar btn btn-light"></span>
                     </div>
                     <a th:href="@{/User/__${meeting.host.id}__}" class="text-reset fs-4 mt-2 ms-2" th:text="${meeting.host.name}">山田太郎</a>
-                    <!-- <input type="submit" value="参加予約" class="btn btn-outline-primary mt-2 ms-auto me-2"> -->
-                    <!-- <input type="submit" value="予約済み" class="btn btn-primary mt-2 ms-auto me-2"> -->
-                    <!-- <span class="text-danger ms-auto">受付終了</span> -->
+                    <div class="ms-auto mt-2 me-2" th:if="${session.user_id != meeting.host.Id}">
+                        <input type="submit" th:formaction="@{/Meeting/leave/__${meeting.id}__}" value="予約済み" class="btn btn-primary" th:if="${#lists.contains(myJoinMeetingList, meeting)}">
+                        <div th:unless="${#lists.contains(myJoinMeetingList, meeting)}">
+                            <input type="submit" th:formaction="@{/Meeting/join/__${meeting.id}__}" value="参加予約" class="btn btn-outline-primary" th:unless="${meeting.numberPeople == 1 && #lists.size(meeting.joinList) == 1}">
+                            <span class="text-danger" th:if="${meeting.numberPeople == 1 && #lists.size(meeting.joinList) == 1}">受付終了</span>                                                            
+                        </div>
+                    </div>
                     <div class="mt-2 ms-auto me-2" th:if="${session.user_id == meeting.host.Id}">
                         <a th:href="@{/Meeting/updateForm}" class="btn btn-outline-dark me-2">編集</a>
                         <a href="#" class="btn btn-outline-danger" data-toggle="modal" data-target="#deletionConfirmationModal">削除</a>
@@ -62,16 +66,18 @@
                             URL
                         </th>
                         <td class="meeting-url">
-                            <!-- <span class="hide-text">参加予約すると表示されます。</span> -->
-                            <a th:if="${session.user_id == meeting.host.Id}" th:href="${meeting.startUrl}" th:text="${meeting.startUrl}" target="_blank" rel="noopener noreferrer"></a>
-                            <a th:unless="${session.user_id == meeting.host.Id}" th:href="${meeting.joinUrl}" th:text="${meeting.joinUrl}" target="_blank" rel="noopener noreferrer"></a>
+                            <div th:unless="${#lists.contains(myJoinMeetingList, meeting)}">
+		                            <span class="hide-text" th:unless="${session.user_id == meeting.host.Id}">参加予約すると表示されます。</span>
+		                            <a th:if="${session.user_id == meeting.host.Id}" th:href="${meeting.startUrl}" th:text="${meeting.startUrl}" target="_blank" rel="noopener noreferrer"></a>
+                            </div>
+                            <a th:if="${#lists.contains(myJoinMeetingList, meeting) && session.user_id != meeting.host.Id}" th:href="${meeting.joinUrl}" th:text="${meeting.joinUrl}" target="_blank" rel="noopener noreferrer"></a>                            
                         </td>
                     </tr>
                     <tr>
                         <th>パスワード</th>
                         <td>
-                            <!-- <span class="hide-text">参加予約すると表示されます。</span> -->
-                            <span th:text="${meeting.password}"></span>
+                            <span class="hide-text" th:if="${!#lists.contains(myJoinMeetingList, meeting) && session.user_id != meeting.host.Id}">参加予約すると表示されます。</span>
+                            <span th:if="${#lists.contains(myJoinMeetingList, meeting) || session.user_id == meeting.host.Id}" th:text="${meeting.password}"></span>
                         </td>
                     </tr>
                 </table>
@@ -101,21 +107,21 @@
     </div>
 
     <h4 class="text-center mt-5 text-decoration-underline">参加予定ユーザ</h4>
-    <div class="list-group">
-        <form th:action="@{/}">
-            <button type="submit" th:formaction="@{/User/detail}" class="list-group-item list-group-item-action">
+    <div class="list-group" th:each="user : ${joinUserList}">
+        <form th:action="@{/}" method="get">
+            <button type="submit" th:formaction="@{/User/__${user.id}__}" class="list-group-item list-group-item-action btn-send">
                 <div class="d-flex w-100">
-                    <img src="https://picsum.photos/20" alt="Avatar" class="avatar">
-                    <a th:href="@{/User/detail}" class="text-reset fs-4 mt-2 ms-3">山田太郎</a>
-                    <!-- <input type="submit" value="フォロー" class="btn btn-outline-primary ms-auto me-2"> -->
-                    <input type="submit" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2">
+                    <div th:unless="${user.profileImage} == null">
+                        <img th:src="${user.profileImage}" alt="プロフィール画像" class="avatar">
+                    </div>
+                    <div th:if="${user.profileImage} == null">
+                        <span class="avatar btn btn-light"></span>
+                    </div>
+                    <a th:href="@{/User/__${user.id}__}" class="text-reset fs-4 mt-2 ms-3" th:text="${user.name}"></a>
+                    <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
+                    <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
                 </div>
-                <p class="ms-5 me-5 mt-2">
-                    プロフィールメッセージです。
-                    プロフィールメッセージです。
-                    プロフィールメッセージです。
-                    プロフィールメッセージです。
-                </p>
+                <p class="ms-5 me-5 mt-2" th:text="${user.profileMessage}"></p>
             </button>
         </form>
     </div>
@@ -129,5 +135,7 @@
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+    
+    <script type="text/javascript" th:src="@{/js/main.js}"></script>
 </body>
 </html>
