@@ -111,20 +111,20 @@
                                 <td th:text="${meeting.topic}"></td>
                             </tr>
                             <tr>
-                                <th>説明　　</th>
+                                <th>説明</th>
                                 <td th:text="${meeting.agenda}"></td>
                             </tr>
                             <tr>
-                                <th>人数　　</th>
+                                <th>人数</th>
                                 <td th:if="${meeting.numberPeople == 1}">１対１</td>
                                 <td th:if="${meeting.numberPeople == 2}">複数</td>
                             </tr>
                             <tr>
-                                <th>日付　　</th>
+                                <th>日付</th>
                                 <td th:text="${#dates.format(meeting.date, 'yyyy/MM/dd')}"></td>
                             </tr>
                             <tr>
-                                <th>時間　　</th>
+                                <th>時間</th>
                                 <td><span th:text="${meeting.startTime}"></span>～<span th:text="${meeting.endTime}"></span></td>
                             </tr>
                         </table>
