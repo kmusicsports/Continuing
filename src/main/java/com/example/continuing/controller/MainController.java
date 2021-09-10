@@ -50,6 +50,7 @@ public class MainController {
 		List<Users> myFollowsList = followService.getFollowsList(userId);
 		List<Meetings> myJoinMeetingList = joinService.getJoinMeetingList(userId);
 		
+		session.setAttribute("path", "/home");
 		mv.setViewName("home");
 		mv.addObject("meetingPage", meetingPage);
 		mv.addObject("meetingList", meetingPage.getContent());

@@ -57,6 +57,7 @@ public class UserController {
 			List<Users> myFollowsList = followService.getFollowsList(myId);
 			List<Meetings> myJoinMeetingList = joinService.getJoinMeetingList(myId);
 			
+			session.setAttribute("path", "/User/" + userId);
 			mv.setViewName("userDetail");
 			mv.addObject("user", user.get());		
 			mv.addObject("followsList", followsList);
@@ -83,6 +84,7 @@ public class UserController {
 		meetingList.addAll(joinMeetingList);
 		Collections.sort(meetingList, new MeetingsComparator());
 		
+		session.setAttribute("path", "/User/mypage");
 		mv.setViewName("userDetail");
 		mv.addObject("user", user);
 		mv.addObject("followsList", followsList);
