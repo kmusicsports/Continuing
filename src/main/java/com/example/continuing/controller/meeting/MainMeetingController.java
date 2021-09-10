@@ -43,6 +43,7 @@ public class MainMeetingController {
 				
 				List<Users> joinUserList = joinService.getJoinUserList(meeting);
 				
+				session.setAttribute("path", "/Meeting/" + meetingId);
 				mv.setViewName("meetingDetail");
 				mv.addObject("meeting", meeting);
 				mv.addObject("myJoinMeetingList", myJoinMeetingList);
@@ -79,6 +80,11 @@ public class MainMeetingController {
 			System.out.println("存在しないミーティングです");
 		}
 		return "redirect:" + Utils.getHeaderPath(request);
+	}
+	
+	@GetMapping("/Meeting/cancel")
+	public String cancel(HttpServletRequest request) {
+		return "redirect:" + session.getAttribute("path");
 	}
 	
 }
