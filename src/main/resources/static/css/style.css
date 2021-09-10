@@ -47,6 +47,7 @@ h5 {
 }
 
 th {
+	width: 100px;
 	white-space: nowrap;
 }
 

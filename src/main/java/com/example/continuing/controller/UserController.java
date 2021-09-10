@@ -102,8 +102,10 @@ public class UserController {
 	@GetMapping("/User/delete")
 	public String deleteUser() {
 		Integer userId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(userId).get();
 		followsRepository.deleteByFollowerId(userId);
 		followsRepository.deleteByFolloweeId(userId);
+		meetingsRepository.deleteByHost(user);
 		usersRepository.deleteById(userId);		
 		// セッション情報をクリアする
 		session.invalidate();

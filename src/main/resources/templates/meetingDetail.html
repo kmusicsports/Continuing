@@ -15,8 +15,8 @@
     <nav th:replace="fragments :: navbar_area"></nav>
 
     <div class="list-group">
-        <form th:action="@{/}">
-            <button type="button" class="list-group-item list-group-item-action" th:object="${meeting}">
+        <form th:action="@{/}" method="get" th:object="${meeting}">
+            <button type="button" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100">
                     <div th:unless="${meeting.host.profileImage} == null">
                         <img th:src="${meeting.host.profileImage}" alt="プロフィール画像" class="avatar">
@@ -24,7 +24,7 @@
                     <div th:if="${meeting.host.profileImage} == null">
                         <span class="avatar btn btn-light"></span>
                     </div>
-                    <a th:href="@{/User/__${meeting.host.id}__}" class="text-reset fs-4 mt-2 ms-2" th:text="${meeting.host.name}">山田太郎</a>
+                    <a th:href="@{/User/__${meeting.host.id}__}" class="text-reset fs-4 mt-2 ms-2" th:text="${meeting.host.name}"></a>
                     <div class="ms-auto mt-2 me-2" th:if="${session.user_id != meeting.host.Id}">
                         <input type="submit" th:formaction="@{/Meeting/leave/__${meeting.id}__}" value="予約済み" class="btn btn-primary" th:if="${#lists.contains(myJoinMeetingList, meeting)}">
                         <div th:unless="${#lists.contains(myJoinMeetingList, meeting)}">
@@ -83,8 +83,8 @@
                 </table>
             </button>
 
-            <!-- deletionConfirmationModal -->
             <div class="modal fade" id="deletionConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deletionConfirmationModalLabel" aria-hidden="true">
+		            <!-- deletionConfirmationModal -->
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -95,7 +95,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
-                            <button type="submit" formaction="#" class="btn btn-danger">削除する</button>
+                            <button type="submit" th:formaction="@{/Meeting/delete/__${meeting.id}__}" class="btn btn-danger">削除する</button>
                         </div>
                     </div>
                 </div>

@@ -87,8 +87,8 @@
             </p>
             
             <div class="list-group">
-                <form th:action="@{/}" method="get">
-                    <button type="submit" th:formaction="@{/Meeting/__${meeting.id}__}" class="list-group-item list-group-item-action" th:each="meeting : ${meetingList}">
+                <form th:action="@{/}" method="get" th:each="meeting : ${meetingList}">
+                    <button type="submit" th:formaction="@{/Meeting/__${meeting.id}__}" class="list-group-item list-group-item-action">
                         <div class="d-flex w-100">
                             <div th:unless="${meeting.host.profileImage} == null">
                                 <img th:src="${meeting.host.profileImage}" alt="プロフィール画像" class="avatar">
@@ -134,8 +134,8 @@
                         </table>
                     </button>
 
-                    <!-- deletionConfirmationModal -->
-                    <div class="modal fade" id="deletionConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deletionConfirmationModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="deletionConfirmationModal" th:if="${session.user_id == meeting.host.Id}" tabindex="-1" role="dialog" aria-labelledby="deletionConfirmationModalLabel" aria-hidden="true">
+                        <!-- deletionConfirmationModal -->
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -146,7 +146,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
-                                    <button type="submit" formaction="#" class="btn btn-danger">削除する</button>
+                                    <button type="submit" th:formaction="@{/Meeting/delete/__${meeting.id}__}" class="btn btn-danger">削除する</button>
                                 </div>
                             </div>
                         </div>
