@@ -15,6 +15,7 @@ import lombok.Data;
 @Data
 public class MeetingData {
 
+	private int id;
     private String topicName;
     private int numberPeople;
     private String date;
