@@ -151,7 +151,7 @@ public class ZoomApiIntegration {
     }
     
     // 会議の削除
-    public String deleteMeeting(OAuth2AccessToken oauthToken, String meetingId) throws IOException{
+    public void deleteMeeting(OAuth2AccessToken oauthToken, String meetingId) throws IOException{
     	 System.out.println("-会議削除サービス");
     	 System.out.println("API URL: " + DELETE_MEETING_API_URL + meetingId);
         OAuth20Service oauthService =new ServiceBuilder()
@@ -166,8 +166,7 @@ public class ZoomApiIntegration {
         
         request.addPayload(jsonOb.toString());
         oauthService.signRequest(oauthToken, request);
-        Response response = request.send();
-        return response.getBody();
+        request.send();
     }
     
 }
