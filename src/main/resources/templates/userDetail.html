@@ -87,7 +87,7 @@
                     </tr>
                     <tr>
                         <th>時間</th>
-                        <td><span th:text="${meeting.startTime}"></span>～<span th:text="${meeting.endTime}"></span></td>
+                        <td th:text="|${#dates.format(meeting.startTime, 'HH:mm')} ～ ${#dates.format(meeting.endTime, 'HH:mm')}|"></td>
                     </tr>
                 </table>
             </button>
