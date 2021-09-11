@@ -18,6 +18,7 @@ import com.example.continuing.comparator.MeetingsComparator;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.ProfileData;
+import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.FollowsRepository;
 import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.UsersRepository;
@@ -65,6 +66,7 @@ public class UserController {
 			mv.addObject("myFollowsList", myFollowsList);
 			mv.addObject("meetingList", meetingList);
 			mv.addObject("myJoinMeetingList", myJoinMeetingList);
+			mv.addObject("searchData", new SearchData());
 		} else {
 			System.out.println("存在しないユーザーです");
 			mv.setViewName("redirect:/home");
@@ -92,12 +94,14 @@ public class UserController {
 		mv.addObject("myFollowsList", followsList);
 		mv.addObject("meetingList", meetingList);
 		mv.addObject("myJoinMeetingList", joinMeetingList);
+		mv.addObject("searchData", new SearchData());
 		return mv;
 	}
 	
 	@GetMapping("/User/setting")
 	public ModelAndView setting(ModelAndView mv) {
 		mv.setViewName("setting");
+		mv.addObject("searchData", new SearchData());
 		return mv;
 	}
 	
@@ -121,6 +125,7 @@ public class UserController {
 		Users user = usersRepository.findById(userId).get();
 		mv.setViewName("profile");
 		mv.addObject("profileData", new ProfileData(user));
+		mv.addObject("searchData", new SearchData());
 		return mv;
 	}
 	
@@ -178,6 +183,7 @@ public class UserController {
 	@GetMapping("/User/list/ranking")
 	public ModelAndView showUserRanking(ModelAndView mv) {
 		mv.setViewName("userRanking");
+		mv.addObject("searchData", new SearchData());
 		return mv;
 	}
 	

@@ -12,8 +12,8 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <form class="d-flex ms-auto">
-                    <input class="form-control me-2" type="search" placeholder="キーワード検索">
+                <form th:action="@{/search}" method="post" class="ms-auto" th:object="${searchData}">
+                    <input class="form-control me-2" type="search" name="keyword" th:value="*{keyword}" placeholder="キーワード検索">
                 </form>
                 <div th:if="${session.user_id == null}">
                     <ul class="navbar-nav mb-2 mb-lg-0">
@@ -28,7 +28,7 @@
                 <div th:unless="${session.user_id == null}">
                     <ul class="navbar-nav mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link ms-2 me-2" aria-current="page" th:href="@{/Meeting/createForm}">
+                            <a class="nav-link ms-2 me-2" aria-current="page" th:href="@{/Meeting/showCreateForm}">
                                 <i class="fas fa-plus"></i>
                             </a>
                         </li>

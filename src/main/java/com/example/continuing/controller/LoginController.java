@@ -12,6 +12,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.LoginData;
 import com.example.continuing.form.RegisterData;
+import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.LoginService;
 
@@ -29,6 +30,7 @@ public class LoginController {
 	public ModelAndView showLogin(ModelAndView mv) {
 		mv.setViewName("login");
 		mv.addObject("loginData", new LoginData());
+		mv.addObject("searchData", new SearchData());
 		return mv;
 	}
 	
@@ -67,6 +69,7 @@ public class LoginController {
 	public ModelAndView showRegister(ModelAndView mv) {
 		mv.setViewName("register");
 		mv.addObject("registerData", new RegisterData());
+		mv.addObject("searchData", new SearchData());
 		return mv;
 	}
 	
@@ -84,6 +87,7 @@ public class LoginController {
 			registerData.setChecked(false);
 			mv.setViewName("register");
 			mv.addObject("registerData", registerData);
+			mv.addObject("searchData", new SearchData());
 		}
 		return mv;
 	}
