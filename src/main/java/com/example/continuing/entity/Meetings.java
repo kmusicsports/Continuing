@@ -1,7 +1,8 @@
 package com.example.continuing.entity;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -44,10 +45,10 @@ public class Meetings {
     private Date date;
 	
 	@Column(name = "start_time")
-    private String startTime;
+    private Time startTime;
 	
 	@Column(name = "end_time")
-    private String endTime;
+    private Time endTime;
 	
 	@Column(name = "duration")
     private Long duration;

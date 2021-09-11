@@ -1,8 +1,9 @@
 package com.example.continuing.common;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -71,5 +72,20 @@ public class Utils {
         } catch (ParseException e) {
             return false;
         }
+    }
+    
+    public static Time str2time(String s) {
+    	Time time = null;
+    	try {
+            long ms = stf.parse(s).getTime();
+            // HH:mm で解釈できた場合
+            time = new Time(ms);
+
+        } catch (ParseException e) {
+            // 変換できなかった場合
+            // time は null のまま
+        }
+        
+        return time;
     }
 }
