@@ -45,3 +45,12 @@ h5 {
 .btn {
     border-radius: 10rem;
 }
+
+th {
+	width: 100px;
+	white-space: nowrap;
+}
+
+.meeting-url {
+	word-break: break-all;
+} 

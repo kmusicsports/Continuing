@@ -11,10 +11,13 @@ import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class MeetingData {
 
+	private int id;
     private String topicName;
     private int numberPeople;
     private String date;
@@ -23,6 +26,18 @@ public class MeetingData {
 	private String password;
 	private String passwordAgain;
 	private String agenda;
+	
+	public MeetingData(Meetings meeting) {
+		id = meeting.getId();
+		topicName = meeting.getTopic();
+		numberPeople = meeting.getNumberPeople();
+		date = meeting.getDate().toString();
+		startTime = meeting.getStartTime();
+		endTime = meeting.getEndTime();
+		password = meeting.getPassword();
+		passwordAgain = meeting.getPassword();
+		agenda = meeting.getAgenda();
+	}
 	
 	public MeetingDto toDto() {
 		MeetingDto meetingDto = new MeetingDto();
@@ -60,4 +75,21 @@ public class MeetingData {
         
         return meeting;
 	}
+	
+	public Meetings toEntity(Meetings meeting) {
+		meeting.setTopic(topicName);
+		meeting.setNumberPeople(numberPeople);
+		meeting.setDate(Utils.str2date(date.replace("/", "-")));
+		meeting.setStartTime(startTime);
+		meeting.setEndTime(endTime);
+		meeting.setPassword(password);
+		meeting.setAgenda(agenda);
+		
+		Date date= new Date();
+        Timestamp timestamp = new Timestamp(date.getTime());
+        meeting.setUpdatedAt(timestamp);
+        
+		return meeting;
+	}
+	
 }

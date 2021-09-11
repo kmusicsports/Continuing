@@ -3,7 +3,9 @@ package com.example.continuing.entity;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,13 +13,17 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Table(name = "meetings")
 @Data
+@ToString(exclude = "joinList")
 public class Meetings {
 
 	@Id
@@ -69,6 +75,10 @@ public class Meetings {
 	private Timestamp createdAt;
 	
 	@Column(name = "updated_at")
-	private Timestamp updatedAt; 
+	private Timestamp updatedAt;
+	
+	@OneToMany(mappedBy = "meeting", cascade = CascadeType.ALL)
+    @OrderBy("id asc")
+	private List<Joins> joinList;
 	
 }

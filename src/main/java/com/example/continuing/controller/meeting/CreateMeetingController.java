@@ -102,8 +102,7 @@ public class CreateMeetingController {
 			Meetings meeting = meetingData.toEntity(jsonObject, user);
 			meetingsRepository.saveAndFlush(meeting);
 			
-			mv.setViewName("redirect:/User/mypage");
-//			mv.setViewName("redirect:/Meeting/" + meeting.getId());
+			mv.setViewName("redirect:/Meeting/" + meeting.getId());
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("会議の作成に失敗しました");
