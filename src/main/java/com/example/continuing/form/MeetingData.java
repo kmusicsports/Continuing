@@ -61,8 +61,8 @@ public class MeetingData {
 		meeting.setUuid(jsonObject.get("uuid").toString());
 		meeting.setTopic(topicName);
 		meeting.setDate(Utils.str2date(date.replace("/", "-")));
-		meeting.setStartTime(startTime);
-		meeting.setEndTime(endTime);
+		meeting.setStartTime(Utils.str2time(startTime));
+		meeting.setEndTime(Utils.str2time(endTime));
 		meeting.setPassword(password);
 		meeting.setAgenda(agenda);
 		meeting.setStartUrl(jsonObject.get("start_url").toString());
