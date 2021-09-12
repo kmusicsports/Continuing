@@ -42,35 +42,61 @@
                     </button>
                     </h2>
                     <div id="collapse" class="accordion-collapse collapse" aria-labelledby="heading" data-bs-parent="#accordionExample">
-                        <div class="accordion-body">
-                            <form action="#">
-                                <h4 class="ms-2">トピック</h4>
-                                <div th:each="topic : ${topicList}">
-		                                <input type="checkbox" name="topic">
-		                                <label th:text="${topic.name}"></label><br>
+                        <div class="accordion-body row">
+                            <form th:action="@{/search}" method="post" th:object="${searchData}">
+		                            <div class="col-5">
+		                                <h5 class="ms-1">キーワード検索</h5>
+		                                <input class="form-control" type="search" name="keyword" th:value="*{keyword}">
+		                            </div>
+		                            
+		                            <div class="col-5">
+		                                <h5 class="ms-1 mt-4">トピック</h5>
+		                                <div th:each="topic : ${topicList}">
+				                                <input type="checkbox" name="topicList" th:value="${topic.name}" th:text="${topic.name}" th:field="*{topicList}">
+				                                <!-- <label th:text="${topic.name}"></label><br> -->
+		                                </div>
                                 </div>
         
-                                <h4 class="ms-2 mt-3">日時</h4>
-                                <div class="input-group date mb-2" id="datePicker" data-target-input="nearest">
-                                    <label class="pt-1 pr-2 me-2">日付:</label>
-                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#datePicker"/>
-                                    <div class="input-group-append" data-target="#datePicker" data-toggle="datetimepicker">
-                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                                    </div>
+                                <h5 class="ms-1 mt-4">人数</h5>
+                                <div class="form-check form-check-inline">
+	                                  <input class="form-check-input" type="radio" value="1" th:field="*{numberPeople}">
+	                                  <label class="form-check-label">1対1 　　</label>
+	                              </div>
+	                              <div class="form-check form-check-inline">
+	                                  <input class="form-check-input" type="radio" value="2" th:field="*{numberPeople}">
+	                                  <label class="form-check-label">複数(～40分)</label>
+	                              </div>  
+        
+                                <h5 class="ms-1 mt-4">日時</h5>
+                                <div class="col-5">
+		                                <div class="input-group date col-5 mb-2" id="datePicker" data-target-input="nearest">
+		                                    <label class="mt-2 pr-2 me-2">日付:</label>
+		                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#datePicker" name="date" th:value="*{date}"/>
+		                                    <div class="input-group-append" data-target="#datePicker" data-toggle="datetimepicker">
+		                                        <div class="input-group-text"><i class="fa fa-calendar pb-1"></i></div>
+		                                    </div>
+		                                </div>
                                 </div>
-                                <div class="input-group date mb-2" id="timePicker1" data-target-input="nearest">
-                                    <label class="pt-1 pr-2 me-2">時間:</label>
-                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#timePicker1"/>
-                                    <div class="input-group-text" data-target="#timePicker1" data-toggle="datetimepicker">
-                                        <i class="fa fa-clock"></i>
-                                    </div>
-                                </div>
-                                <div class="input-group date mb-5" id="timePicker2" data-target-input="nearest">
-                                    <label class="pt-1 pr-2 me-2">　　～</label>
-                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#timePicker2"/>
-                                    <div class="input-group-text" data-target="#timePicker2" data-toggle="datetimepicker">
-                                        <i class="fa fa-clock"></i>
-                                    </div>
+		                                
+                                <div class="col-12 d-flex">
+                                    <div class="col-5">
+				                                <div class="input-group date mb-2" id="timePicker1" data-target-input="nearest">
+				                                    <label class="mt-1 pr-2 me-2">時間:</label>
+				                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#timePicker1" name="startTime" th:value="*{startTime}"/>
+				                                    <div class="input-group-text" data-target="#timePicker1" data-toggle="datetimepicker">
+				                                        <i class="fa fa-clock"></i>
+				                                    </div>
+				                                </div>
+		                                </div>
+		                                <div class="col-5">
+				                                <div class="input-group col-5 date mb-5" id="timePicker2" data-target-input="nearest">
+				                                    <label class="pt-1 pr-2 ms-2 me-2">～</label>
+				                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#timePicker2" name="endTime" th:value="*{endTime}"/>
+				                                    <div class="input-group-text" data-target="#timePicker2" data-toggle="datetimepicker">
+				                                        <i class="fa fa-clock"></i>
+				                                    </div>
+				                                </div>                                
+		                                </div>
                                 </div>
         
                                 <button type="reset" class="btn btn-outline-primary">リセット</button>
