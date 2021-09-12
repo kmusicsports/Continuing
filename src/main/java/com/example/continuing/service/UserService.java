@@ -1,13 +1,17 @@
 package com.example.continuing.service;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.example.continuing.common.Utils;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.ProfileData;
+import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.UsersRepository;
-import com.example.continuing.common.Utils;
 
 import lombok.AllArgsConstructor;
 
@@ -60,4 +64,14 @@ public class UserService {
 		
 		return answer;
 	}
+	
+	public List<Users> getSearchReuslt(SearchData searchData) {
+		List<Users> userListName = usersRepository.findByNameContainingIgnoreCase(searchData.getKeyword());
+		List<Users> userList = usersRepository.findByProfileMessageContainingIgnoreCase(searchData.getKeyword());
+		userList.addAll(userListName);
+		userList = new ArrayList<Users>(new LinkedHashSet<>(userList));
+		
+		return userList;
+	}
+ 	
 }
