@@ -13,6 +13,7 @@ import org.springframework.web.servlet.ModelAndView;
 import com.example.continuing.common.Utils;
 import com.example.continuing.entity.Follows;
 import com.example.continuing.entity.Users;
+import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.FollowsRepository;
 import com.example.continuing.service.FollowService;
 
@@ -53,6 +54,7 @@ public class FollowController {
 		mv.addObject("followsList", followsList);
 		mv.addObject("followersList", followersList);
 		mv.addObject("myFollowsList", myFollowsList);
+		mv.addObject("searchData", new SearchData());
 		return mv;
 	}
 }

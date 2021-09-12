@@ -15,6 +15,7 @@ import com.example.continuing.common.Utils;
 import com.example.continuing.entity.Joins;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
+import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.JoinsRepository;
 import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.service.FollowService;
@@ -49,6 +50,7 @@ public class MainMeetingController {
 				mv.addObject("myJoinMeetingList", myJoinMeetingList);
 				mv.addObject("joinUserList", joinUserList);
 				mv.addObject("myFollowsList", myFollowsList);
+				mv.addObject("searchData", new SearchData());
 			}, () -> {
 				System.out.println("存在しないミーティングです");
 				mv.setViewName("redirect:/home");
@@ -87,4 +89,10 @@ public class MainMeetingController {
 		return "redirect:" + session.getAttribute("path");
 	}
 	
+	@GetMapping("/Meeting/list/mine/today")
+	public ModelAndView showTodayMyMeeting(ModelAndView mv) {
+		mv.setViewName("todayMyMeetings");
+		mv.addObject("searchData", new SearchData());
+		return mv;
+	}
 }

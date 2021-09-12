@@ -32,8 +32,8 @@ public class MeetingData {
 		topicName = meeting.getTopic();
 		numberPeople = meeting.getNumberPeople();
 		date = meeting.getDate().toString();
-		startTime = meeting.getStartTime();
-		endTime = meeting.getEndTime();
+		startTime = meeting.getStartTime().toString();
+		endTime = meeting.getEndTime().toString();
 		password = meeting.getPassword();
 		passwordAgain = meeting.getPassword();
 		agenda = meeting.getAgenda();
@@ -80,8 +80,8 @@ public class MeetingData {
 		meeting.setTopic(topicName);
 		meeting.setNumberPeople(numberPeople);
 		meeting.setDate(Utils.str2date(date.replace("/", "-")));
-		meeting.setStartTime(startTime);
-		meeting.setEndTime(endTime);
+		meeting.setStartTime(Utils.str2time(startTime));
+		meeting.setEndTime(Utils.str2time(endTime));
 		meeting.setPassword(password);
 		meeting.setAgenda(agenda);
 		
