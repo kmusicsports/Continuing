@@ -1,6 +1,5 @@
 package com.example.continuing.controller;
 
-
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -22,10 +21,10 @@ import com.example.continuing.entity.Topics;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.TopicsRepository;
-import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.JoinService;
 import com.example.continuing.service.MeetingService;
+import com.example.continuing.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,12 +32,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MainController {
 
-	private final UsersRepository usersRepository;
 	private final HttpSession session;
 	private final FollowService followService;
 	private final TopicsRepository topicsRepository;
 	private final JoinService joinService;
 	private final MeetingService meetingService;
+	private final UserService userService;
 	
 	@PersistenceContext
     private EntityManager entityManager;
@@ -74,7 +73,7 @@ public class MainController {
         }
 		
 		Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, prevPageable);
-		List<Users> userList = usersRepository.findAll();
+		List<Users> userList = userService.getSearchReuslt(searchData);
 		List<Topics> topicList = topicsRepository.findAll();
 		
 		Integer userId = (Integer)session.getAttribute("user_id");
@@ -96,7 +95,6 @@ public class MainController {
 	@PostMapping("/search")
 	public ModelAndView search(ModelAndView mv, SearchData searchData, 
 			@PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
-		List<Users> userList = usersRepository.findAll();
 		List<Topics> topicList = topicsRepository.findAll();
 		
 		Integer userId = (Integer)session.getAttribute("user_id");
@@ -108,14 +106,20 @@ public class MainController {
 		
 		if (meetingService.isValid(searchData)) {			
 			Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, pageable);
+			List<Users> userList = userService.getSearchReuslt(searchData);
 			
 			// 入力された検索条件をsessionへ保存
 			session.setAttribute("searchData", searchData);
 			mv.addObject("meetingPage", meetingPage);
 			mv.addObject("meetingList", meetingPage.getContent());
-			
+			mv.addObject("userList", userList);
+						
 			if (meetingPage.getContent().size() == 0) {
-				System.out.println("該当する検索結果はありません");
+				System.out.println("該当するミーティングはありません");
+				// 該当なかったらメッセージを表示
+				
+			} else if(userList.size() == 0) {
+				System.out.println("該当するユーザーアカウントはありません");
 				// 該当なかったらメッセージを表示
 				
 			}
@@ -123,11 +127,11 @@ public class MainController {
 			System.out.println("入力に間違いがあります");
 			mv.addObject("meetingPage", null);
 			mv.addObject("meetingList", null);
+			mv.addObject("userList", null);
 			// 検索条件エラーあり -> エラーメッセージをセット
 			
 		}
 		
-		mv.addObject("userList", userList);
 		mv.addObject("topicList", topicList);
 		mv.addObject("myFollowsList", myFollowsList);
 		mv.addObject("myJoinMeetingList", myJoinMeetingList);
