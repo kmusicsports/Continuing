@@ -20,7 +20,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "users")
 @Data
-@ToString(exclude = "meetingList")
+@ToString(exclude = {"meetingList", "recordList"})
 public class Users {
 
 	@Id
@@ -52,8 +52,11 @@ public class Users {
 	@Column(name = "updated_at")
 	private Timestamp updatedAt;
 	
-	// Usersへの操作をMeetingsにも適用する
     @OneToMany(mappedBy = "host", cascade = CascadeType.ALL)
     @OrderBy("id asc")
     private List<Meetings> meetingList = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OrderBy("id asc")
+    private List<Records> recordList = new ArrayList<>();
 }
