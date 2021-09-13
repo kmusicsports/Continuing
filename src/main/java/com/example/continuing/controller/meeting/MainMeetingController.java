@@ -20,6 +20,7 @@ import com.example.continuing.repository.JoinsRepository;
 import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.JoinService;
+import com.example.continuing.service.MeetingService;
 
 import lombok.AllArgsConstructor;
 
@@ -32,6 +33,7 @@ public class MainMeetingController {
 	private final HttpSession session;
 	private final FollowService followService;
 	private final JoinsRepository joinsRepository;
+	private final MeetingService meetingService;
 	
 	@GetMapping("/Meeting/{meeting_id}")
 	public ModelAndView showMeetingDetail(ModelAndView mv, @PathVariable(name = "meeting_id") int meetingId) {
@@ -67,6 +69,7 @@ public class MainMeetingController {
 			joinsRepository.saveAndFlush(join);
 		} else {
 			System.out.println("存在しないミーティングです");
+			return "redirect:/home";
 		}
 		return "redirect:" + Utils.getHeaderPath(request);
 	}
@@ -80,6 +83,7 @@ public class MainMeetingController {
 			joinsRepository.deleteAll(joinList);
 		} else {
 			System.out.println("存在しないミーティングです");
+			return "redirect:/home";
 		}
 		return "redirect:" + Utils.getHeaderPath(request);
 	}
@@ -87,6 +91,26 @@ public class MainMeetingController {
 	@GetMapping("/Meeting/cancel")
 	public String cancel(HttpServletRequest request) {
 		return "redirect:" + session.getAttribute("path");
+	}
+	
+	@GetMapping("/Meeting/check/{meeting_id}")
+	public String joinCheck(@PathVariable(name = "meeting_id") int meetingId) {
+		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
+		String meetingUrl = null;
+		if(someMeeting.isPresent()) {
+			Meetings meeting = someMeeting.get();
+			Integer myId = (Integer)session.getAttribute("user_id");
+			meetingService.joinCheck(meeting, myId);
+			if(meeting.getHost().getId() == myId) {
+				meetingUrl = meeting.getStartUrl();
+			} else {
+				meetingUrl = meeting.getJoinUrl();
+			}
+		} else {
+			System.out.println("存在しないミーティングです");
+			return "redirect:/home";
+		}
+		return "redirect:" +  meetingUrl;
 	}
 	
 	@GetMapping("/Meeting/list/mine/today")
