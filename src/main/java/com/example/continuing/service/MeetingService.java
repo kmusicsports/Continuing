@@ -1,16 +1,34 @@
 package com.example.continuing.service;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.LocalDate;
+import java.util.Date;
+import java.util.Optional;
+
+import javax.servlet.http.HttpSession;
 
 import org.springframework.stereotype.Service;
 
 import com.example.continuing.common.Utils;
+import com.example.continuing.entity.Meetings;
+import com.example.continuing.entity.Records;
+import com.example.continuing.entity.Users;
 import com.example.continuing.form.MeetingData;
 import com.example.continuing.form.SearchData;
+import com.example.continuing.repository.RecordsRepository;
+import com.example.continuing.repository.UsersRepository;
+
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class MeetingService {
+	
+	private final UsersRepository usersRepository;
+	private final RecordsRepository recordsRepository;
+	private final HttpSession session;
 
 	// ミーティングフォーム用のチェック
 	public boolean isValid(MeetingData meetingData, boolean isCreate) {
@@ -96,6 +114,51 @@ public class MeetingService {
         }
 		
         return answer;
+	}
+	
+	// ミーティングへの参加かどうかのチェック
+	public void joinCheck(Meetings meeting, Integer userId) {
+		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
+		
+		String strMeetingDate = meeting.getDate().toString();
+		String strToday = sdf.format(new java.util.Date());
+		if(strMeetingDate.equals(strToday)) {
+			String strStartTime = stf.format(meeting.getStartTime());
+			String strNow = stf.format(new java.util.Date());
+			int duration = Utils.string2Int(strStartTime) - Utils.string2Int(strNow);
+			if(duration <= 15) {
+				Users user = usersRepository.findById(userId).get();
+				Optional<Records> someRecord = recordsRepository.findByUserAndTopic(user, meeting.getTopic());
+				Records record = new Records(user, meeting.getTopic());
+				if (someRecord.isPresent()) {
+					record = someRecord.get();
+				}
+				if (session.getAttribute(strStartTime) == null) {
+					System.out.println("参加");
+					session.setAttribute(strStartTime, "not first");
+					session.setMaxInactiveInterval(24 * 60 - Utils.string2Int(strNow));
+					record.setDays(record.getDays() + 1);
+					
+					Date date= new Date();
+			        Timestamp timestamp = new Timestamp(date.getTime());
+					record.setUpdatedAt(timestamp);
+					
+					recordsRepository.saveAndFlush(record);
+					
+					if(session.getAttribute(strToday) == null) {
+						session.setAttribute(strToday, "not today's first");
+						user.setContinuousDays(user.getContinuousDays() + 1);
+						usersRepository.saveAndFlush(user);					
+					}					
+				}
+				
+			} else {
+				System.out.println("不参加");
+			}
+		} else {
+			System.out.println("meeting is not today!");
+		}
 	}
 	
 }
