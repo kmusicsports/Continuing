@@ -45,8 +45,8 @@ public class Utils {
     }
     
     public static int string2Int(String time) {
-    	int hour = Integer.valueOf(time.charAt(0) + time.charAt(1));
-    	int minute = Integer.valueOf(time.charAt(3) + time.charAt(4));
+    	int hour = Integer.valueOf(time.substring(0, 2));
+    	int minute = Integer.valueOf(time.substring(3, 5));
     	return hour * 60 + minute;
     }
     
