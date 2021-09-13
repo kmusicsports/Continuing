@@ -68,9 +68,9 @@
                         <td class="meeting-url">
                             <div th:unless="${#lists.contains(myJoinMeetingList, meeting)}">
 		                            <span class="hide-text" th:unless="${session.user_id == meeting.host.Id}">参加予約すると表示されます。</span>
-		                            <a th:if="${session.user_id == meeting.host.Id}" th:href="${meeting.startUrl}" th:text="${meeting.startUrl}" target="_blank" rel="noopener noreferrer"></a>
+		                            <a th:if="${session.user_id == meeting.host.Id}" th:href="@{/Meeting/check/__${meeting.id}__}" th:text="${meeting.startUrl}" target="_blank" rel="noopener noreferrer"></a>
                             </div>
-                            <a th:if="${#lists.contains(myJoinMeetingList, meeting) && session.user_id != meeting.host.Id}" th:href="${meeting.joinUrl}" th:text="${meeting.joinUrl}" target="_blank" rel="noopener noreferrer"></a>                            
+                            <a th:if="${#lists.contains(myJoinMeetingList, meeting) && session.user_id != meeting.host.Id}" th:href="@{/Meeting/check/__${meeting.id}__}" th:text="${meeting.joinUrl}" target="_blank" rel="noopener noreferrer"></a>                            
                         </td>
                     </tr>
                     <tr>
