@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.example.continuing.common.Utils;
 import com.example.continuing.entity.Follows;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.SearchData;
@@ -32,7 +31,7 @@ public class FollowController {
 		Integer followerId = (Integer)session.getAttribute("user_id");
 		Follows follow = new Follows(followerId, followeeId);
 		followsRepository.saveAndFlush(follow);
-	    return "redirect:" + Utils.getHeaderPath(request);
+	    return "redirect:" + session.getAttribute("path");
 	}
 	
 	@GetMapping("/User/unfollow/{followee_id}")
@@ -40,7 +39,7 @@ public class FollowController {
 		Integer followerId = (Integer)session.getAttribute("user_id");
 		List<Follows> follows = followsRepository.findByFollowerIdAndFolloweeId(followerId, followeeId);
 		followsRepository.deleteAll(follows);
-	    return "redirect:" + Utils.getHeaderPath(request);
+		return "redirect:" + session.getAttribute("path");
 	}
 	
 	@GetMapping("/User/{user_id}/list/follows")

@@ -5,8 +5,6 @@ import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import javax.servlet.http.HttpServletRequest;
-
 public class Utils {
 	
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -36,12 +34,6 @@ public class Utils {
             }
         }
         return true;
-    }
-    
-    public static String getHeaderPath(HttpServletRequest request) {
-    	String header = request.getHeader("REFERER");
-		String headerPath = header.substring(header.indexOf("/", 10));
-		return headerPath;
     }
     
     public static int string2Int(String time) {
