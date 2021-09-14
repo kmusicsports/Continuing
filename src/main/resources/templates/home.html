@@ -131,10 +131,6 @@
 						                            <span class="text-danger" th:if="${meeting.numberPeople == 1 && #lists.size(meeting.joinList) == 1}">受付終了</span>                            		                            
 				                            </div>
 		                            </div>
-		                            <div class="mt-2 ms-auto me-2" th:if="${session.user_id == meeting.host.Id}">
-		                                <!-- <a th:href="@{/Meeting/__${meeting.id}__/showUpdateForm}" class="btn btn-outline-dark me-2">編集</a> -->
-		                                <a href="#" class="btn btn-outline-danger ps-4 pe-4" data-toggle="modal" data-target="#deletionConfirmationModal">削除</a>
-		                            </div>
 		                        </div>
 		                        <table class="table">
 		                            <tr>
@@ -160,24 +156,6 @@
 		                            </tr>
 		                        </table>
 		                    </button>
-		
-		                    <div class="modal fade" id="deletionConfirmationModal" th:if="${session.user_id == meeting.host.Id}" tabindex="-1" role="dialog" aria-labelledby="deletionConfirmationModalLabel" aria-hidden="true">
-		                        <!-- deletionConfirmationModal -->
-		                        <div class="modal-dialog modal-dialog-centered" role="document">
-		                            <div class="modal-content">
-		                                <div class="modal-header">
-		                                    <h5 class="modal-title" id="deletionConfirmationModalLabel">削除確認</h5>
-		                                </div>
-		                                <div class="modal-body">
-		                                    本当に削除してもよろしいですか？
-		                                </div>
-		                                <div class="modal-footer">
-		                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
-		                                    <button type="submit" th:formaction="@{/Meeting/delete/__${meeting.id}__}" class="btn btn-danger">削除する</button>
-		                                </div>
-		                            </div>
-		                        </div>
-		                    </div>
 		                </form>
 		
 		            </div>
@@ -214,86 +192,27 @@
         <div class="tab-pane fade" id="pills-account" role="tabpanel" aria-labelledby="pills-account-tab">
             <div class="m-5">
                 <h3 class="ms-2">継続日数ランキング</h3>
-                <form th:action="@{/User/detail}">
+                <form th:action="@{/}" method="get">
                     <div class="row">
                         <a th:href="@{/User/list/ranking}" class="text-end fs-6 mb-2">もっと見る</a>
-                        <div class="col-4 p-0">
+                        <div class="col-4 p-0" th:each="user, stat : ${userRanking}">
                             <div class="card">
                                 <div>
-                                    <span class="badge bg-warning col-3 pt-2 pb-2">1</span>
-                                    <span class="ms-1">24</span> 日
+                                    <span th:if="${stat.count == 1}" class="badge bg-warning mb-3 col-3 pt-2 pb-2">1</span>
+								                    <span th:if="${stat.count == 2}" class="badge bg-secondary col-3 pt-2 pb-2 mb-3">2</span>
+								                    <span th:if="${stat.count == 3}" class="badge mb-3 col-3 pt-2 pb-2" style="background-color: saddlebrown;">3</span>
+                                    <span class="ms-1" th:text="${user.continuousDays}"></span> 日
                                 </div>
                                 <button class="card-body btn p-2" style="border-radius: 0">
                                     <img src="https://picsum.photos/120" class="card-img-top mb-2" alt="...">
-                                    <h5 class="card-title">
-                                        ユーザー名です。
-                                        ユーザー名です。
-                                        ユーザー名です。
-                                        ユーザー名です。
-                                    </h5>
-                                    <p class="card-text">
-                                        プロフィールメッセージです。
-                                        プロフィールメッセージです。
-                                        プロフィールメッセージです。
-                                        プロフィールメッセージです。
-                                    </p>
-                                    <!-- <input type="submit" class="btn btn-outline-primary" value="フォロー"> -->
-                                    <input type="submit" class="btn btn-primary" value="フォロー中">
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-4 p-0">
-                            <div class="card">
-                                <div>
-                                    <span class="badge bg-secondary col-3 pt-2 pb-2"> 2</span>
-                                    <span class="ms-1">19</span> 日
-                                </div>
-                                <button class="card-body btn p-2" style="border-radius: 0">
-                                    <img src="https://picsum.photos/80" class="card-img-top mb-2" alt="...">
-                                    <h5 class="card-title">
-                                        ユーザー名です。
-                                        ユーザー名です。
-                                        ユーザー名です。
-                                        ユーザー名です。
-                                    </h5>
-                                    <p class="card-text">
-                                        プロフィールメッセージです。
-                                        プロフィールメッセージです。
-                                        プロフィールメッセージです。
-                                        プロフィールメッセージです。
-                                    </p>
-                                    <input type="submit" class="btn btn-outline-primary" value="フォロー">
-                                    <!-- <input type="submit" class="btn btn-primary" value="フォロー中"> -->
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-4 p-0">
-                            <div class="card">
-                                <div>
-                                    <span class="badge col-3 pt-2 pb-2" style="background-color: saddlebrown;">3</span>
-                                    <span class="ms-1">18</span> 日
-                                </div>
-                                <button class="card-body btn p-2" style="border-radius: 0">
-                                    <img src="https://picsum.photos/40" class="card-img-top mb-2" alt="...">
-                                    <h5 class="card-title">
-                                        ユーザー名です。
-                                        ユーザー名です。
-                                        ユーザー名です。
-                                        ユーザー名です。
-                                    </h5>
-                                    <p class="card-text">
-                                        プロフィールメッセージです。
-                                        プロフィールメッセージです。
-                                        プロフィールメッセージです。
-                                        プロフィールメッセージです。
-                                    </p>
-                                    <input type="submit" class="btn btn-outline-primary" value="フォロー">
-                                    <!-- <input type="submit" class="btn btn-primary" value="フォロー中"> -->
+                                    <h5 class="card-title" th:text="${user.name}"></h5>
+                                    <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
+                                    <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
+                                    <div class="my-card" th:if="${session.user_id == user.id}"></div>
                                 </button>
                             </div>
                         </div>
                     </div>
-                    
                 </form>
             </div>
 
