@@ -182,8 +182,16 @@ public class UserController {
 
 	@GetMapping("/User/list/ranking")
 	public ModelAndView showUserRanking(ModelAndView mv) {
+		List<Users> userList = usersRepository.findAllByOrderByContinuousDaysDesc();
+		
+		Integer myId = (Integer)session.getAttribute("user_id");
+		List<Users> myFollowsList = followService.getFollowsList(myId);
+		
+		session.setAttribute("path", "/User/list/ranking");
 		mv.setViewName("userRanking");
 		mv.addObject("searchData", new SearchData());
+		mv.addObject("userList", userList);
+		mv.addObject("myFollowsList", myFollowsList);
 		return mv;
 	}
 	
