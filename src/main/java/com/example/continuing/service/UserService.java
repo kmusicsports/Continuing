@@ -3,7 +3,9 @@ package com.example.continuing.service;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import org.springframework.stereotype.Service;
 
@@ -74,4 +76,16 @@ public class UserService {
 		return userList;
 	}
  	
+	public Map<Integer, Integer> makeRankingMap(List<Users> userList) {
+		Map<Integer, Integer> rankingMap = new TreeMap<>();
+		int i = 1;
+		for(Users user : userList) {
+			if (!rankingMap.containsKey(user.getContinuousDays())) {
+				rankingMap.put(user.getContinuousDays(), i++);				
+			}
+		}
+		
+		return rankingMap;
+	}
+	
 }

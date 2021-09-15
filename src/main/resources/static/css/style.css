@@ -54,3 +54,7 @@ th {
 .meeting-url {
 	word-break: break-all;
 } 
+
+.my-card {
+	height: 38px;
+}

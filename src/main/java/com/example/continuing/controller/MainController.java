@@ -1,6 +1,7 @@
 package com.example.continuing.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -21,6 +22,7 @@ import com.example.continuing.entity.Topics;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.TopicsRepository;
+import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.JoinService;
 import com.example.continuing.service.MeetingService;
@@ -38,6 +40,7 @@ public class MainController {
 	private final JoinService joinService;
 	private final MeetingService meetingService;
 	private final UserService userService;
+	private final UsersRepository usersRepository;
 	
 	@PersistenceContext
     private EntityManager entityManager;
@@ -75,6 +78,8 @@ public class MainController {
 		Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, prevPageable);
 		List<Users> userList = userService.getSearchReuslt(searchData);
 		List<Topics> topicList = topicsRepository.findAll();
+		List<Users> userRanking = usersRepository.findTop3ByOrderByContinuousDaysDesc();
+		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userRanking);
 		
 		Integer userId = (Integer)session.getAttribute("user_id");
 		List<Users> myFollowsList = followService.getFollowsList(userId);
@@ -89,6 +94,8 @@ public class MainController {
 		mv.addObject("myFollowsList", myFollowsList);
 		mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		mv.addObject("searchData", searchData);
+		mv.addObject("userRanking", userRanking);
+		mv.addObject("rankingMap", rankingMap);
 		return mv;
 	}
 	
@@ -96,6 +103,8 @@ public class MainController {
 	public ModelAndView search(ModelAndView mv, SearchData searchData, 
 			@PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
 		List<Topics> topicList = topicsRepository.findAll();
+		List<Users> userRanking = usersRepository.findTop3ByOrderByContinuousDaysDesc();
+		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userRanking);
 		
 		Integer userId = (Integer)session.getAttribute("user_id");
 		List<Users> myFollowsList = followService.getFollowsList(userId);
@@ -136,6 +145,8 @@ public class MainController {
 		mv.addObject("myFollowsList", myFollowsList);
 		mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		mv.addObject("searchData", searchData);
+		mv.addObject("userRanking", userRanking);
+		mv.addObject("rankingMap", rankingMap);
 		return mv;
 	}
 	

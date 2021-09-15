@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.example.continuing.common.Utils;
 import com.example.continuing.entity.Joins;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
@@ -71,7 +70,7 @@ public class MainMeetingController {
 			System.out.println("存在しないミーティングです");
 			return "redirect:/home";
 		}
-		return "redirect:" + Utils.getHeaderPath(request);
+		return "redirect:" + session.getAttribute("path");
 	}
 	
 	@GetMapping("/Meeting/leave/{meeting_id}")
@@ -85,7 +84,7 @@ public class MainMeetingController {
 			System.out.println("存在しないミーティングです");
 			return "redirect:/home";
 		}
-		return "redirect:" + Utils.getHeaderPath(request);
+		return "redirect:" + session.getAttribute("path");
 	}
 	
 	@GetMapping("/Meeting/cancel")

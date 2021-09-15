@@ -2,6 +2,7 @@ package com.example.continuing.controller;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
@@ -182,8 +183,18 @@ public class UserController {
 
 	@GetMapping("/User/list/ranking")
 	public ModelAndView showUserRanking(ModelAndView mv) {
+		List<Users> userList = usersRepository.findAllByOrderByContinuousDaysDesc();
+		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userList);
+		
+		Integer myId = (Integer)session.getAttribute("user_id");
+		List<Users> myFollowsList = followService.getFollowsList(myId);
+		
+		session.setAttribute("path", "/User/list/ranking");
 		mv.setViewName("userRanking");
 		mv.addObject("searchData", new SearchData());
+		mv.addObject("userList", userList);
+		mv.addObject("myFollowsList", myFollowsList);
+		mv.addObject("rankingMap", rankingMap);
 		return mv;
 	}
 	
