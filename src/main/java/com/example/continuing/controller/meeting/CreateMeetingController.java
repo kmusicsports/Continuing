@@ -64,7 +64,7 @@ public class CreateMeetingController {
 	
 	// call
 	@PostMapping("/Meeting/create")
-	public void createRedirect(MeetingData meetingData, HttpServletResponse response) {
+	public ModelAndView createRedirect(MeetingData meetingData, HttpServletResponse response, ModelAndView mv) {
 		// エラーチェック
 		boolean isValid = meetingService.isValid(meetingData, true);
 		if(isValid) {
@@ -82,6 +82,17 @@ public class CreateMeetingController {
 				e.printStackTrace();
 			}
 			
+			return null;
+		} else {
+			List<Topics> topicList = topicsRepository.findAll();
+			
+			session.setAttribute("mode", "create");
+			mv.setViewName("meetingForm");
+			mv.addObject("topicList", topicList);
+			mv.addObject("meetingData", meetingData);
+			mv.addObject("searchData", new SearchData());
+			
+			return mv;
 		}
 	}
 	
