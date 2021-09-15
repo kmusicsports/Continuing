@@ -1,6 +1,7 @@
 package com.example.continuing.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
@@ -78,6 +79,7 @@ public class MainController {
 		List<Users> userList = userService.getSearchReuslt(searchData);
 		List<Topics> topicList = topicsRepository.findAll();
 		List<Users> userRanking = usersRepository.findTop3ByOrderByContinuousDaysDesc();
+		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userRanking);
 		
 		Integer userId = (Integer)session.getAttribute("user_id");
 		List<Users> myFollowsList = followService.getFollowsList(userId);
@@ -93,6 +95,7 @@ public class MainController {
 		mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		mv.addObject("searchData", searchData);
 		mv.addObject("userRanking", userRanking);
+		mv.addObject("rankingMap", rankingMap);
 		return mv;
 	}
 	
@@ -101,6 +104,7 @@ public class MainController {
 			@PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
 		List<Topics> topicList = topicsRepository.findAll();
 		List<Users> userRanking = usersRepository.findTop3ByOrderByContinuousDaysDesc();
+		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userRanking);
 		
 		Integer userId = (Integer)session.getAttribute("user_id");
 		List<Users> myFollowsList = followService.getFollowsList(userId);
@@ -142,6 +146,7 @@ public class MainController {
 		mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		mv.addObject("searchData", searchData);
 		mv.addObject("userRanking", userRanking);
+		mv.addObject("rankingMap", rankingMap);
 		return mv;
 	}
 	
