@@ -49,6 +49,8 @@ public class FollowController {
 		
 		Integer myId = (Integer)session.getAttribute("user_id");
 		List<Users> myFollowsList = followService.getFollowsList(myId);
+		
+		session.setAttribute("path", "/User/" + userId + "/list/follows");
 		mv.setViewName("follows");
 		mv.addObject("followsList", followsList);
 		mv.addObject("followersList", followersList);
