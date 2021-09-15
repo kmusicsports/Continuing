@@ -46,14 +46,19 @@ public class MeetingService {
 			answer = false;
 		}
 		
+		if(meetingData.getNumberPeople() < 1) {
+			System.out.println("Error: 人数を選択してください");
+			answer = false;
+		}
+		
 		int duration = Utils.string2Int(meetingData.getEndTime()) - Utils.string2Int(meetingData.getStartTime());
-		if(meetingData.getNumberPeople() == 2 && duration > 40) {
-			System.out.println("Error: 複数人でのミーティング時間は最大40分です");
+		if(meetingData.getNumberPeople() == 2 && (duration < 15 || duration > 40)) {
+			System.out.println("Error: 複数人でのミーティング時間は15~40分です");
 			meetingData.setStartTime("");
 			meetingData.setEndTime("");
 			answer = false;
-		} else if(meetingData.getNumberPeople() == 1 && duration > 1800) {
-			System.out.println("Error: ミーティング時間は最大30時間(1800分)です");
+		} else if(meetingData.getNumberPeople() == 1 && (duration < 15 || duration > 1800)) {
+			System.out.println("Error: ミーティング時間は15~1800分(30時間)です");
 			meetingData.setStartTime("");
 			meetingData.setEndTime("");
 			answer = false;
