@@ -205,12 +205,12 @@
                                 </div>
                                 <button class="card-body btn p-2" style="border-radius: 0">
                                     <div th:unless="${user.profileImage} == null">
-				                                <img th:src="${user.profileImage}" alt="プロフィール画像" class="avatar">
+				                                <img th:src="${user.profileImage}" alt="プロフィール画像" class="avatar mb-2">
 				                            </div>
 				                            <div th:if="${user.profileImage} == null">
-				                                <span class="avatar btn btn-light"></span>
+				                                <span class="avatar btn btn-light mb-2"></span>
 				                            </div>
-                                    <h5 class="card-title" th:text="${user.name}"></h5>
+                                    <h5 class="card-title mb-4" th:text="${user.name}"></h5>
                                     <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
                                     <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
                                     <div class="my-card" th:if="${session.user_id == user.id}"></div>
