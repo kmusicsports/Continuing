@@ -19,11 +19,11 @@
         <form th:action="@{/}" method="get">
 		        <button type="submit" th:formaction="@{/User/__${user.id}__}" class="list-group-item list-group-item-action" th:each="user, stat : ${userList}">   
 		            <div>
-		                <span th:if="${stat.count == 1}" class="badge bg-warning mb-3">1</span>
-                    <span th:if="${stat.count == 2}" class="badge bg-secondary mb-3">2</span>
-		                <span th:if="${stat.count == 3}" class="badge mb-3" style="background-color: saddlebrown;">3</span>
-		                <span th:if="${stat.count &gt; 3}" class="badge bg-light border text-dark mb-3" th:text="${stat.count}"></span>
-		                <span class="ms-1" th:text="${user.continuousDays}"></span> 日継続!
+		                <span th:if="${rankingMap.get(user.continuousDays) == 1}" class="badge bg-warning mb-3">1</span>
+                    <span th:if="${rankingMap.get(user.continuousDays) == 2}" class="badge bg-secondary mb-3">2</span>
+		                <span th:if="${rankingMap.get(user.continuousDays) == 3}" class="badge mb-3" style="background-color: saddlebrown;">3</span>
+		                <span th:if="${rankingMap.get(user.continuousDays) &gt; 3}" class="badge bg-light border text-dark mb-3" th:text="${rankingMap.get(user.continuousDays)}"></span>
+		                <span class="ms-1" th:text="${user.continuousDays}"></span> 日
 		            </div>
 		            <div class="d-flex w-100">
 		                <div th:unless="${user.profileImage} == null">
