@@ -1,6 +1,7 @@
 package com.example.continuing.controller.meeting;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.repository.MeetingsRepository;
@@ -36,19 +38,35 @@ public class DeleteMeetingController {
     }
 	
 	@GetMapping("/Meeting/delete/{id}")
-    public void createRedirect(@PathVariable(name = "id") int id, HttpServletResponse response) {
-    	System.out.println("--delete meeting api request");
-    	
-    	this.id = id;
-    	
-    	//ミーティング情報
-    	ZoomDetails.setZOOM_STATE("zoom_delete");
-        String zoomAuthUrl = ZoomApiIntegration.getAuthorizationUrl(session);
-        System.out.println("ZoomAuthUrl: " + zoomAuthUrl);
-        try {
-        	response.sendRedirect(zoomAuthUrl);
-		} catch (Exception e) {
-			e.printStackTrace();
+    public ModelAndView createRedirect(@PathVariable(name = "id") int id, HttpServletResponse response, ModelAndView mv) {
+		Optional<Meetings> someMeeting = meetingsRepository.findById(id);
+		if(someMeeting.isPresent()) {
+			Integer myId = (Integer)session.getAttribute("user_id");
+			if(someMeeting.get().getHost().getId().equals(myId)) {
+				System.out.println("--delete meeting api request");
+				
+				this.id = id;
+				
+				//ミーティング情報
+				ZoomDetails.setZOOM_STATE("zoom_delete");
+				String zoomAuthUrl = ZoomApiIntegration.getAuthorizationUrl(session);
+				System.out.println("ZoomAuthUrl: " + zoomAuthUrl);
+				try {
+					response.sendRedirect(zoomAuthUrl);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+				return null;
+			} else {
+				System.out.println("他ユーザーのミーティングです");
+				mv.setViewName("redirect:/Meeting/" + id);
+				return mv;
+			}				
+		} else {
+			System.out.println("存在しないミーティングです");
+			mv.setViewName("redirect:/home");
+			return mv;
 		}
         
     }
