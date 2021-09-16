@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,6 +43,7 @@ public class UserController {
 	private final FollowsRepository followsRepository; 
 	private final MeetingsRepository meetingsRepository;
 	private final JoinService joinService;
+	private final PasswordEncoder passwordEncoder;
 	
 	@GetMapping("/User/{user_id}")
 	public ModelAndView showUserDetail(ModelAndView mv, @PathVariable(name = "user_id") int userId) {
@@ -133,22 +135,17 @@ public class UserController {
 	@PostMapping("/User/update")
 	public String updateProfile(ProfileData profileData) {
 		Integer userId = (Integer)session.getAttribute("user_id");
-		if(userId == null) {
-			System.out.println("Error: ログインし直してください");
-			return "redirect:/User/showLogin";
+		Users oldData = usersRepository.findById(userId).get();
+		// エラーチェック
+		boolean isValid = userService.isValid(profileData, oldData); 
+		if(isValid) {
+			// エラーなし -> 更新
+			Users user = profileData.toEntity(oldData, passwordEncoder);
+			usersRepository.saveAndFlush(user);
+			return "redirect:/User/mypage";
 		} else {
-			Users oldData = usersRepository.findById(userId).get();
-			// エラーチェック
-			boolean isValid = userService.isValid(profileData, oldData); 
-			if(isValid) {
-				// エラーなし -> 更新
-				Users user = profileData.toEntity(oldData);
-				usersRepository.saveAndFlush(user);
-				return "redirect:/User/mypage";
-			} else {
-				
-				return "redirect:/User/updateForm";
-			}			
+			
+			return "redirect:/User/updateForm";
 		}
 	}
 	
