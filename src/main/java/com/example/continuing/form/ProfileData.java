@@ -3,6 +3,8 @@ package com.example.continuing.form;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import com.example.continuing.entity.Users;
 
 import lombok.Data;
@@ -31,7 +33,7 @@ public class ProfileData {
 		this.newPasswordAgain = null;
 	}
 	
-	public Users toEntity(Users oldData) {
+	public Users toEntity(Users oldData, PasswordEncoder passwordEncoder) {
 		Users user = new Users();
 		user.setId(oldData.getId());
 		user.setName(name);
@@ -44,7 +46,7 @@ public class ProfileData {
 		if (newPassword == null || newPassword.equals("")) {
 			user.setPassword(oldData.getPassword());			
 		} else {
-			user.setPassword(newPassword);
+			user.setPassword(passwordEncoder.encode(newPassword));
 		}
 		
 		Date date= new Date();
