@@ -8,7 +8,6 @@ import javax.servlet.http.HttpSession;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,14 +40,8 @@ public class CreateMeetingController {
 	private final HttpSession session;
 	private final MeetingsRepository meetingsRepository;
 	private MeetingData meetingData = new MeetingData(); 
-	private ZoomApiIntegration zoomApiIntegration;
+	private final ZoomApiIntegration zoomApiIntegration;
 	private final UsersRepository usersRepository;
-
-	@Autowired
-	private void setZoomApiIntegration(ZoomApiIntegration zoomApiIntegration) {
-		this.zoomApiIntegration = zoomApiIntegration;
-	}
-
 	
 	@GetMapping("/Meeting/showCreateForm")
 	public ModelAndView createMeetingForm(ModelAndView mv) {

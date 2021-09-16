@@ -6,7 +6,6 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,13 +29,8 @@ public class DeleteMeetingController {
 	private final MeetingsRepository meetingsRepository;
 	private final HttpSession session;
 	private Integer id = null;
-	private ZoomApiIntegration ZoomApiIntegration;
-	
-	@Autowired
-    private void setZoomApiIntegration(ZoomApiIntegration ZoomApiIntegration) {
-        this.ZoomApiIntegration = ZoomApiIntegration;
-    }
-	
+	private final ZoomApiIntegration ZoomApiIntegration;
+
 	@GetMapping("/Meeting/delete/{id}")
     public ModelAndView createRedirect(@PathVariable(name = "id") int id, HttpServletResponse response, ModelAndView mv) {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(id);

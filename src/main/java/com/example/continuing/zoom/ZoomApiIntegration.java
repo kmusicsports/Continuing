@@ -6,6 +6,7 @@ import java.util.UUID;
 import javax.servlet.http.HttpSession;
 
 import org.json.simple.JSONObject;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.example.continuing.dto.MeetingDto;
@@ -16,6 +17,7 @@ import com.github.scribejava.core.model.Response;
 import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
 
+@Component
 public class ZoomApiIntegration {
 
 	// App credentials
@@ -123,9 +125,9 @@ public class ZoomApiIntegration {
     	
     // 会議の追加
     public String createMeeting(OAuth2AccessToken oauthToken, MeetingDto meetingDto) throws IOException{
-    	 System.out.println("-会議追加サービス");
+    	System.out.println("-会議追加サービス");
     	 
-        OAuth20Service oauthService =new ServiceBuilder()
+        OAuth20Service oauthService = new ServiceBuilder()
                 .apiKey(CLIENT_ID)
                 .apiSecret(CLIENT_SECRET)
                 .callback(REDIRECT_URI).build(ZoomDetails.instance());
@@ -152,13 +154,13 @@ public class ZoomApiIntegration {
     
     // 会議の削除
     public void deleteMeeting(OAuth2AccessToken oauthToken, String meetingId) throws IOException{
-    	 System.out.println("-会議削除サービス");
-    	 System.out.println("API URL: " + DELETE_MEETING_API_URL + meetingId);
-        OAuth20Service oauthService =new ServiceBuilder()
+		System.out.println("-会議削除サービス");
+		System.out.println("API URL: " + DELETE_MEETING_API_URL + meetingId);
+        OAuth20Service oauthService = new ServiceBuilder()
                 .apiKey(CLIENT_ID)
                 .apiSecret(CLIENT_SECRET)
                 .callback(REDIRECT_URI).build(ZoomDetails.instance());
-        OAuthRequest request = new OAuthRequest(Verb.DELETE, DELETE_MEETING_API_URL+ meetingId, oauthService);
+        OAuthRequest request = new OAuthRequest(Verb.DELETE, DELETE_MEETING_API_URL + meetingId, oauthService);
         
         request.addHeader("Content-Type", "application/json;charset=UTF-8");
         JSONObject jsonOb = new JSONObject();
