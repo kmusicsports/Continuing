@@ -9,14 +9,23 @@ import com.example.continuing.entity.Users;
 import com.example.continuing.form.RegisterData;
 import com.example.continuing.repository.UsersRepository;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class LoginService {
 	
 	private final UsersRepository usersRepository;
+	private final MailService mailService;
+	private final static String MESSAGE_TEXT = "<html>"
+			+ "<head></head>"
+			+ "<body>"
+			+ "<h3>Welcom to Continuing!</h3>"
+			+ "<p>You're officially a Continuing user.</p>"
+			+ "<a href='https://www.yahoo.co.jp'>Go to Yahoo</a>"
+			+ "</body>"
+			+ "</html>";
 
 	// 登録画面用のチェック
 	public boolean isValid(RegisterData registerData) {
@@ -58,6 +67,11 @@ public class LoginService {
 			System.out.println("Error: 既に登録されているメールアドレスです");
 			registerData.setEmail(null);
 			answer = false;
+		} else {
+			if(!mailService.sendMail(registerData.getEmail(), "Welcom to Continuing!", MESSAGE_TEXT)) {
+				System.out.println("Error: メールが送信できませんでした");
+				answer = false;
+			}
 		}
 		
 		return answer;
