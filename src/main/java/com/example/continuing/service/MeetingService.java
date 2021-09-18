@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.continuing.common.Utils;
@@ -20,15 +21,18 @@ import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.RecordsRepository;
 import com.example.continuing.repository.UsersRepository;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class MeetingService {
 	
 	private final UsersRepository usersRepository;
 	private final RecordsRepository recordsRepository;
 	private final HttpSession session;
+	
+	@Value("${app.url}")
+	private String APP_URL;
 
 	// ミーティングフォーム用のチェック
 	public boolean isValid(MeetingData meetingData, boolean isCreate) {
@@ -164,6 +168,41 @@ public class MeetingService {
 		} else {
 			System.out.println("meeting is not today!");
 		}
+	}
+	
+	public String getMessageText(Meetings meeting, String username, String type) {
+		String messageText = "<html><head></head><html><head></head><body>";
+		String meetingInfo = "<br>"
+				+ "作成者 : " + meeting.getHost().getName() + "<br>" 
+				+ "トピック : " + meeting.getTopic() + "<br>"
+				+ "日付 : " + Utils.date2str(meeting.getDate()) + "<br>"
+				+ "時間 : " + Utils.time2str(meeting.getStartTime()) + "～" + Utils.time2str(meeting.getEndTime()) + "<br>"
+				+ "<br>";
+		if(type.equals("create")) {
+			messageText += username + "様。<br>"
+					+ "<br>"
+					+ meeting.getHost().getName() + "さんが以下のミーティングを作成しました。<br>"
+					+ meetingInfo
+					+ "<a href='" + APP_URL + "/Meeting/" + meeting.getId() + "'>さっそく参加予約をしに行こう!</a>";
+		} else if (type.equals("delete")) {
+			messageText += username + "様。<br>" 
+					+ "<br>"
+					+ "参加予定だった以下のミーティングが削除されました。<br>"
+					+ meetingInfo
+					+ "<a href='" + APP_URL + "/home'>代わりのミーティングを探しに行こう!</a>";
+		} else if(type.equals("join")) {
+			messageText += "以下のミーティングに" + username + "さんが参加予約をしました。<br>"
+					+ meetingInfo
+					+ "参加を拒否する場合は<a href='https://www.yahoo.co.jp'>こちら</a>";
+		} else if(type.equals("leave")) {
+			messageText += username + "さんが以下のミーティングの参加予約を取り消しました。<br>"
+					+ meetingInfo;
+		} else {
+			messageText += "Something is wrong!";
+		}
+		
+		messageText += "</body></html>";
+		return messageText;
 	}
 	
 }
