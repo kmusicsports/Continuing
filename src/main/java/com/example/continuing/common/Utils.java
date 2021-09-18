@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 public class Utils {
 	
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	private static final SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd");
 	private static final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
 
 	public static boolean isAllDoubleSpace(String s) {
@@ -79,5 +80,13 @@ public class Utils {
         }
         
         return time;
+    }
+    
+    public static String date2str(Date date) {
+    	return sdf2.format(date);
+    }
+    
+    public static String time2str(Time time) {
+    	return stf.format(time);
     }
 }
