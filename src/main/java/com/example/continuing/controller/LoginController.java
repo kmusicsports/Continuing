@@ -47,7 +47,7 @@ public class LoginController {
     			if (passwordEncoder.matches(loginData.getPassword(), user.getPassword())) {
     				session.setAttribute("user_id", user.getId());
     				session.setAttribute("user_name", user.getName());
-    				mv.setViewName("redirect:/home");
+    				mv.setViewName("redirect:" + session.getAttribute("path"));
     			} else {
     				System.out.println("パスワードが違います");
         			mv.setViewName("redirect:/showLogin");
