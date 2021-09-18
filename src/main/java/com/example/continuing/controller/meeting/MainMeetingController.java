@@ -17,8 +17,10 @@ import com.example.continuing.entity.Users;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.JoinsRepository;
 import com.example.continuing.repository.MeetingsRepository;
+import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.JoinService;
+import com.example.continuing.service.MailService;
 import com.example.continuing.service.MeetingService;
 
 import lombok.AllArgsConstructor;
@@ -33,6 +35,8 @@ public class MainMeetingController {
 	private final FollowService followService;
 	private final JoinsRepository joinsRepository;
 	private final MeetingService meetingService;
+	private final UsersRepository usersRepository;
+	private final MailService mailService;
 	
 	@GetMapping("/Meeting/{meeting_id}")
 	public ModelAndView showMeetingDetail(ModelAndView mv, @PathVariable(name = "meeting_id") int meetingId) {
@@ -64,8 +68,15 @@ public class MainMeetingController {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
 			Integer myId = (Integer)session.getAttribute("user_id");
-			Joins join = new Joins(myId, someMeeting.get());
+			Meetings meeting = someMeeting.get();
+			Joins join = new Joins(myId, meeting);
 			joinsRepository.saveAndFlush(join);
+			
+			Users user = usersRepository.findById(myId).get();
+			mailService.sendMail(
+					meeting.getHost().getEmail(), 
+					"Continuing - ミーティングに" + user.getName() + "さんが参加予約をしました", 
+					meetingService.getMessageText(meeting, user.getName(), "join"));
 		} else {
 			System.out.println("存在しないミーティングです");
 			return "redirect:/home";
@@ -78,8 +89,15 @@ public class MainMeetingController {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
 			Integer myId = (Integer)session.getAttribute("user_id");
-			List<Joins> joinList = joinsRepository.findByUserIdAndMeeting(myId, someMeeting.get());
+			Meetings meeting = someMeeting.get();
+			List<Joins> joinList = joinsRepository.findByUserIdAndMeeting(myId, meeting);
 			joinsRepository.deleteAll(joinList);
+			
+			Users user = usersRepository.findById(myId).get();
+			mailService.sendMail(
+					meeting.getHost().getEmail(),
+					"Continuing - ミーティングに" + user.getName() + "さんが参加予約をしました",
+					meetingService.getMessageText(meeting, user.getName(), "leave"));
 		} else {
 			System.out.println("存在しないミーティングです");
 			return "redirect:/home";
