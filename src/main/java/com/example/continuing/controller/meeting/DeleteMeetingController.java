@@ -1,6 +1,7 @@
 package com.example.continuing.controller.meeting;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletResponse;
@@ -15,7 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.example.continuing.entity.Meetings;
+import com.example.continuing.entity.Users;
 import com.example.continuing.repository.MeetingsRepository;
+import com.example.continuing.service.JoinService;
+import com.example.continuing.service.MailService;
+import com.example.continuing.service.MeetingService;
 import com.example.continuing.zoom.ZoomApiIntegration;
 import com.example.continuing.zoom.ZoomDetails;
 import com.github.scribejava.core.model.OAuth2AccessToken;
@@ -30,6 +35,9 @@ public class DeleteMeetingController {
 	private final HttpSession session;
 	private Integer id = null;
 	private final ZoomApiIntegration ZoomApiIntegration;
+	private final JoinService joinService;
+	private final MeetingService meetingService;
+	private final MailService mailService;
 
 	@GetMapping("/Meeting/delete/{id}")
     public ModelAndView createRedirect(@PathVariable(name = "id") int id, HttpServletResponse response, ModelAndView mv) {
@@ -76,7 +84,15 @@ public class DeleteMeetingController {
 		OAuth2AccessToken oauthToken = ZoomApiIntegration.getAccessToken(session, code, state);
 		ZoomApiIntegration.deleteMeeting(oauthToken, meetingId);
 		
-		meetingsRepository.deleteById(id);
+		meetingsRepository.deleteById(id);		
+		
+		List<Users> joinUserList = joinService.getJoinUserList(meeting);
+		for(Users user : joinUserList) {
+			mailService.sendMail(
+					user.getEmail(),
+					"Continuing - 参加予定のミーティングが削除されました",
+					meetingService.getMessageText(meeting, user.getName(), "delete"));			
+		}
 		
 		System.out.println("会議の削除に成功しました");
 		

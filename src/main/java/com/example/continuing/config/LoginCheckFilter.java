@@ -28,12 +28,15 @@ public class LoginCheckFilter implements Filter {
 			HttpSession session = httpRequest.getSession(false);
 			if(session == null) {
 				// session無し -> Login画面へリダイレクト
+				session = httpRequest.getSession(true);
+				session.setAttribute("path", requestURI);
 				httpResponse.sendRedirect("/showLogin");
 			} else {
 				// sessionにuserIdが存在するか(=loginしたか？)
 				Integer userId = (Integer)session.getAttribute("user_id");
 				if(userId == null) {
 					// userId無し　-> loginしていない -> Login画面へリダイレクト
+					session.setAttribute("path", requestURI);
 					httpResponse.sendRedirect("/showLogin");
 				} else {
 					// loginしている -> コントローラーへリクエストを渡す
