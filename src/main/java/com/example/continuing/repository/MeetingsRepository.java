@@ -1,5 +1,6 @@
 package com.example.continuing.repository;
 
+import java.sql.Date;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -14,6 +15,8 @@ import com.example.continuing.entity.Users;
 public interface MeetingsRepository extends JpaRepository<Meetings, Integer> {
 
 	List<Meetings> findByHost(Users host);
+	List<Meetings> findByHostAndDate(Users host, Date date);
+	List<Meetings> findByHostAndDateGreaterThanEqual(Users host, Date date);
 	
 	@Transactional
 	void deleteByHost(Users host);
