@@ -96,7 +96,7 @@ public class MainMeetingController {
 			Users user = usersRepository.findById(myId).get();
 			mailService.sendMail(
 					meeting.getHost().getEmail(),
-					"Continuing - ミーティングに" + user.getName() + "さんが参加予約をしました",
+					"Continuing - " + user.getName() + "さんがミーティングへの参加予約を取り消しました",
 					meetingService.getMessageText(meeting, user.getName(), "leave"));
 		} else {
 			System.out.println("存在しないミーティングです");
@@ -132,7 +132,14 @@ public class MainMeetingController {
 	
 	@GetMapping("/Meeting/list/mine/today")
 	public ModelAndView showTodayMyMeeting(ModelAndView mv) {
+		Integer myId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(myId).get();
+		List<Meetings> meetingList = meetingService.getTodayMeetingList(user);
+		List<Meetings> myJoinMeetingList = joinService.getJoinMeetingList(myId);
+		
 		mv.setViewName("todayMyMeetings");
+		mv.addObject("meetingList", meetingList);
+		mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		mv.addObject("searchData", new SearchData());
 		return mv;
 	}
