@@ -1,10 +1,13 @@
 package com.example.continuing.service;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.LocalDate;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
@@ -13,11 +16,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.example.continuing.common.Utils;
+import com.example.continuing.comparator.MeetingsComparator;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Records;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.MeetingData;
 import com.example.continuing.form.SearchData;
+import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.RecordsRepository;
 import com.example.continuing.repository.UsersRepository;
 
@@ -30,6 +35,9 @@ public class MeetingService {
 	private final UsersRepository usersRepository;
 	private final RecordsRepository recordsRepository;
 	private final HttpSession session;
+	private final MeetingsRepository meetingsRepository;
+	private final JoinService joinService;
+	private final MeetingsComparator meetingsComparator;
 	
 	@Value("${app.url}")
 	private String APP_URL;
@@ -149,7 +157,7 @@ public class MeetingService {
 					session.setMaxInactiveInterval(24 * 60 - Utils.string2Int(strNow));
 					record.setDays(record.getDays() + 1);
 					
-					Date date= new Date();
+					java.util.Date date = new java.util.Date();
 			        Timestamp timestamp = new Timestamp(date.getTime());
 					record.setUpdatedAt(timestamp);
 					
@@ -192,8 +200,8 @@ public class MeetingService {
 					+ "<a href='" + APP_URL + "/home'>代わりのミーティングを探しに行こう!</a>";
 		} else if(type.equals("join")) {
 			messageText += "以下のミーティングに" + username + "さんが参加予約をしました。<br>"
-					+ meetingInfo
-					+ "参加を拒否する場合は<a href='https://www.yahoo.co.jp'>こちら</a>";
+					+ meetingInfo;
+//					+ "参加を拒否する場合は<a href='https://www.yahoo.co.jp'>こちら</a>";
 		} else if(type.equals("leave")) {
 			messageText += username + "さんが以下のミーティングの参加予約を取り消しました。<br>"
 					+ meetingInfo;
@@ -203,6 +211,43 @@ public class MeetingService {
 		
 		messageText += "</body></html>";
 		return messageText;
+	}
+	
+	public List<Meetings> getUserMeetingList(Users user) {
+		List<Meetings> userMeetingList = new ArrayList<>();
+		Date today = new Date(System.currentTimeMillis());
+		
+		List<Meetings> hostMeetingList = meetingsRepository.findByHostAndDateGreaterThanEqual(user, today);
+		List<Meetings> joinMeetingList = joinService.getJoinMeetingList(user.getId());
+		userMeetingList.addAll(hostMeetingList);
+		for(Meetings meeting : joinMeetingList) {
+			if(meeting.getDate().compareTo(today) == 1) {
+				userMeetingList.add(meeting);
+			}
+		}
+		Collections.sort(userMeetingList, meetingsComparator);
+		
+		return userMeetingList;
+		
+	}
+	
+	public List<Meetings> getTodayMeetingList(Users user) {
+		List<Meetings> todayMeetingList = new ArrayList<>();
+		Date today = new Date(System.currentTimeMillis());
+		
+		List<Meetings> todayHostMeetingList = meetingsRepository.findByHostAndDate(user, today);
+		List<Meetings> joinMeetingList = joinService.getJoinMeetingList(user.getId());  
+		
+		todayMeetingList.addAll(todayHostMeetingList);
+		for(Meetings meeting : joinMeetingList) {
+			if(meeting.getDate().compareTo(today) == 0) {
+				todayMeetingList.add(meeting);
+			}
+		}
+		Collections.sort(todayMeetingList, meetingsComparator);
+		
+		return todayMeetingList;
+		
 	}
 	
 }

@@ -43,7 +43,7 @@ public class FollowController {
 		Users followee = usersRepository.findById(followeeId).get();
 		Users follower = usersRepository.findById(followerId).get();
 	
-		String messageText = "<html><head></head><html><head></head><body>"
+		String messageText = "<html><head></head><body>"
 				+ "<a href='" + APP_URL + "/User/" + follower.getId() + "'>" + follower.getName() + "さんのページに行く</a>"
 				+ "</body></html>";
 		
