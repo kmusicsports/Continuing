@@ -44,51 +44,7 @@
     
 
     <h4 class="text-center mt-5 text-decoration-underline">参加予定ミーティング</h4>
-    <div class="list-group">
-        <form th:action="@{/}" method="get" th:each="meeting : ${meetingList}">
-            <button type="submit" th:formaction="@{/Meeting/__${meeting.id}__}" class="list-group-item list-group-item-action">
-                <div class="d-flex w-100">
-                    <div th:unless="${meeting.host.profileImage} == null">
-                        <img th:src="${meeting.host.profileImage}" alt="プロフィール画像" class="avatar">
-                    </div>
-                    <div th:if="${meeting.host.profileImage} == null">
-                        <span class="avatar btn btn-light"></span>
-                    </div>
-                    <a th:href="@{/User/__${meeting.host.id}__}" class="text-reset fs-4 mt-2 ms-2" th:text="${meeting.host.name}">山田太郎</a>
-                    <div class="ms-auto mt-2 me-2" th:if="${session.user_id != meeting.host.Id}">
-	                      <input type="submit" th:formaction="@{/Meeting/leave/__${meeting.id}__}" value="予約済み" class="btn btn-primary" th:if="${#lists.contains(myJoinMeetingList, meeting)}">
-	                      <div th:unless="${#lists.contains(myJoinMeetingList, meeting)}">
-	                          <input type="submit" th:formaction="@{/Meeting/join/__${meeting.id}__}" value="参加予約" class="btn btn-outline-primary" th:unless="${meeting.numberPeople == 1 && #lists.size(meeting.joinList) == 1}">
-	                          <span class="text-danger" th:if="${meeting.numberPeople == 1 && #lists.size(meeting.joinList) == 1}">受付終了</span>                                                            
-	                      </div>
-	                  </div>
-                </div>
-                <table class="table">
-                    <tr>
-                        <th>トピック</th>
-                        <td th:text="${meeting.topic}"></td>
-                    </tr>
-                    <tr>
-                        <th>説明</th>
-                        <td th:text="${meeting.agenda}"></td>
-                    </tr>
-                    <tr>
-                        <th>人数</th>
-                        <td th:if="${meeting.numberPeople == 1}">１対１</td>
-                        <td th:if="${meeting.numberPeople == 2}">複数</td>
-                    </tr>
-                    <tr>
-                        <th>日付</th>
-                        <td th:text="${#dates.format(meeting.date, 'yyyy/MM/dd')}"></td>
-                    </tr>
-                    <tr>
-                        <th>時間</th>
-                        <td th:text="|${#dates.format(meeting.startTime, 'HH:mm')} ～ ${#dates.format(meeting.endTime, 'HH:mm')}|"></td>
-                    </tr>
-                </table>
-            </button>
-        </form>
-    </div>
+    <div th:replace="fragments :: meeting_list_area"></div>
 
     <!-- Popper and Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>

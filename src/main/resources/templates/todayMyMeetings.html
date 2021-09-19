@@ -15,60 +15,7 @@
     <nav th:replace="fragments :: navbar_area"></nav>
 
     <h4 class="text-center mt-2 text-decoration-underline">今日参加予定のミーティング</h4>
-    <div class="list-group">
-        <form th:action="@{/}">
-            <button type="submit" th:formaction="@{/Meeting/detail}" class="list-group-item list-group-item-action">
-                <div class="d-flex w-100">
-                    <img src="https://picsum.photos/20" alt="Avatar" class="avatar">
-                    <a th:href="@{/User/detail}" class="text-reset fs-4 mt-2 ms-3">山田太郎</a>
-                    <!-- <input type="submit" value="参加予約" class="btn btn-outline-primary mt-2 ms-auto me-2"> -->
-                    <input type="submit" value="予約済み" class="btn btn-primary mt-2 ms-auto me-2">
-                    <!-- <div class="mt-2 ms-auto me-2">
-                        <a th:href="@{/Meeting/updateForm}" class="btn btn-outline-dark me-2">編集</a>
-                        <a href="#" class="btn btn-outline-danger" data-toggle="modal" data-target="#deletionConfirmationModal">削除</a>
-                    </div> -->
-                    <!-- <span class="text-danger ms-auto">受付終了</span> -->
-                </div>
-                <table class="table">
-                    <tr>
-                        <th>トピック</th>
-                        <td>勉強会</td>
-                    </tr>
-                    <tr>
-                        <th>説明　　</th>
-                        <td>開始15分は朝食や各自のモーニングルーティンをする時間にしています。</td>
-                    </tr>
-                    <tr>
-                        <th>人数　　</th>
-                        <td>１対１</td>
-                    </tr>
-                    <tr>
-                        <th>日時　　</th>
-                        <td>9:00 ～ 12:00</td>
-                    </tr>
-                </table>
-            </button>
-
-            <!-- deletionConfirmationModal -->
-            <!-- <div class="modal fade" id="deletionConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deletionConfirmationModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="deletionConfirmationModalLabel">削除確認</h5>
-                        </div>
-                        <div class="modal-body">
-                            本当に削除してもよろしいですか？
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
-                            <button type="submit" formaction="#" class="btn btn-danger">削除する</button>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-
-        </form>
-    </div>
+    <div th:replace="fragments :: meeting_list_area"></div>
 
     <!-- Popper and Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
