@@ -2,6 +2,7 @@ package com.example.continuing.common;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -10,6 +11,7 @@ public class Utils {
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd");
 	private static final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
+	private static final SimpleDateFormat sdtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	public static boolean isAllDoubleSpace(String s) {
         if (s == null || s.equals("")) {
@@ -77,6 +79,7 @@ public class Utils {
         } catch (ParseException e) {
             // 変換できなかった場合
             // time は null のまま
+        	e.printStackTrace();
         }
         
         return time;
@@ -89,4 +92,19 @@ public class Utils {
     public static String time2str(Time time) {
     	return stf.format(time);
     }
+    
+    public static Timestamp dateAndTime2Timestamp(Date date, Time time) {
+    	String datetime = date + " " + time;
+        
+    	long ms = new Date(System.currentTimeMillis()).getTime(); 
+        try {
+        	ms = sdtf.parse(datetime).getTime();
+        } catch (ParseException e){
+            e.printStackTrace();
+        }
+        Timestamp dateTime = new Timestamp(ms);
+
+        return dateTime;
+    }
+    
 }
