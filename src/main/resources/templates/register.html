@@ -26,26 +26,31 @@
                                 </div>
                                 <form th:action="@{/regist}" class="user" method="post" th:object="${registerData}">
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="text" class="form-control mb-3" name="name" th:value="*{name}" placeholder="ユーザー名" required>
+                                        <input type="text" class="form-control" name="name" th:value="*{name}" placeholder="ユーザー名" required>
+                                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="email" class="form-control mb-3" name="email" th:value="*{email}"placeholder="メールアドレス" required>
+                                        <input type="email" class="form-control mt-3" name="email" th:value="*{email}"placeholder="メールアドレス" required>
+                                        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="password" class="form-control mb-3" name="password" th:value="*{password}" placeholder="パスワード" required>
+                                        <input type="password" class="form-control mt-3" name="password" th:value="*{password}" placeholder="パスワード" required>
+                                        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="password" class="form-control mb-4" name="passwordAgain" th:value="*{passwordAgain}" placeholder="パスワードの確認" required>
+                                        <input type="password" class="form-control mt-3" name="passwordAgain" th:value="*{passwordAgain}" placeholder="パスワードの確認" required>
+                                        <div th:if="${#fields.hasErrors('passwordAgain')}" th:errors="*{passwordAgain}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <div class="custom-control custom-checkbox mb-5">
+                                        <div class="custom-control custom-checkbox mt-4">
                                             <input type="checkbox" th:field="*{checked}" class="custom-control-input">
                                             <label class="custom-control-label">
                                                 <a href="#">利用規約</a>に同意します。
                                             </label>
+                                            <div th:if="${#fields.hasErrors('checked')}" th:errors="*{checked}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
-                                    <div class="text-center">
+                                    <div class="text-center mt-5">
                                         <button type="submit" class="btn btn-primary ps-5 pe-5">
                                             登録する
                                         </button>

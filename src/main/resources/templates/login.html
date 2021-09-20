@@ -28,14 +28,16 @@
                                 </div>
                                 <form th:action="@{/login}" method="post" class="user" th:object="${loginData}">
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="email" class="form-control mb-3" aria-describedby="emailHelp"
+                                        <input type="email" class="form-control" aria-describedby="emailHelp"
                                             placeholder="メールアドレス" name="email" th:value="*{email}" required>
+                                        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="password" class="form-control mb-5" placeholder="パスワード"
+                                        <input type="password" class="form-control mt-3" placeholder="パスワード"
                                           name="password" th:value="*{password}" required>
+                                        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" th:errorclass="invalid-feedback"></div>
                                     </div>
-                                    <div class="text-center mb-5">
+                                    <div class="text-center mt-5 mb-5">
                                         <button type="submit" class="btn btn-primary ps-5 pe-5">
                                             ログイン
                                         </button>
