@@ -53,7 +53,6 @@
 		                                <h5 class="ms-1 mt-4">トピック</h5>
 		                                <div th:each="topic : ${topicList}">
 				                                <input type="checkbox" name="topicList" th:value="${topic.name}" th:text="${topic.name}" th:field="*{topicList}">
-				                                <!-- <label th:text="${topic.name}"></label><br> -->
 		                                </div>
                                 </div>
         
@@ -75,6 +74,7 @@
 		                                    <div class="input-group-append" data-target="#datePicker" data-toggle="datetimepicker">
 		                                        <div class="input-group-text"><i class="fa fa-calendar pb-1"></i></div>
 		                                    </div>
+		                                    <div th:if="${#fields.hasErrors('date')}" th:errors="*{date}" th:errorclass="invalid-feedback"></div>
 		                                </div>
                                 </div>
 		                                
@@ -86,6 +86,7 @@
 				                                    <div class="input-group-text" data-target="#timePicker1" data-toggle="datetimepicker">
 				                                        <i class="fa fa-clock"></i>
 				                                    </div>
+				                                    <div th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" th:errorclass="invalid-feedback"></div>
 				                                </div>
 		                                </div>
 		                                <div class="col-5">
@@ -95,6 +96,7 @@
 				                                    <div class="input-group-text" data-target="#timePicker2" data-toggle="datetimepicker">
 				                                        <i class="fa fa-clock"></i>
 				                                    </div>
+				                                    <div th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" th:errorclass="invalid-feedback"></div>
 				                                </div>                                
 		                                </div>
                                 </div>
