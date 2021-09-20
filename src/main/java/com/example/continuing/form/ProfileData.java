@@ -3,6 +3,10 @@ package com.example.continuing.form;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+
+import org.hibernate.validator.constraints.Length;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.continuing.entity.Users;
@@ -13,18 +17,23 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ProfileData {
-
-	private Integer id;
+	@NotBlank
 	private String name;
+	
+	@NotBlank
+	@Email
 	private String email;
-	private String profileImage;	
-	private String profileMessage;	
+	
+	private String profileImage;
+	
+	@Length(min = 0, max = 140)
+	private String profileMessage;
+	
 	private String newPassword;
 	private String newPasswordAgain;
 	private Timestamp createdAt;
 	
 	public ProfileData(Users user) {
-		this.id = user.getId();
 		this.name = user.getName();
 		this.email = user.getEmail();
 		this.profileImage = user.getProfileImage();

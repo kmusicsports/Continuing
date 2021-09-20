@@ -8,7 +8,10 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -127,20 +130,23 @@ public class UserController {
 	}
 	
 	@PostMapping("/User/update")
-	public String updateProfile(ProfileData profileData) {
+	public ModelAndView updateProfile(@ModelAttribute @Validated ProfileData profileData,
+			BindingResult result, ModelAndView mv) {
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users oldData = usersRepository.findById(userId).get();
 		// エラーチェック
-		boolean isValid = userService.isValid(profileData, oldData); 
-		if(isValid) {
+		boolean isValid = userService.isValid(profileData, oldData, result); 
+		if(!result.hasErrors() && isValid) {
 			// エラーなし -> 更新
 			Users user = profileData.toEntity(oldData, passwordEncoder);
 			usersRepository.saveAndFlush(user);
-			return "redirect:/User/mypage";
+			mv.setViewName("redirect:/User/mypage");
 		} else {
-			
-			return "redirect:/User/updateForm";
+			mv.setViewName("profile");
+			mv.addObject("searchData", new SearchData());
 		}
+		
+		return mv;
 	}
 	
 	@PostMapping("/User/profileImage/upload")

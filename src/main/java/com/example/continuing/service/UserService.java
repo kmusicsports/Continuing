@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.TreeMap;
 
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import com.example.continuing.common.Utils;
 import com.example.continuing.entity.Users;
@@ -24,15 +26,32 @@ public class UserService {
 	private final UsersRepository usersRepository;
 
 	// プロフィール編集画面用のチェック
-	public boolean isValid(ProfileData profileData, Users oldData) {
-		Boolean answer = true;
+	public boolean isValid(ProfileData profileData, Users oldData, BindingResult result) {
+		
+		if(!profileData.getNewPassword().equals("")) {
+			if(profileData.getNewPassword().length() < 8 || profileData.getNewPassword().length() > 16) {
+				// パスワードの長さ
+				FieldError fieldError = new FieldError(
+						result.getObjectName(),
+						"newPasswordAgain",
+						"パスワードの文字数は8～16にしてください");
+				result.addError(fieldError);
+				profileData.setNewPassword(null);
+				profileData.setNewPasswordAgain(null);
+				return false;
+			}			
+		}
 		
 		if(!profileData.getNewPassword().equals(profileData.getNewPasswordAgain())) {
 			// パスワード不一致
-			System.out.println("Error: パスワードが一致しません");
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"newPasswordAgain",
+					"パスワードが一致しません");
+			result.addError(fieldError);
 			profileData.setNewPassword(null);
 			profileData.setNewPasswordAgain(null);
-			answer = false;
+			return false;
 		}
 		
 		String newName = profileData.getName(); 
@@ -41,14 +60,23 @@ public class UserService {
 			Optional<Users> nameUser = usersRepository.findByName(newName);
 			if(nameUser.isPresent()) {
 				// 既に同じ名前が登録されている ->　別の名前で登録してください
-				System.out.println("Error: 既に登録されている名前です");
+				FieldError fieldError = new FieldError(
+						result.getObjectName(),
+						"name",
+						"既に使用されている名前です");
+				result.addError(fieldError);
 				profileData.setName(null);
-				answer = false;
+				return false;
 			}
 			// 名前が全角スペースだけで構成されていたらエラー
 			if (!Utils.isBlank(newName)) {
 				if (Utils.isAllDoubleSpace(newName)) {
-					answer = false;
+					FieldError fieldError = new FieldError(
+							result.getObjectName(),
+							"name",
+							"名前が全角スペースです");
+					result.addError(fieldError);
+					return false;
 				}
 			}
 		}
@@ -58,13 +86,17 @@ public class UserService {
 			Optional<Users> emailUser = usersRepository.findByEmail(profileData.getEmail());		
 			if(emailUser.isPresent()) {
 				// 既にemailアドレスが登録されている ->　別のemailアドレスで登録してください
-				System.out.println("Error: 既に登録されているメールアドレスです");
+				FieldError fieldError = new FieldError(
+						result.getObjectName(),
+						"email",
+						"既に登録されているメールアドレスです");
+				result.addError(fieldError);
 				profileData.setEmail(null);
-				answer = false;
+				return false;
 			}			
 		}
 		
-		return answer;
+		return true;
 	}
 	
 	public List<Users> getSearchReuslt(SearchData searchData) {

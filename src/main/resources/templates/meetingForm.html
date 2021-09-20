@@ -26,38 +26,42 @@
                         <div class="row">
                             <div class="p-5">
                                 <div class="text-center">
-                                    <h2 class="mb-4">ミーティング</h2>
+                                    <h2 class="">ミーティング</h2>
                                 </div>
                                 <form th:action="@{/}" method="post" th:object="${meetingData}">
                                     <input type="hidden" th:field="*{id}">
-                                    <div class="mb-3 row">
+                                    <div class="mt-4 row">
                                         <label class="col-sm-2 col-form-label">トピック</label>
                                         <div class="col-sm-10">
                                             <select class="form-select" name="topicName">
-                                                <option value="0" th:field="*{topicName}">選択してください</option>
+                                                <option value="" th:field="*{topicName}">選択してください</option>
                                                 <option th:each="topic : ${topicList}" th:value="${topic.name}" th:text="${topic.name}" th:field="*{topicName}" th:selected="${topicName == topic.name ? 'true' : 'flase'}"></option>
                                             </select>
+                                            <div th:if="${#fields.hasErrors('topicName')}" th:errors="*{topicName}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row">
+                                    <div class="mt-3 row">
                                         <label class="col-sm-2 col-form-label">説明</label>
                                         <div class="col-sm-10">
                                             <textarea class="form-control" rows="3" th:field="*{agenda}" th:value="*{agenda}" required></textarea>
+                                            <div th:if="${#fields.hasErrors('agenda')}" th:errors="*{agenda}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row">
+                                    <div class="mt-3 row">
                                         <label class="col-sm-2 col-form-label">パスワード</label>
                                         <div class="col-sm-10">
-                                            <input type="password" class="form-control" name="password" th:value="*{password}" required>
+                                            <input type="password" class="form-control" name="password" th:value="*{password}" placeholder="10文字以内" required>
+                                            <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row">
+                                    <div class="mt-3 row">
                                         <label class="col-sm-2 col-form-label">パスワードの確認</label>
                                         <div class="col-sm-10">
                                             <input type="password" class="form-control" name="passwordAgain" th:value="*{passwordAgain}" required>
+                                            <div th:if="${#fields.hasErrors('passwordAgain')}" th:errors="*{passwordAgain}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row">
+                                    <div class="mt-3 row">
                                         <span class="col-sm-2 col-form-label">人数 　　</span>
                                         <div class="col-sm-10 mt-2">
 		                                        <div class="form-check form-check-inline">
@@ -68,20 +72,22 @@
 		                                            <input class="form-check-input" type="radio" value="2" th:field="*{numberPeople}">
 		                                            <label class="form-check-label">複数(～40分)</label>
 		                                        </div>                                        
+                                            <div th:if="${#fields.hasErrors('numberPeople')}" th:errors="*{numberPeople}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
-                                    <div class="mb-3 row">
+                                    <div class="mt-3 row">
                                         <div class="input-group date mb-3" id="datePicker" data-target-input="nearest">
                                             <label class="col-sm-2 col-12 col-form-label">日付</label>
                                             <div class="col-sm-10 col-12 d-flex">
 		                                            <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#datePicker" name="date" th:value="*{date}" required>
 		                                            <div class="input-group-append" data-target="#datePicker" data-toggle="datetimepicker">
 		                                                <div class="input-group-text"><i class="fa fa-calendar pt-1 pb-1"></i></div>
-		                                            </div>                                            
+		                                            </div>
                                             </div>
+		                                        <div th:if="${#fields.hasErrors('date')}" th:errors="*{date}" th:errorclass="invalid-feedback"></div>                                            
                                         </div>
                                     </div>
-                                    <div class="mb-3 row">
+                                    <div class="mt-3 row">
                                         <div class="input-group date mb-3" id="startTimePicker" data-target-input="nearest">
                                             <label class="col-sm-2 col-12 col-form-label">開始時刻</label>
                                             <div class="col-sm-10 col-12 d-flex">
@@ -90,9 +96,10 @@
 		                                                <i class="fa fa-clock"></i>
 		                                            </div>
                                             </div>
+		                                        <div th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                    </div>
-                                   <div class="mb-5 row">
+                                   <div class="mt-3 row">
                                         <div class="input-group date mb-3" id="endTimePicker" data-target-input="nearest">
                                             <label class="col-sm-2 col-12 col-form-label">終了時刻</label>
                                             <div class="col-sm-10 col-12 d-flex">
@@ -101,10 +108,11 @@
                                                     <i class="fa fa-clock"></i>
                                                 </div>
                                             </div>
+                                            <div th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                    </div>
                                    
-                                   <div class="row ms-auto me-auto mb-3">
+                                   <div class="row ms-auto me-auto mt-5 mb-3">
                                        <div class="col-1"></div>          
                                        <a th:href="@{/Meeting/cancel}" class="btn btn-secondary col-4 pt-2 pb-2">
                                            キャンセル

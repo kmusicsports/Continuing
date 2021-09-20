@@ -12,7 +12,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -100,7 +103,9 @@ public class MainController {
 	}
 	
 	@PostMapping("/search")
-	public ModelAndView search(ModelAndView mv, SearchData searchData, 
+	public ModelAndView search(ModelAndView mv, 
+			@ModelAttribute @Validated SearchData searchData,
+			BindingResult result,
 			@PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
 		List<Topics> topicList = topicsRepository.findAll();
 		List<Users> userRanking = usersRepository.findTop3ByOrderByContinuousDaysDesc();
@@ -113,7 +118,8 @@ public class MainController {
 		session.setAttribute("path", "/home");
 		mv.setViewName("home");
 		
-		if (meetingService.isValid(searchData)) {			
+		boolean isValid = meetingService.isValid(searchData, result);
+		if (!result.hasErrors() && isValid) {			
 			Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, pageable);
 			List<Users> userList = userService.getSearchReuslt(searchData);
 			
@@ -133,7 +139,7 @@ public class MainController {
 				
 			}
 		} else {
-			System.out.println("入力に間違いがあります");
+			System.out.println("入力に誤りがあります。");
 			mv.addObject("meetingPage", null);
 			mv.addObject("meetingList", null);
 			mv.addObject("userList", null);

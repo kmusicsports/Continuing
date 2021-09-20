@@ -17,7 +17,7 @@
     <div class="container">
         <!-- Outer Row -->
         <div class="row justify-content-center">
-            <div class="col-md-6">
+            <div class="col-12 col-lg-10">
                 <div class="card o-hidden border-0 shadow-lg my-5">
                     <div class="card-body p-0">
                         <!-- Nested Row within Card Body -->
@@ -36,33 +36,41 @@
                                     <div class="form-group col-10 ms-auto me-auto mb-5">
                                         <input type="file" class="form-control" name="file" placeholder="写真をアップロードする" required>
                                     </div>
-                                    <div class="text-center">
-                                        <button type="submit" th:formaction="@{/User/profileImage/delete}" class="btn btn-outline-danger me-3">画像を削除</button>                                    	                                    
-                                        <button type="submit" th:formaction="@{/User/profileImage/upload}" class="btn btn-secondary">画像を変更</button>
+                                    <div class="row ms-auto me-auto">
+                                        <div class="col-1"></div>
+                                        <button type="submit" th:formaction="@{/User/profileImage/delete}" class="btn btn-outline-danger col-4 pt-2 pb-2">画像を削除</button>
+                                        <div class="col-2"></div>                                    	                                    
+                                        <button type="submit" th:formaction="@{/User/profileImage/upload}" class="btn btn-secondary col-4 pt-2 pb-2">画像を変更</button>
                                     </div>
                                 </form>
-                                <hr>
+                                <hr class="mt-5 mb-5">
                                 <form th:action="@{/User/update}" method="post">
-                                    <input type="hidden" >
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="text" class="form-control mb-3" name="name" th:value="*{name}" placeholder="ユーザー名">
+                                        <input type="text" class="form-control" name="name" th:value="*{name}" placeholder="ユーザー名">
+                                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="email" class="form-control mb-3" name="email" th:value="*{email}" placeholder="メールアドレス">
+                                        <input type="email" class="form-control mt-3" name="email" th:value="*{email}" placeholder="メールアドレス">
+                                        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:errorclass="invalid-feedback"></div>
                                     </div>
-                                    <div class="form-group col-10 ms-auto me-auto mb-3">
+                                    <div class="form-group col-10 ms-auto me-auto mt-3">
                                         <textarea class="form-control" th:field="*{profileMessage}" placeholder="プロフィールメッセージ"></textarea>
+                                        <div th:if="${#fields.hasErrors('profileMessage')}" th:errors="*{profileMessage}" th:errorclass="invalid-feedback"></div>
                                     </div>
-                                    <label class="ms-5 mb-1">※パスワードを変更する場合のみ記入してください</label>
+                                    <label class="ms-5 me-5 mb-1">※パスワードを変更する場合は記入して下さい</label>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="password" class="form-control mb-3" name="newPassword" th:value="*{newPassword}" placeholder="新しいパスワード">
+                                        <input type="password" class="form-control mt-3" name="newPassword" th:value="*{newPassword}" placeholder="新しいパスワード">
+                                        <div th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="password" class="form-control mb-5" name="newPasswordAgain" th:value="*{newPasswordAgain}" placeholder="新しいパスワードの確認">
+                                        <input type="password" class="form-control mt-3" name="newPasswordAgain" th:value="*{newPasswordAgain}" placeholder="新しいパスワードの確認">
+                                        <div th:if="${#fields.hasErrors('newPasswordAgain')}" th:errors="*{newPasswordAgain}" th:errorclass="invalid-feedback"></div>
                                     </div>
-                                    <div class="text-center">
-                                        <a th:href="@{/User/mypage}" class="btn btn-outline-secondary ps-5 pe-5">戻る</a>
-                                        <button type="submit" class="btn btn-primary ps-5 pe-5 ms-3">変更する</button>
+                                    <div class="row ms-auto me-auto mt-5">
+                                        <div class="col-1"></div>
+                                        <a th:href="@{/User/mypage}" class="btn btn-secondary col-4 pt-2 pb-2">キャンセル</a>
+                                        <div class="col-2"></div>
+                                        <button type="submit" class="btn btn-primary col-4 pt-2 pb-2">変更する</button>
                                     </div>
                                 </form>
                             </div>
