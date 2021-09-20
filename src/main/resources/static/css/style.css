@@ -58,3 +58,7 @@ th {
 .my-card {
 	height: 38px;
 }
+
+.invalid-feedback {
+	display: block;
+}
