@@ -2,10 +2,15 @@ package com.example.continuing.service;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import com.example.continuing.common.Utils;
 import com.example.continuing.entity.Users;
+import com.example.continuing.form.LoginData;
 import com.example.continuing.form.RegisterData;
 import com.example.continuing.repository.UsersRepository;
 
@@ -17,31 +22,42 @@ import lombok.RequiredArgsConstructor;
 public class LoginService {
 	
 	private final UsersRepository usersRepository;
+	private final PasswordEncoder passwordEncoder;
 	private final MailService mailService;
-	private final static String MESSAGE_TEXT = "<html>"
-			+ "<head></head>"
-			+ "<body>"
-			+ "<h3>Welcom to Continuing!</h3>"
-			+ "<p>You're officially a Continuing user.</p>"
-			+ "<a href='https://www.yahoo.co.jp'>Go to Yahoo</a>"
-			+ "</body>"
-			+ "</html>";
 
+	@Value("${app.url}")
+	private String APP_URL;
+	
+	// ログインチェック
+	public boolean isValid(LoginData loginData, BindingResult result) {
+		Optional<Users> someUser = usersRepository.findByEmail(loginData.getEmail());
+    	if(!someUser.isPresent()) {
+    		// 登録されていない
+			System.out.println("メールアドレスが違います");
+			return false;
+    	}
+    	
+    	// パスワードが正しいか？ 
+    	if (!passwordEncoder.matches(loginData.getPassword(), someUser.get().getPassword())) {
+    		System.out.println("パスワードが違います");
+    		return false;
+    	}
+    	
+    	return true;
+	}
+	
 	// 登録画面用のチェック
-	public boolean isValid(RegisterData registerData) {
-		Boolean answer = true;
-		
-		if(!registerData.isChecked()) {
-			System.out.println("Error: 利用規約に同意して、チェックを入れてください");
-			answer = false;
-		}
-		
+	public boolean isValid(RegisterData registerData, BindingResult result) {
 		if(!registerData.getPassword().equals(registerData.getPasswordAgain())) {
 			// パスワード不一致
-			System.out.println("Error: パスワードが一致しません");
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"passwordAgain",
+					"パスワードが一致しません");
+			result.addError(fieldError);
 			registerData.setPassword(null);
 			registerData.setPasswordAgain(null);
-			answer = false;
+			return false;
 		}
 		
 		Optional<Users> someUser;
@@ -49,32 +65,61 @@ public class LoginService {
 		someUser = usersRepository.findByName(name);
 		if(someUser.isPresent()) {
 			// 既に同じ名前が登録されている ->　別の名前で登録してください
-			System.out.println("Error: 既に登録されている名前です");
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"name",
+					"既に使用されている名前です");
+			result.addError(fieldError);
 			registerData.setName(null);
-			answer = false;
+			return false;
 		}
 		
 		// 名前が全角スペースだけで構成されていたらエラー
 		if (!Utils.isBlank(name)) {
 			if (Utils.isAllDoubleSpace(name)) {
-				answer = false;
+				FieldError fieldError = new FieldError(
+						result.getObjectName(),
+						"name",
+						"名前が全角スペースです");
+				result.addError(fieldError);
+				return false;
 			}
 		}
 		
 		someUser = usersRepository.findByEmail(registerData.getEmail());		
 		if(someUser.isPresent()) {
 			// 既にemailアドレスが登録されている ->　別のemailアドレスで登録してください
-			System.out.println("Error: 既に登録されているメールアドレスです");
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"email",
+					"既に登録されているメールアドレスです");
+			result.addError(fieldError);
 			registerData.setEmail(null);
-			answer = false;
-		} else {
-			if(!mailService.sendMail(registerData.getEmail(), "Welcom to Continuing!", MESSAGE_TEXT)) {
-				System.out.println("Error: メールが送信できませんでした");
-				answer = false;
-			}
+			return false;
 		}
 		
-		return answer;
+		return true;
 	}
 
+	public String sendMail(String email, String type) {
+		String token = null;
+		String subject = null;;
+		String messageText = "<html><head></head><body>";
+		if(type.equals("welcome")) {
+			subject = "Welcom to Continuing!";
+			messageText += "<h3>Welcom to Continuing!</h3>"
+					+ "You're officially a Continuing user.<br>"
+					+ "<br>"
+					+ "<a href='" + APP_URL + "/User/mypage'>Go to Continuing!</a>";
+		} else {
+			subject = "Something is wrong!";
+			messageText += "Something is wrong!";
+		}
+		
+		messageText += "</body></html>";
+		mailService.sendMail(email, subject, messageText);
+		
+		return token;
+	}
+	
 }
