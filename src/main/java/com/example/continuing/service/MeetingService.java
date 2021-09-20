@@ -14,6 +14,8 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 
 import com.example.continuing.common.Utils;
 import com.example.continuing.comparator.MeetingsComparator;
@@ -43,34 +45,47 @@ public class MeetingService {
 	private String APP_URL;
 
 	// ミーティングフォーム用のチェック
-	public boolean isValid(MeetingData meetingData, boolean isCreate) {
+	public boolean isValid(MeetingData meetingData, boolean isCreate, BindingResult result) {
 		Boolean answer = true;
 		
-		if(meetingData.getTopicName().equals("0")) {
-			System.out.println("Error: トピックを選択してください");
-			answer = false;
-		}
-		
 		if(!meetingData.getPassword().equals(meetingData.getPasswordAgain())) {
-			System.out.println("Error: パスワードが一致しません");
+			// パスワード不一致
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"passwordAgain",
+					"パスワードが一致しません");
+			result.addError(fieldError);
 			meetingData.setPassword("");
 			meetingData.setPasswordAgain("");
 			answer = false;
 		}
 		
-		if(meetingData.getNumberPeople() < 1) {
-			System.out.println("Error: 人数を選択してください");
-			answer = false;
-		}
-		
 		int duration = Utils.string2Int(meetingData.getEndTime()) - Utils.string2Int(meetingData.getStartTime());
-		if(meetingData.getNumberPeople() == 2 && (duration < 15 || duration > 40)) {
-			System.out.println("Error: 複数人でのミーティング時間は15~40分です");
+		if(meetingData.getNumberPeople() == 2 && (duration < 15 || duration > 40)) {			
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"startTime",
+					"複数人でのミーティング時間は15~40分です");
+			result.addError(fieldError);
+			fieldError = new FieldError(
+					result.getObjectName(),
+					"endTime",
+					"複数人でのミーティング時間は15~40分です");
+			result.addError(fieldError);
 			meetingData.setStartTime("");
 			meetingData.setEndTime("");
 			answer = false;
 		} else if(meetingData.getNumberPeople() == 1 && (duration < 15 || duration > 1800)) {
-			System.out.println("Error: ミーティング時間は15~1800分(30時間)です");
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"startTime",
+					"ミーティング時間は15~1800分(30時間)です");
+			result.addError(fieldError);
+			fieldError = new FieldError(
+					result.getObjectName(),
+					"endTime",
+					"ミーティング時間は15~1800分(30時間)です");
+			result.addError(fieldError);
 			meetingData.setStartTime("");
 			meetingData.setEndTime("");
 			answer = false;
@@ -82,29 +97,30 @@ public class MeetingService {
         	LocalDate today = LocalDate.now();
         	localeDate = LocalDate.parse(date);
             if (isCreate && localeDate.isBefore(today)) {
-            	System.out.println("今日以降の日付を入力してください");
+            	FieldError fieldError = new FieldError(
+    					result.getObjectName(),
+    					"date",
+    					"今日以降の日付を入力してください");
+    			result.addError(fieldError);
             	meetingData.setDate("");
                 answer =  false;
             }
         } catch (DateTimeException e) {
-        	System.out.println("Error: 日付はyyyy/mm/dd または　yyyy-mm-dd　の形式で入力してください");
+        	FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"date",
+					"日付はyyyy/mm/dd または　yyyy-mm-dd　の形式で入力してください");
+			result.addError(fieldError);
         	meetingData.setDate("");
         	e.printStackTrace();
             answer =  false;
-        }
-        
-        if (!Utils.checkTimeFormat(meetingData.getStartTime()) || !Utils.checkTimeFormat(meetingData.getEndTime())) {
-        	System.out.println("Error: 時間はHH:mm　の形式で入力してください");
-        	meetingData.setStartTime("");
-			meetingData.setEndTime("");
-        	answer = false;
         }
         
         return answer;
 	}
 	
 	// 検索条件のチェック
-	public boolean isValid(SearchData searchData) {
+	public boolean isValid(SearchData searchData, BindingResult result) {
 		Boolean answer = true;
 		
 		String date = searchData.getDate().replace("/", "-");
@@ -112,20 +128,31 @@ public class MeetingService {
 			try {
 				LocalDate.parse(date);
 			} catch (DateTimeException e) {
-				System.out.println("Error: 日付はyyyy/mm/dd または　yyyy-mm-dd　の形式で入力してください");
-				e.printStackTrace();
+				FieldError fieldError = new FieldError(
+						result.getObjectName(),
+						"date",
+						"日付はyyyy/mm/dd または　yyyy-mm-dd　の形式で入力してください");
+				result.addError(fieldError);
 				answer =  false;
 			}			
 		}
         
         if (!searchData.getStartTime().equals("") && !Utils.checkTimeFormat(searchData.getStartTime())) {
-        	System.out.println("Error: 時間はHH:mm　の形式で入力してください");
+        	FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"startTime",
+					"時間はHH:mm　の形式で入力してください");
+			result.addError(fieldError);
         	searchData.setStartTime(null);
         	answer = false;
         }
         
         if (!searchData.getEndTime().equals("") && !Utils.checkTimeFormat(searchData.getEndTime())) {
-        	System.out.println("Error: 時間はHH:mm　の形式で入力してください");
+        	FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"endTime",
+					"時間はHH:mm　の形式で入力してください");
+			result.addError(fieldError);
         	searchData.setEndTime(null);
         	answer = false;
         }
