@@ -9,7 +9,10 @@ import javax.servlet.http.HttpSession;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -61,10 +64,10 @@ public class CreateMeetingController {
 	
 	// call
 	@PostMapping("/Meeting/create")
-	public ModelAndView createRedirect(MeetingData meetingData, HttpServletResponse response, ModelAndView mv) {
+	public ModelAndView createRedirect(@ModelAttribute @Validated MeetingData meetingData, BindingResult result, HttpServletResponse response, ModelAndView mv) {
 		// エラーチェック
-		boolean isValid = meetingService.isValid(meetingData, true);
-		if(isValid) {
+		boolean isValid = meetingService.isValid(meetingData, true, result);
+		if(!result.hasErrors() && isValid) {
 			System.out.println("-create meeting api request");
 			this.meetingData = meetingData;
 			
@@ -82,11 +85,11 @@ public class CreateMeetingController {
 			return null;
 		} else {
 			List<Topics> topicList = topicsRepository.findAll();
+			System.out.println("入力に誤りがあります。");
 			
 			session.setAttribute("mode", "create");
 			mv.setViewName("meetingForm");
 			mv.addObject("topicList", topicList);
-			mv.addObject("meetingData", meetingData);
 			mv.addObject("searchData", new SearchData());
 			
 			return mv;
@@ -95,7 +98,7 @@ public class CreateMeetingController {
 	
 	// callback
 	@RequestMapping(value = "/create/meeting/redirect", method = { RequestMethod.GET, RequestMethod.POST })
-	public ModelAndView createMeeting(@RequestParam String code, @RequestParam String state, ModelAndView mv) throws IOException {
+	public String createMeeting(@RequestParam String code, @RequestParam String state, ModelAndView mv) throws IOException {
 		try {
 			System.out.println("会議の作成を開始します");
 			OAuth2AccessToken oauthToken = zoomApiIntegration.getAccessToken(session, code, state);
@@ -122,13 +125,12 @@ public class CreateMeetingController {
 			
 			System.out.println("会議の作成に成功しました");
 			
-			mv.setViewName("redirect:/Meeting/" + meeting.getId());
+			return "redirect:/Meeting/" + meeting.getId();
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("会議の作成に失敗しました");
-			mv.setViewName("redirect:/User/mypage");
+			return "redirect:" + session.getAttribute("path");
 		} 
-		return mv;
 	}
 
 }
