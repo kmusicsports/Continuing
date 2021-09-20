@@ -3,6 +3,11 @@ package com.example.continuing.form;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+
+import org.hibernate.validator.constraints.Length;
 import org.json.simple.JSONObject;
 
 import com.example.continuing.common.Utils;
@@ -18,13 +23,37 @@ import lombok.NoArgsConstructor;
 public class MeetingData {
 
 	private int id;
+	
+	@NotBlank
     private String topicName;
+	
+	@Min(value = 1)
     private int numberPeople;
+	
+	@NotBlank
     private String date;
+	
+	@NotBlank
+	@Pattern(regexp = "^([01][0-9]|2[0-3]):[0-5][0-9]")
     private String startTime;
+	
+	@NotBlank
+	@Pattern(regexp = "^([01][0-9]|2[0-3]):[0-5][0-9]")
     private String endTime;
+	
+	@NotBlank
+	@Length(min = 5, max = 10)
+	@Pattern(regexp = "^[a-zA-Z0-9]+$")
 	private String password;
+	
+	@NotBlank
+	@Length(min = 5, max = 10)
+	@Pattern(regexp = "^[a-zA-Z0-9]+$")
 	private String passwordAgain;
+	
+	@NotBlank
+	@Length(min = 1, max = 140)
+	@Pattern(regexp = "^[a-zA-Z0-9]+$")
 	private String agenda;
 	
 	public MeetingData(Meetings meeting) {
