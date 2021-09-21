@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.example.continuing.dao.MeetingsDaoImpl;
+import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Topics;
 import com.example.continuing.entity.Users;
@@ -128,23 +129,24 @@ public class MainController {
 			mv.addObject("meetingPage", meetingPage);
 			mv.addObject("meetingList", meetingPage.getContent());
 			mv.addObject("userList", userList);
-						
+			
 			if (meetingPage.getContent().size() == 0) {
-				System.out.println("該当するミーティングはありません");
 				// 該当なかったらメッセージを表示
-				
-			} else if(userList.size() == 0) {
-				System.out.println("該当するユーザーアカウントはありません");
+				String msg = "該当するミーティングはありません。";
+				mv.addObject("msgMeeting", new MessageDto("W", msg));
+			} 
+			if(userList.size() == 0) {
 				// 該当なかったらメッセージを表示
-				
+				String msg = "該当するユーザーアカウントはありません。";
+				mv.addObject("msgAccount", new MessageDto("W", msg));
 			}
 		} else {
-			System.out.println("入力に誤りがあります。");
+			String msg = "入力に誤りがあります。";
 			mv.addObject("meetingPage", null);
 			mv.addObject("meetingList", null);
 			mv.addObject("userList", null);
 			// 検索条件エラーあり -> エラーメッセージをセット
-			
+			mv.addObject("msgMeeting", new MessageDto("E", msg));
 		}
 		
 		mv.addObject("topicList", topicList);
