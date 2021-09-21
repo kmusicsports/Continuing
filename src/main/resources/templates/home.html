@@ -113,6 +113,8 @@
             
             <div th:replace="fragments :: msg_meeting_area"></div>
             
+            <div th:replace="fragments :: meeting_list_area"></div>
+            
             <div th:if="${meetingList != null && #lists.size(meetingList) != 0}">
 		            <p class="text-end me-2">
 		              <span th:text="|該当: 全 ${#lists.size(meetingList)} 中|"></span>

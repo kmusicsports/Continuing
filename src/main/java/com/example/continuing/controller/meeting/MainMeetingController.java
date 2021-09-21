@@ -10,7 +10,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Joins;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
@@ -20,7 +22,6 @@ import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.JoinService;
-import com.example.continuing.service.MailService;
 import com.example.continuing.service.MeetingService;
 
 import lombok.AllArgsConstructor;
@@ -36,10 +37,11 @@ public class MainMeetingController {
 	private final JoinsRepository joinsRepository;
 	private final MeetingService meetingService;
 	private final UsersRepository usersRepository;
-	private final MailService mailService;
 	
 	@GetMapping("/Meeting/{meeting_id}")
-	public ModelAndView showMeetingDetail(ModelAndView mv, @PathVariable(name = "meeting_id") int meetingId) {
+	public ModelAndView showMeetingDetail(ModelAndView mv, 
+			@PathVariable(name = "meeting_id") int meetingId,
+			RedirectAttributes redirectAttributes) {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		someMeeting
 			.ifPresentOrElse(meeting -> {
@@ -57,14 +59,16 @@ public class MainMeetingController {
 				mv.addObject("myFollowsList", myFollowsList);
 				mv.addObject("searchData", new SearchData());
 			}, () -> {
-				System.out.println("存在しないミーティングです");
+				String msg = "存在しないミーティングです。";
 				mv.setViewName("redirect:/home");
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 			});
 		return mv;
 	}
 	
 	@GetMapping("/Meeting/join/{meeting_id}")
-	public String joinMeeting(@PathVariable(name = "meeting_id") int meetingId, HttpServletRequest request) {
+	public String joinMeeting(@PathVariable(name = "meeting_id") int meetingId,
+			HttpServletRequest request, RedirectAttributes redirectAttributes) {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
 			Integer myId = (Integer)session.getAttribute("user_id");
@@ -73,19 +77,18 @@ public class MainMeetingController {
 			joinsRepository.saveAndFlush(join);
 			
 			Users user = usersRepository.findById(myId).get();
-			mailService.sendMail(
-					meeting.getHost().getEmail(), 
-					"Continuing - ミーティングに" + user.getName() + "さんが参加予約をしました", 
-					meetingService.getMessageText(meeting, user.getName(), "join"));
+			meetingService.sendMail(meeting, user, "join");
 		} else {
-			System.out.println("存在しないミーティングです");
+			String msg = "存在しないミーティングです。";
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 			return "redirect:/home";
 		}
 		return "redirect:" + session.getAttribute("path");
 	}
 	
 	@GetMapping("/Meeting/leave/{meeting_id}")
-	public String leaveMeeting(@PathVariable(name = "meeting_id") int meetingId, HttpServletRequest request) {
+	public String leaveMeeting(@PathVariable(name = "meeting_id") int meetingId, 
+			HttpServletRequest request, RedirectAttributes redirectAttributes) {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
 			Integer myId = (Integer)session.getAttribute("user_id");
@@ -94,12 +97,10 @@ public class MainMeetingController {
 			joinsRepository.deleteAll(joinList);
 			
 			Users user = usersRepository.findById(myId).get();
-			mailService.sendMail(
-					meeting.getHost().getEmail(),
-					"Continuing - " + user.getName() + "さんがミーティングへの参加予約を取り消しました",
-					meetingService.getMessageText(meeting, user.getName(), "leave"));
+			meetingService.sendMail(meeting, user, "leave");
 		} else {
-			System.out.println("存在しないミーティングです");
+			String msg = "存在しないミーティングです。";
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 			return "redirect:/home";
 		}
 		return "redirect:" + session.getAttribute("path");
@@ -111,7 +112,8 @@ public class MainMeetingController {
 	}
 	
 	@GetMapping("/Meeting/check/{meeting_id}")
-	public String joinCheck(@PathVariable(name = "meeting_id") int meetingId) {
+	public String joinCheck(@PathVariable(name = "meeting_id") int meetingId,
+			RedirectAttributes redirectAttributes) {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		String meetingUrl = null;
 		if(someMeeting.isPresent()) {
@@ -124,7 +126,8 @@ public class MainMeetingController {
 				meetingUrl = meeting.getJoinUrl();
 			}
 		} else {
-			System.out.println("存在しないミーティングです");
+			String msg = "存在しないミーティングです。";
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 			return "redirect:/home";
 		}
 		return "redirect:" +  meetingUrl;
