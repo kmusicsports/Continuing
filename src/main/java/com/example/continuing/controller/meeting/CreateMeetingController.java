@@ -30,7 +30,6 @@ import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.TopicsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
-import com.example.continuing.service.MailService;
 import com.example.continuing.service.MeetingService;
 import com.example.continuing.zoom.ZoomApiIntegration;
 import com.example.continuing.zoom.ZoomDetails;
@@ -50,7 +49,6 @@ public class CreateMeetingController {
 	private final ZoomApiIntegration zoomApiIntegration;
 	private final UsersRepository usersRepository;
 	private final FollowService followService;
-	private final MailService mailService;
 	
 	@GetMapping("/Meeting/showCreateForm")
 	public ModelAndView createMeetingForm(ModelAndView mv) {
@@ -121,10 +119,7 @@ public class CreateMeetingController {
 			
 			List<Users> followersList = followService.getFollowersList(userId);
 			for(Users follower : followersList) {
-				mailService.sendMail(
-						follower.getEmail(),
-						"Continuing - " + meeting.getHost().getName() + "さんがミーティングを作成しました",
-						meetingService.getMessageText(meeting, follower.getName(), "create"));			
+				meetingService.sendMail(meeting, follower, "create");			
 			}
 			
 			String msg = "ミーティングの作成に成功しました。";

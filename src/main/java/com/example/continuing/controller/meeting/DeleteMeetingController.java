@@ -21,7 +21,6 @@ import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
 import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.service.JoinService;
-import com.example.continuing.service.MailService;
 import com.example.continuing.service.MeetingService;
 import com.example.continuing.zoom.ZoomApiIntegration;
 import com.example.continuing.zoom.ZoomDetails;
@@ -39,7 +38,6 @@ public class DeleteMeetingController {
 	private final ZoomApiIntegration ZoomApiIntegration;
 	private final JoinService joinService;
 	private final MeetingService meetingService;
-	private final MailService mailService;
 
 	@GetMapping("/Meeting/delete/{id}")
     public ModelAndView createRedirect(@PathVariable(name = "id") int id, 
@@ -94,10 +92,7 @@ public class DeleteMeetingController {
 		
 		List<Users> joinUserList = joinService.getJoinUserList(meeting);
 		for(Users user : joinUserList) {
-			mailService.sendMail(
-					user.getEmail(),
-					"Continuing - 参加予定のミーティングが削除されました",
-					meetingService.getMessageText(meeting, user.getName(), "delete"));			
+			meetingService.sendMail(meeting, user, "delete");			
 		}
 		
 		String msg = "ミーティングを削除しました。";

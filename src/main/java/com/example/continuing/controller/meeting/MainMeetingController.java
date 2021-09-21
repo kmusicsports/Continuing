@@ -20,7 +20,6 @@ import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.JoinService;
-import com.example.continuing.service.MailService;
 import com.example.continuing.service.MeetingService;
 
 import lombok.AllArgsConstructor;
@@ -36,7 +35,6 @@ public class MainMeetingController {
 	private final JoinsRepository joinsRepository;
 	private final MeetingService meetingService;
 	private final UsersRepository usersRepository;
-	private final MailService mailService;
 	
 	@GetMapping("/Meeting/{meeting_id}")
 	public ModelAndView showMeetingDetail(ModelAndView mv, @PathVariable(name = "meeting_id") int meetingId) {
@@ -73,10 +71,7 @@ public class MainMeetingController {
 			joinsRepository.saveAndFlush(join);
 			
 			Users user = usersRepository.findById(myId).get();
-			mailService.sendMail(
-					meeting.getHost().getEmail(), 
-					"Continuing - ミーティングに" + user.getName() + "さんが参加予約をしました", 
-					meetingService.getMessageText(meeting, user.getName(), "join"));
+			meetingService.sendMail(meeting, user, "join");
 		} else {
 			System.out.println("存在しないミーティングです");
 			return "redirect:/home";
@@ -94,10 +89,7 @@ public class MainMeetingController {
 			joinsRepository.deleteAll(joinList);
 			
 			Users user = usersRepository.findById(myId).get();
-			mailService.sendMail(
-					meeting.getHost().getEmail(),
-					"Continuing - " + user.getName() + "さんがミーティングへの参加予約を取り消しました",
-					meetingService.getMessageText(meeting, user.getName(), "leave"));
+			meetingService.sendMail(meeting, user, "leave");
 		} else {
 			System.out.println("存在しないミーティングです");
 			return "redirect:/home";
