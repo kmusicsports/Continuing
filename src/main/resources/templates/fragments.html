@@ -94,5 +94,62 @@
         </form>
     </div>
     
+	  <div th:fragment="msg_area">
+		    <div th:if="${msg != null}" class="m-4">
+			      <div th:if="${msg.type == 'S'}">
+				        <div class="alert alert-success d-flex" role="alert">
+			              <span class="flex-fill" th:text="${msg.text}"></span>
+			              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				        </div>
+			      </div>
+			      <div th:if="${msg.type == 'W'}">
+			          <div class="alert alert-warning d-flex" role="alert">
+			              <span class="flex-fill" th:text="${msg.text}"></span>
+			              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			          </div>
+		        </div>
+			      <div th:if="${msg.type == 'E'}">
+			          <div class="alert alert-danger d-flex " role="alert">
+			              <span class="flex-fill" th:text="${msg.text}"></span>
+							      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			          </div>
+		        </div>
+		        <div th:if="${msg.type == 'I'}">
+			          <div class="alert alert-info d-flex" role="alert">
+			              <span class="flex-fill" th:text="${msg.text}"></span>
+					          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			          </div>
+		        </div>
+        </div>
+	  </div>
+				  
+		<div th:fragment="msg_meeting_area">  
+		    <div th:if="${msgMeeting != null}" class="m-4">
+		        <div th:if="${msgMeeting.type == 'W'}">
+			          <div class="alert alert-warning d-flex" role="alert">
+			              <span class="flex-fill" th:text="${msgMeeting.text}"></span>
+			              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			          </div>
+            </div>
+		        <div th:if="${msgMeeting.type == 'E'}">
+			          <div class="alert alert-danger d-flex " role="alert">
+			              <span class="flex-fill" th:text="${msgMeeting.text}"></span>
+			              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			          </div>
+		        </div>
+        </div>
+    </div>
+	  
+	  <div th:fragment="msg_account_area">  
+		    <div th:if="${msgAccount != null}" class="m-4">
+		        <div th:if="${msgAccount.type == 'W'}">
+				         <div class="alert alert-warning d-flex" role="alert">
+				             <span class="flex-fill" th:text="${msgAccount.text}"></span>
+				             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				         </div>
+	          </div>
+	      </div>
+    </div>
+    
 </body>
 </html>
