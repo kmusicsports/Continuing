@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.LoginData;
 import com.example.continuing.form.RegisterData;
@@ -39,37 +41,34 @@ public class LoginController {
 	
 	@PostMapping("/login")
 	public String login(@ModelAttribute @Validated LoginData loginData,
-			BindingResult result, ModelAndView mv) {
+			BindingResult result, ModelAndView mv, RedirectAttributes redirectAttributes) {
 		
-		// バリデーション
-		if(result.hasErrors()) {
-			// エラーあり -> エラーメッセージをセット
-			String msg = "メールアドレスまたはパスワードが間違っています。";
-			System.out.println(msg);
-			return "redirect:/showLogin"; 
-		}
-		
-		// サービスでチェック
-		if(!loginService.isValid(loginData, result)) {
-			// エラーあり -> エラーメッセージをセット
-			String msg = "メールアドレスまたはパスワードが間違っています。";
-			System.out.println(msg);
-			return "redirect:/showLogin"; 
-		}
-		Users user = usersRepository.findByEmail(loginData.getEmail()).get();
-		session.setAttribute("user_id", user.getId());
-		session.setAttribute("user_name", user.getName());
-		if(session.getAttribute("path") == null) {
-			return "redirect:/home";    					
+		boolean isValid = loginService.isValid(loginData, result); 
+		if(!result.hasErrors() && isValid) { 
+			Users user = usersRepository.findByEmail(loginData.getEmail()).get();
+			session.setAttribute("user_id", user.getId());
+			session.setAttribute("user_name", user.getName());
+			String msg = "こんにちは、" + user.getName() + "さん!";
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
+			if(session.getAttribute("path") == null) {
+				return "redirect:/home";    					
+			} else {
+				return "redirect:" + session.getAttribute("path");
+			}
 		} else {
-			return "redirect:" + session.getAttribute("path");
+			// エラーあり -> エラーメッセージをセット
+			String msg = "メールアドレスまたはパスワードが間違っています。";
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
+			return "redirect:/showLogin"; 
 		}
 	}
 	
 	@GetMapping("/logout")
-	public String logout() {
+	public String logout(RedirectAttributes redirectAttributes) {
 		// セッション情報をクリアする
 		session.invalidate();
+		String msg = "ログアウトしました。";
+		redirectAttributes.addFlashAttribute("msg", new MessageDto("I", msg));
 		return "redirect:/showLogin";
 	}
 	
@@ -83,7 +82,7 @@ public class LoginController {
 	
 	@PostMapping("/regist")
 	public ModelAndView registCheck(@ModelAttribute @Validated RegisterData registerData,
-			BindingResult result, ModelAndView mv) {
+			BindingResult result, ModelAndView mv, RedirectAttributes redirectAttributes) {
 		// エラーチェック
 		if(!result.hasErrors()) {
 			boolean isValid = loginService.isValid(registerData, result);
@@ -93,20 +92,24 @@ public class LoginController {
 				usersRepository.saveAndFlush(newUser);
 				loginService.sendMail(newUser.getEmail(), "welcome");
 				
-				System.out.println("ユーザーアカウントが正常に登録されました。メールが届いていない場合は、メールアドレスが正しいか確認し、変更して下さい。");
-				mv.setViewName("redirect:/showLogin");						
+				String msg = "ユーザーアカウントが正常に登録されました。メールが届いていない場合は、メールアドレスが正しいか確認し、変更して下さい。";
+				mv.setViewName("redirect:/showLogin");
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 			} else {
-				System.out.println("入力に誤りがあります。");
+				String msg = "入力に誤りがあります。";
 				registerData.setChecked(false);
 				mv.setViewName("register");
 				mv.addObject("searchData", new SearchData());
+				mv.addObject("msg", new MessageDto("E", msg));
 			}
 		} else {
-			System.out.println("入力に誤りがあります。");
+			String msg = "入力に誤りがあります。";
 			registerData.setChecked(false);
 			mv.setViewName("register");
 			mv.addObject("searchData", new SearchData());
+			mv.addObject("msg", new MessageDto("E", msg));
 		}
+		
 		return mv;
 	}
 }

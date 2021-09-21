@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.ProfileData;
@@ -49,7 +51,8 @@ public class UserController {
 	private final MeetingService meetingService;
 	
 	@GetMapping("/User/{user_id}")
-	public ModelAndView showUserDetail(ModelAndView mv, @PathVariable(name = "user_id") int userId) {
+	public ModelAndView showUserDetail(ModelAndView mv, @PathVariable(name = "user_id") int userId,
+			RedirectAttributes redirectAttributes) {
 		Optional<Users> someUser = usersRepository.findById(userId);
 		someUser
 			.ifPresentOrElse(user -> {
@@ -71,8 +74,9 @@ public class UserController {
 				mv.addObject("myJoinMeetingList", myJoinMeetingList);
 				mv.addObject("searchData", new SearchData());
 			}, () -> {
-				System.out.println("存在しないユーザーです");
+				String msg = "存在しないユーザーです。";
 				mv.setViewName("redirect:/home");
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 			});
 		return mv;
 	}
@@ -131,7 +135,7 @@ public class UserController {
 	
 	@PostMapping("/User/update")
 	public ModelAndView updateProfile(@ModelAttribute @Validated ProfileData profileData,
-			BindingResult result, ModelAndView mv) {
+			BindingResult result, ModelAndView mv, RedirectAttributes redirectAttributes) {
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users oldData = usersRepository.findById(userId).get();
 		// エラーチェック
@@ -140,10 +144,14 @@ public class UserController {
 			// エラーなし -> 更新
 			Users user = profileData.toEntity(oldData, passwordEncoder);
 			usersRepository.saveAndFlush(user);
+			String msg = "プロフィールを更新しました。";
 			mv.setViewName("redirect:/User/mypage");
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 		} else {
+			String msg = "入力に誤りがあります。";
 			mv.setViewName("profile");
 			mv.addObject("searchData", new SearchData());
+			mv.addObject("msg", new MessageDto("E", msg));
 		}
 		
 		return mv;

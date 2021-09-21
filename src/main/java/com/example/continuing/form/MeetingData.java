@@ -53,7 +53,6 @@ public class MeetingData {
 	
 	@NotBlank
 	@Length(min = 1, max = 140)
-	@Pattern(regexp = "^[a-zA-Z0-9]+$")
 	private String agenda;
 	
 	public MeetingData(Meetings meeting) {
