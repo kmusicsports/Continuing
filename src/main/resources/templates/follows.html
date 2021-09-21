@@ -28,8 +28,12 @@
         </li>
     </ul>
     <hr class="mt-0">
+    
     <div class="tab-content" id="pills-tabContent">
-        <div class="tab-pane fade" id="pills-follows" role="tabpanel" aria-labelledby="pills-follows-tab">            
+        <div class="tab-pane fade" id="pills-follows" role="tabpanel" aria-labelledby="pills-follows-tab">
+            
+            <div th:replace="fragments :: msg_area"></div>
+                        
             <div class="list-group" th:each="user : ${followsList}">
                 <form th:action="@{/}" method="get">
                     <button type="submit" th:formaction="@{/User/__${user.id}__}" class="list-group-item list-group-item-action btn-send">
@@ -51,6 +55,9 @@
         </div>
 
         <div class="tab-pane fade" id="pills-followers" role="tabpanel" aria-labelledby="pills-followers-tab">
+        
+            <div th:replace="fragments :: msg_area"></div>
+        
             <div class="list-group" th:each="user : ${followersList}">
                 <form th:action="@{/}" method="get">
                     <button type="submit" th:formaction="@{/User/__${user.id}__}" class="list-group-item list-group-item-action btn-send">

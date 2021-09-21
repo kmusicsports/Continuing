@@ -33,6 +33,8 @@
     <div class="tab-content" id="pills-tabContent">
         <div class="tab-pane fade" id="pills-meeting" role="tabpanel" aria-labelledby="pills-meeting-tab">
 
+            <div th:replace="fragments :: msg_area"></div>
+
             <div class="accordion" id="accordionExample">
                 <div class="accordion-item m-2">
                     <h2 class="accordion-header" id="heading">
@@ -108,15 +110,15 @@
                     </div>
                 </div>
             </div>
-
+            
+            <div th:replace="fragments :: msg_meeting_area"></div>
+            
             <div th:if="${meetingList != null && #lists.size(meetingList) != 0}">
 		            <p class="text-end me-2">
 		              <span th:text="|該当: 全 ${#lists.size(meetingList)} 中|"></span>
 		              <span th:text="|${#lists.size(meetingList) * meetingPage.getNumber() + 1 / meetingPage.getTotalPages()} 件|"></span>
 		            </p>
 		            
-		            <div th:replace="fragments :: meeting_list_area"></div>
-		
 		            <nav>
 		                <ul class="pagination justify-content-center mt-5" th:if="${meetingList != null && #lists.size(meetingList) != 0}">
 		                    <li class="page-item" th:classappend="${meetingPage.isFirst() ? 'disabled' : ''}">
@@ -147,6 +149,9 @@
 
 
         <div class="tab-pane fade" id="pills-account" role="tabpanel" aria-labelledby="pills-account-tab">
+        
+            <div th:replace="fragments :: msg_area"></div>
+            
             <div class="m-5">
                 <h3 class="ms-2">継続日数ランキング</h3>
                 <form th:action="@{/}" method="get">
@@ -177,6 +182,8 @@
                     </div>
                 </form>
             </div>
+
+            <div th:replace="fragments :: msg_account_area"></div>
 
             <div class="list-group" th:each="user : ${userList}">
                 <form th:action="@{/}" method="get">
