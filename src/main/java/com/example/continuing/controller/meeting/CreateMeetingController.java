@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Topics;
 import com.example.continuing.entity.Users;
@@ -85,20 +87,22 @@ public class CreateMeetingController {
 			return null;
 		} else {
 			List<Topics> topicList = topicsRepository.findAll();
-			System.out.println("入力に誤りがあります。");
+			String msg = "入力に誤りがあります。";
 			
 			session.setAttribute("mode", "create");
 			mv.setViewName("meetingForm");
 			mv.addObject("topicList", topicList);
 			mv.addObject("searchData", new SearchData());
-			
+			mv.addObject("msg", new MessageDto("E", msg));
 			return mv;
 		}
 	}
 	
 	// callback
 	@RequestMapping(value = "/create/meeting/redirect", method = { RequestMethod.GET, RequestMethod.POST })
-	public String createMeeting(@RequestParam String code, @RequestParam String state, ModelAndView mv) throws IOException {
+	public String createMeeting(@RequestParam String code,
+			@RequestParam String state, ModelAndView mv, 
+			RedirectAttributes redirectAttributes) throws IOException {
 		try {
 			System.out.println("会議の作成を開始します");
 			OAuth2AccessToken oauthToken = zoomApiIntegration.getAccessToken(session, code, state);
@@ -123,12 +127,13 @@ public class CreateMeetingController {
 						meetingService.getMessageText(meeting, follower.getName(), "create"));			
 			}
 			
-			System.out.println("会議の作成に成功しました");
-			
+			String msg = "ミーティングの作成に成功しました。";
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 			return "redirect:/Meeting/" + meeting.getId();
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("会議の作成に失敗しました");
+			String msg = "ミーティングの作成に失敗しました。";
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 			return "redirect:" + session.getAttribute("path");
 		} 
 	}
