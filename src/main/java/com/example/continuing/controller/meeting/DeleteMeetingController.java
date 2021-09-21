@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
 import com.example.continuing.repository.MeetingsRepository;
@@ -40,7 +42,8 @@ public class DeleteMeetingController {
 	private final MailService mailService;
 
 	@GetMapping("/Meeting/delete/{id}")
-    public ModelAndView createRedirect(@PathVariable(name = "id") int id, HttpServletResponse response, ModelAndView mv) {
+    public ModelAndView createRedirect(@PathVariable(name = "id") int id, 
+    		HttpServletResponse response, ModelAndView mv, RedirectAttributes redirectAttributes) {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(id);
 		if(someMeeting.isPresent()) {
 			Integer myId = (Integer)session.getAttribute("user_id");
@@ -61,20 +64,23 @@ public class DeleteMeetingController {
 				
 				return null;
 			} else {
-				System.out.println("他ユーザーのミーティングです");
+				String msg = "他ユーザーのミーティングです。";
 				mv.setViewName("redirect:/Meeting/" + id);
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 				return mv;
 			}				
 		} else {
-			System.out.println("存在しないミーティングです");
+			String msg = "存在しないミーティングです。";
 			mv.setViewName("redirect:/home");
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 			return mv;
 		}
         
     }
 	
 	@RequestMapping(value = "/delete/meeting/redirect", method = { RequestMethod.GET, RequestMethod.POST })
-	public String deleteMeeting(@RequestParam String code, @RequestParam String state)
+	public String deleteMeeting(@RequestParam String code,
+			@RequestParam String state, RedirectAttributes redirectAttributes)
             throws IOException {
 		System.out.println("会議の削除を開始します");
 
@@ -94,8 +100,8 @@ public class DeleteMeetingController {
 					meetingService.getMessageText(meeting, user.getName(), "delete"));			
 		}
 		
-		System.out.println("会議の削除に成功しました");
-		
+		String msg = "ミーティングを削除しました。";
+		redirectAttributes.addFlashAttribute("msg", new MessageDto("I", msg));
 		return "redirect:/User/mypage";
 	}
 }
