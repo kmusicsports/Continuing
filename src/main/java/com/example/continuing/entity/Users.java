@@ -46,6 +46,9 @@ public class Users {
 	@Column(name = "continuous_days")
 	private Integer continuousDays;
 	
+	@Column(name = "language")
+	private String language;
+	
 	@Column(name = "created_at")
 	private Timestamp createdAt;
 	
