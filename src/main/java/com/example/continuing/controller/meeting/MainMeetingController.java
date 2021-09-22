@@ -1,11 +1,13 @@
 package com.example.continuing.controller.meeting;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,11 +39,12 @@ public class MainMeetingController {
 	private final JoinsRepository joinsRepository;
 	private final MeetingService meetingService;
 	private final UsersRepository usersRepository;
+	private final MessageSource messageSource;
 	
 	@GetMapping("/Meeting/{meeting_id}")
 	public ModelAndView showMeetingDetail(ModelAndView mv, 
 			@PathVariable(name = "meeting_id") int meetingId,
-			RedirectAttributes redirectAttributes) {
+			RedirectAttributes redirectAttributes, Locale locale) {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		someMeeting
 			.ifPresentOrElse(meeting -> {
@@ -59,16 +62,17 @@ public class MainMeetingController {
 				mv.addObject("myFollowsList", myFollowsList);
 				mv.addObject("searchData", new SearchData());
 			}, () -> {
-				String msg = "存在しないミーティングです。";
 				mv.setViewName("redirect:/home");
-				redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
+				String msg = messageSource.getMessage("msg.w.meeting_not_found", null, locale);
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			});
 		return mv;
 	}
 	
 	@GetMapping("/Meeting/join/{meeting_id}")
 	public String joinMeeting(@PathVariable(name = "meeting_id") int meetingId,
-			HttpServletRequest request, RedirectAttributes redirectAttributes) {
+			HttpServletRequest request, 
+			RedirectAttributes redirectAttributes, Locale locale) {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
 			Integer myId = (Integer)session.getAttribute("user_id");
@@ -77,10 +81,10 @@ public class MainMeetingController {
 			joinsRepository.saveAndFlush(join);
 			
 			Users user = usersRepository.findById(myId).get();
-			meetingService.sendMail(meeting, user, "join");
+			meetingService.sendMail(meeting, user, "join", locale);
 		} else {
-			String msg = "存在しないミーティングです。";
-			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
+			String msg = messageSource.getMessage("msg.w.meeting_not_found", null, locale);
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			return "redirect:/home";
 		}
 		return "redirect:" + session.getAttribute("path");
@@ -88,7 +92,8 @@ public class MainMeetingController {
 	
 	@GetMapping("/Meeting/leave/{meeting_id}")
 	public String leaveMeeting(@PathVariable(name = "meeting_id") int meetingId, 
-			HttpServletRequest request, RedirectAttributes redirectAttributes) {
+			HttpServletRequest request, 
+			RedirectAttributes redirectAttributes, Locale locale) {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
 			Integer myId = (Integer)session.getAttribute("user_id");
@@ -97,10 +102,10 @@ public class MainMeetingController {
 			joinsRepository.deleteAll(joinList);
 			
 			Users user = usersRepository.findById(myId).get();
-			meetingService.sendMail(meeting, user, "leave");
+			meetingService.sendMail(meeting, user, "leave", locale);
 		} else {
-			String msg = "存在しないミーティングです。";
-			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
+			String msg = messageSource.getMessage("msg.w.meeting_not_found", null, locale);
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			return "redirect:/home";
 		}
 		return "redirect:" + session.getAttribute("path");
@@ -113,24 +118,27 @@ public class MainMeetingController {
 	
 	@GetMapping("/Meeting/check/{meeting_id}")
 	public String joinCheck(@PathVariable(name = "meeting_id") int meetingId,
-			RedirectAttributes redirectAttributes) {
+			RedirectAttributes redirectAttributes, Locale locale) {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
-		String meetingUrl = null;
 		if(someMeeting.isPresent()) {
 			Meetings meeting = someMeeting.get();
 			Integer myId = (Integer)session.getAttribute("user_id");
-			meetingService.joinCheck(meeting, myId);
-			if(meeting.getHost().getId() == myId) {
-				meetingUrl = meeting.getStartUrl();
+			String warningMessage = meetingService.joinCheck(meeting, myId, locale);
+			if(warningMessage == null) {
+				if(meeting.getHost().getId() == myId) {
+					return "redirect:" +  meeting.getStartUrl();
+				} else {
+					return "redirect:" +  meeting.getJoinUrl();
+				}				
 			} else {
-				meetingUrl = meeting.getJoinUrl();
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("W", warningMessage));
+				return "redirect:/Meeting/" + meetingId;
 			}
 		} else {
-			String msg = "存在しないミーティングです。";
-			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
+			String msg = messageSource.getMessage("msg.w.meeting_not_found", null, locale);
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			return "redirect:/home";
 		}
-		return "redirect:" +  meetingUrl;
 	}
 	
 	@GetMapping("/Meeting/list/mine/today")

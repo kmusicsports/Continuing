@@ -8,11 +8,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -41,12 +43,14 @@ public class MeetingService {
 	private final JoinService joinService;
 	private final MeetingsComparator meetingsComparator;
 	private final MailService mailService;
+	private final MessageSource messageSource;
 	
 	@Value("${app.url}")
 	private String APP_URL;
 
 	// ミーティングフォーム用のチェック
-	public boolean isValid(MeetingData meetingData, boolean isCreate, BindingResult result) {
+	public boolean isValid(MeetingData meetingData, boolean isCreate, 
+			BindingResult result, Locale locale) {
 		Boolean answer = true;
 		
 		if(!meetingData.getPassword().equals(meetingData.getPasswordAgain())) {
@@ -54,7 +58,7 @@ public class MeetingService {
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"passwordAgain",
-					"パスワードが一致しません");
+					messageSource.getMessage("Unmatch.password", null, locale));
 			result.addError(fieldError);
 			meetingData.setPassword("");
 			meetingData.setPasswordAgain("");
@@ -66,12 +70,12 @@ public class MeetingService {
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"startTime",
-					"複数人でのミーティング時間は15~40分です");
+					messageSource.getMessage("Time.Length.2.startTime", null, locale));
 			result.addError(fieldError);
 			fieldError = new FieldError(
 					result.getObjectName(),
 					"endTime",
-					"複数人でのミーティング時間は15~40分です");
+					messageSource.getMessage("Time.Length.2.endTime", null, locale));
 			result.addError(fieldError);
 			meetingData.setStartTime("");
 			meetingData.setEndTime("");
@@ -80,12 +84,12 @@ public class MeetingService {
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"startTime",
-					"ミーティング時間は15~1800分(30時間)です");
+					messageSource.getMessage("Time.Length.1.startTime", null, locale));
 			result.addError(fieldError);
 			fieldError = new FieldError(
 					result.getObjectName(),
 					"endTime",
-					"ミーティング時間は15~1800分(30時間)です");
+					messageSource.getMessage("Time.Length.1.endTime", null, locale));
 			result.addError(fieldError);
 			meetingData.setStartTime("");
 			meetingData.setEndTime("");
@@ -101,7 +105,7 @@ public class MeetingService {
             	FieldError fieldError = new FieldError(
     					result.getObjectName(),
     					"date",
-    					"今日以降の日付を入力してください");
+    					messageSource.getMessage("Previous.date", null, locale));
     			result.addError(fieldError);
             	meetingData.setDate("");
                 answer =  false;
@@ -110,7 +114,7 @@ public class MeetingService {
         	FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"date",
-					"日付はyyyy/mm/dd または　yyyy-mm-dd　の形式で入力してください");
+					messageSource.getMessage("InvalidFormat.date", null, locale));
 			result.addError(fieldError);
         	meetingData.setDate("");
         	e.printStackTrace();
@@ -121,7 +125,7 @@ public class MeetingService {
 	}
 	
 	// 検索条件のチェック
-	public boolean isValid(SearchData searchData, BindingResult result) {
+	public boolean isValid(SearchData searchData, BindingResult result, Locale locale) {
 		Boolean answer = true;
 		
 		String date = searchData.getDate().replace("/", "-");
@@ -132,7 +136,7 @@ public class MeetingService {
 				FieldError fieldError = new FieldError(
 						result.getObjectName(),
 						"date",
-						"日付はyyyy/mm/dd または　yyyy-mm-dd　の形式で入力してください");
+						messageSource.getMessage("InvalidFormat.date", null, locale));
 				result.addError(fieldError);
 				answer =  false;
 			}			
@@ -142,7 +146,7 @@ public class MeetingService {
         	FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"startTime",
-					"時間はHH:mm　の形式で入力してください");
+					messageSource.getMessage("Pattern.meetingData.startTime", null, locale));
 			result.addError(fieldError);
         	searchData.setStartTime(null);
         	answer = false;
@@ -152,7 +156,7 @@ public class MeetingService {
         	FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"endTime",
-					"時間はHH:mm　の形式で入力してください");
+					messageSource.getMessage("Pattern.meetingData.endTime", null, locale));
 			result.addError(fieldError);
         	searchData.setEndTime(null);
         	answer = false;
@@ -162,7 +166,7 @@ public class MeetingService {
 	}
 	
 	// ミーティングへの参加かどうかのチェック
-	public void joinCheck(Meetings meeting, Integer userId) {
+	public String joinCheck(Meetings meeting, Integer userId, Locale locale) {
 		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
 		
@@ -172,7 +176,7 @@ public class MeetingService {
 			String strStartTime = stf.format(meeting.getStartTime());
 			String strNow = stf.format(new java.util.Date());
 			int duration = Utils.string2Int(strStartTime) - Utils.string2Int(strNow);
-			if(duration <= 15) {
+			if(duration >= 0 && duration <= 15) {
 				Users user = usersRepository.findById(userId).get();
 				Optional<Records> someRecord = recordsRepository.findByUserAndTopic(user, meeting.getTopic());
 				Records record = new Records(user, meeting.getTopic());
@@ -180,7 +184,7 @@ public class MeetingService {
 					record = someRecord.get();
 				}
 				if (session.getAttribute(strStartTime) == null) {
-					System.out.println("参加");
+					System.out.println("Join");
 					session.setAttribute(strStartTime, "not first");
 					session.setMaxInactiveInterval(24 * 60 - Utils.string2Int(strNow));
 					record.setDays(record.getDays() + 1);
@@ -198,54 +202,82 @@ public class MeetingService {
 					}					
 				}
 				
+				return null;
 			} else {
-				System.out.println("不参加");
+				// "You can join the meeting 15 minutes in advance."
+				return messageSource.getMessage("msg.w.advance_15", null, locale);
 			}
 		} else {
-			System.out.println("meeting is not today!");
+			// "This meeting is not today."
+			return messageSource.getMessage("msg.w.meeting_not_today", null, locale);
 		}
 	}
 	
-	public void sendMail(Meetings meeting, Users user, String type) {
+	public void sendMail(Meetings meeting, Users user, String type, Locale locale) {
 		String username = user.getName();
 		String subject = null;
-		String messageText = "<html><head></head><html><head></head><body>";
+		String messageText = "<html><head></head><body>";
 		String meetingInfo = "<br>"
-				+ "作成者 : " + meeting.getHost().getName() + "<br>" 
-				+ "トピック : " + meeting.getTopic() + "<br>"
-				+ "日付 : " + Utils.date2str(meeting.getDate()) + "<br>"
-				+ "時間 : " + Utils.time2str(meeting.getStartTime()) + "～" + Utils.time2str(meeting.getEndTime()) + "<br>"
+				+ messageSource.getMessage("mail.msg.meeting_host", null, locale)
+				+ " : " + meeting.getHost().getName() + "<br>" 
+				+ messageSource.getMessage("mail.msg.meeting_topic", null, locale) 
+				+ " : " + meeting.getTopic() + "<br>"
+				+ messageSource.getMessage("mail.msg.meeting_date", null, locale)
+				+ " : " + Utils.date2str(meeting.getDate()) + "<br>"
+				+ messageSource.getMessage("mail.msg.meeting_time", null, locale)
+				+ " : " + Utils.time2str(meeting.getStartTime()) + "～" + Utils.time2str(meeting.getEndTime()) + "<br>"
 				+ "<br>";
 		if(type.equals("create")) {
-			subject = meeting.getHost().getName() + "さんがミーティングを作成しました";
-			messageText += username + "様。<br>"
+			subject = meeting.getHost().getName() 
+					+ messageSource.getMessage("mail.subject.meeting_created", null, locale);
+			messageText += meeting.getHost().getName() 
+					+ messageSource.getMessage("mail.msg.meeting_created", null, locale) 
 					+ "<br>"
-					+ meeting.getHost().getName() + "さんが以下のミーティングを作成しました。<br>"
 					+ meetingInfo
-					+ "<a href='" + APP_URL + "/Meeting/" + meeting.getId() + "'>さっそく参加予約をしに行こう!</a>";
+					+ "<a href='" + APP_URL + "/Meeting/" + meeting.getId() + "'>" 
+					+ messageSource.getMessage("mail.msg.go_join", null, locale) 
+					+ "</a>"
+					+ "</body></html>";
+			
+			mailService.sendMail(user.getEmail(), subject, messageText);
 		} else if (type.equals("delete")) {
-			subject = "参加予定のミーティングが削除されました";
-			messageText += username + "様。<br>" 
+			subject = messageSource.getMessage("mail.subject.meeting_deleted", null, locale);
+			messageText += messageSource.getMessage("mail.msg.meeting_deleted", null, locale)
 					+ "<br>"
-					+ "参加予定だった以下のミーティングが削除されました。<br>"
 					+ meetingInfo
-					+ "<a href='" + APP_URL + "/home'>代わりのミーティングを探しに行こう!</a>";
+					+ "<a href='" + APP_URL + "/home'>" 
+					+ messageSource.getMessage("mail.msg.go_find_replacement", null, locale) 
+					+ "</a>"
+					+ "</body></html>";
+			
+			mailService.sendMail(user.getEmail(), subject, messageText);
 		} else if(type.equals("join")) {
-			subject = username + "さんが参加予約をしました";
-			messageText += "以下のミーティングに" + username + "さんが参加予約をしました。<br>"
-					+ meetingInfo;
+			subject = messageSource.getMessage("mail.subject.meeting_joined", null, locale);
+			messageText += messageSource.getMessage("mail.msg.meeting_joined_start", null, locale) 
+					+ username 
+					+ messageSource.getMessage("mail.msg.meeting_joined_end", null, locale) 
+					+ "<br>"
+					+ meetingInfo
 //					+ "参加を拒否する場合は<a href='https://" + APP_URL + "/'>こちら</a>";
+					+ "</body></html>";
+			
+			mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
 		} else if(type.equals("leave")) {
-			subject = username + "さんがミーティングへの参加予約を取り消しました";
-			messageText += username + "さんが以下のミーティングの参加予約を取り消しました。<br>"
-					+ meetingInfo;
+			subject = username 
+					+ messageSource.getMessage("mail.subject.meeting_left", null, locale);
+			messageText += username 
+					+ messageSource.getMessage("mail.msg.meeting_left", null, locale) 
+					+ "<br>"
+					+ meetingInfo
+					+ "</body></html>";
+			
+			mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
 		} else {
-			messageText += "Something is wrong!";
-		}
-		
-		messageText += "</body></html>";
-
-		mailService.sendMail(user.getEmail(), subject, messageText);
+			subject = messageSource.getMessage("mail.subject.error", null, locale);
+			messageText += messageSource.getMessage("mail.msg.operation_error", null, locale)
+					+ "</body></html>";
+			mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
+		}		
 	}
 	
 	public List<Meetings> getUserMeetingList(Users user) {

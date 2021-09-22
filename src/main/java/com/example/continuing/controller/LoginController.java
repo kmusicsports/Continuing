@@ -1,7 +1,10 @@
 package com.example.continuing.controller;
 
+import java.util.Locale;
+
 import javax.servlet.http.HttpSession;
 
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -30,6 +33,7 @@ public class LoginController {
 	private final HttpSession session;
 	private final LoginService loginService;
 	private final PasswordEncoder passwordEncoder;
+	private final MessageSource messageSource;
 
 	@GetMapping("/showLogin")
 	public ModelAndView showLogin(ModelAndView mv) {
@@ -41,14 +45,16 @@ public class LoginController {
 	
 	@PostMapping("/login")
 	public String login(@ModelAttribute @Validated LoginData loginData,
-			BindingResult result, ModelAndView mv, RedirectAttributes redirectAttributes) {
+			BindingResult result, ModelAndView mv, 
+			RedirectAttributes redirectAttributes, Locale locale) {
 		
 		boolean isValid = loginService.isValid(loginData, result); 
 		if(!result.hasErrors() && isValid) { 
 			Users user = usersRepository.findByEmail(loginData.getEmail()).get();
 			session.setAttribute("user_id", user.getId());
 			session.setAttribute("user_name", user.getName());
-			String msg = "こんにちは、" + user.getName() + "さん!";
+			String[] args = {user.getName()};
+			String msg = messageSource.getMessage("msg.s.login", args, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 			if(session.getAttribute("path") == null) {
 				return "redirect:/home";    					
@@ -57,17 +63,17 @@ public class LoginController {
 			}
 		} else {
 			// エラーあり -> エラーメッセージをセット
-			String msg = "メールアドレスまたはパスワードが間違っています。";
+			String msg = messageSource.getMessage("msg.e.login", null, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 			return "redirect:/showLogin"; 
 		}
 	}
 	
 	@GetMapping("/logout")
-	public String logout(RedirectAttributes redirectAttributes) {
+	public String logout(RedirectAttributes redirectAttributes, Locale locale) {
 		// セッション情報をクリアする
 		session.invalidate();
-		String msg = "ログアウトしました。";
+		String msg = messageSource.getMessage("msg.i.logout", null, locale);
 		redirectAttributes.addFlashAttribute("msg", new MessageDto("I", msg));
 		return "redirect:/showLogin";
 	}
@@ -82,32 +88,33 @@ public class LoginController {
 	
 	@PostMapping("/regist")
 	public ModelAndView registCheck(@ModelAttribute @Validated RegisterData registerData,
-			BindingResult result, ModelAndView mv, RedirectAttributes redirectAttributes) {
+			BindingResult result, ModelAndView mv, 
+			RedirectAttributes redirectAttributes, Locale locale) {
 		// エラーチェック
 		if(!result.hasErrors()) {
-			boolean isValid = loginService.isValid(registerData, result);
+			boolean isValid = loginService.isValid(registerData, result, locale);
 			if(isValid) {
 				// ユーザー新規登録
 				Users newUser = registerData.toEntity(passwordEncoder);
 				usersRepository.saveAndFlush(newUser);
-				loginService.sendMail(newUser.getEmail(), "welcome");
+				loginService.sendMail(newUser.getEmail(), "welcome", locale);
 				
-				String msg = "ユーザーアカウントが正常に登録されました。メールが届いていない場合は、メールアドレスが正しいか確認し、変更して下さい。";
 				mv.setViewName("redirect:/showLogin");
+				String msg = messageSource.getMessage("msg.s.regist", null, locale);
 				redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 			} else {
-				String msg = "入力に誤りがあります。";
+				String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
 				registerData.setChecked(false);
 				mv.setViewName("register");
 				mv.addObject("searchData", new SearchData());
-				mv.addObject("msg", new MessageDto("E", msg));
+				mv.addObject("msg",new MessageDto("E", msg));
 			}
 		} else {
-			String msg = "入力に誤りがあります。";
 			registerData.setChecked(false);
+			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
 			mv.setViewName("register");
 			mv.addObject("searchData", new SearchData());
-			mv.addObject("msg", new MessageDto("E", msg));
+			mv.addObject("msg",new MessageDto("E", msg));
 		}
 		
 		return mv;

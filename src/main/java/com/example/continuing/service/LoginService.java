@@ -1,8 +1,10 @@
 package com.example.continuing.service;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -24,7 +26,11 @@ public class LoginService {
 	private final UsersRepository usersRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final MailService mailService;
+	private final MessageSource messageSource;
 
+	@Value("${app.name}")
+	private String APP_NAME;
+	
 	@Value("${app.url}")
 	private String APP_URL;
 	
@@ -33,13 +39,13 @@ public class LoginService {
 		Optional<Users> someUser = usersRepository.findByEmail(loginData.getEmail());
     	if(!someUser.isPresent()) {
     		// 登録されていない
-			System.out.println("メールアドレスが違います");
+			System.out.println("email is wrong");
 			return false;
     	}
     	
     	// パスワードが正しいか？ 
     	if (!passwordEncoder.matches(loginData.getPassword(), someUser.get().getPassword())) {
-    		System.out.println("パスワードが違います");
+    		System.out.println("password is wrong");
     		return false;
     	}
     	
@@ -47,13 +53,13 @@ public class LoginService {
 	}
 	
 	// 登録画面用のチェック
-	public boolean isValid(RegisterData registerData, BindingResult result) {
+	public boolean isValid(RegisterData registerData, BindingResult result, Locale locale) {
 		if(!registerData.getPassword().equals(registerData.getPasswordAgain())) {
 			// パスワード不一致
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"passwordAgain",
-					"パスワードが一致しません");
+					messageSource.getMessage("Unmatch.password", null, locale));
 			result.addError(fieldError);
 			registerData.setPassword(null);
 			registerData.setPasswordAgain(null);
@@ -68,7 +74,7 @@ public class LoginService {
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"name",
-					"既に使用されている名前です");
+					messageSource.getMessage("AlreadyUsed.name", null, locale));
 			result.addError(fieldError);
 			registerData.setName(null);
 			return false;
@@ -80,7 +86,7 @@ public class LoginService {
 				FieldError fieldError = new FieldError(
 						result.getObjectName(),
 						"name",
-						"名前が全角スペースです");
+						messageSource.getMessage("DoubleSpace.name", null, locale));
 				result.addError(fieldError);
 				return false;
 			}
@@ -92,7 +98,7 @@ public class LoginService {
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"email",
-					"既に登録されているメールアドレスです");
+					messageSource.getMessage("AlreadyUsed.email", null, locale));
 			result.addError(fieldError);
 			registerData.setEmail(null);
 			return false;
@@ -101,19 +107,33 @@ public class LoginService {
 		return true;
 	}
 
-	public String sendMail(String email, String type) {
+	public String sendMail(String email, String type, Locale locale) {
 		String token = null;
 		String subject = null;;
 		String messageText = "<html><head></head><body>";
 		if(type.equals("welcome")) {
-			subject = "Welcom to Continuing!";
-			messageText += "<h3>Welcom to Continuing!</h3>"
-					+ "You're officially a Continuing user.<br>"
+			subject = messageSource.getMessage("mail.subject.regist_thanks", null, locale);
+			messageText += "<h3>"
+					// "Welcome to " 
+					+ messageSource.getMessage("mail.msg.welcome_start", null, locale)
+					+ " " + APP_NAME
+					// "!"
+					+ messageSource.getMessage("mail.msg.welcome_end", null, locale) 
+					+ "</h3>"
+					// "You're officially a Continuing user."
+					+ messageSource.getMessage("mail.msg.regist_successful", null, locale)
 					+ "<br>"
-					+ "<a href='" + APP_URL + "/User/mypage'>Go to Continuing!</a>";
+					+ "<br>"
+					+ "<a href='" + APP_URL + "/User/mypage'>"
+					// "Go to"
+					+ messageSource.getMessage("mail.msg.go_app_start", null, locale)
+					+ " " + APP_NAME 
+					// "!"
+					+ messageSource.getMessage("mail.msg.go_app_end", null, locale)
+					+ "</a>";
 		} else {
-			subject = "Something is wrong!";
-			messageText += "Something is wrong!";
+			subject = messageSource.getMessage("mail.subject.error", null, locale);
+			messageText += messageSource.getMessage("mail.msg.operation_error", null, locale);
 		}
 		
 		messageText += "</body></html>";

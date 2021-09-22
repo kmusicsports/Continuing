@@ -1,11 +1,13 @@
 package com.example.continuing.controller;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -49,10 +51,11 @@ public class UserController {
 	private final JoinService joinService;
 	private final PasswordEncoder passwordEncoder;
 	private final MeetingService meetingService;
+	private final MessageSource messageSource;
 	
 	@GetMapping("/User/{user_id}")
-	public ModelAndView showUserDetail(ModelAndView mv, @PathVariable(name = "user_id") int userId,
-			RedirectAttributes redirectAttributes) {
+	public ModelAndView showUserDetail(@PathVariable(name = "user_id") int userId,
+			ModelAndView mv, RedirectAttributes redirectAttributes, Locale locale) {
 		Optional<Users> someUser = usersRepository.findById(userId);
 		someUser
 			.ifPresentOrElse(user -> {
@@ -74,9 +77,9 @@ public class UserController {
 				mv.addObject("myJoinMeetingList", myJoinMeetingList);
 				mv.addObject("searchData", new SearchData());
 			}, () -> {
-				String msg = "存在しないユーザーです。";
 				mv.setViewName("redirect:/home");
-				redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
+				String msg = messageSource.getMessage("msg.w.user_not_found", null, locale);
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			});
 		return mv;
 	}
@@ -110,7 +113,7 @@ public class UserController {
 	}
 	
 	@GetMapping("/User/delete")
-	public String deleteUser() {
+	public String deleteUser(RedirectAttributes redirectAttributes, Locale locale) {
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();
 		followsRepository.deleteByFollowerId(userId);
@@ -119,6 +122,8 @@ public class UserController {
 		usersRepository.deleteById(userId);		
 		// セッション情報をクリアする
 		session.invalidate();
+		String msg = messageSource.getMessage("msg.s.user_deleted", null, locale);
+		redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 		return "redirect:/home";
 	}
 	
@@ -135,20 +140,30 @@ public class UserController {
 	
 	@PostMapping("/User/update")
 	public ModelAndView updateProfile(@ModelAttribute @Validated ProfileData profileData,
-			BindingResult result, ModelAndView mv, RedirectAttributes redirectAttributes) {
+			BindingResult result, ModelAndView mv, 
+			RedirectAttributes redirectAttributes, Locale locale) {
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users oldData = usersRepository.findById(userId).get();
 		// エラーチェック
-		boolean isValid = userService.isValid(profileData, oldData, result); 
-		if(!result.hasErrors() && isValid) {
-			// エラーなし -> 更新
-			Users user = profileData.toEntity(oldData, passwordEncoder);
-			usersRepository.saveAndFlush(user);
-			String msg = "プロフィールを更新しました。";
-			mv.setViewName("redirect:/User/mypage");
-			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
+		if(!result.hasErrors()) {
+			boolean isValid = userService.isValid(profileData, oldData, result, locale); 
+			if(isValid) {
+				// エラーなし -> 更新
+				Users user = profileData.toEntity(oldData, passwordEncoder);
+				usersRepository.saveAndFlush(user);
+				userService.sendMail(profileData.getEmail(), locale);
+				
+				mv.setViewName("redirect:/User/mypage");
+				String msg = messageSource.getMessage("msg.s.user_updated", null, locale);
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));					
+			} else {
+				String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
+				mv.setViewName("profile");
+				mv.addObject("searchData", new SearchData());
+				mv.addObject("msg", new MessageDto("E", msg));
+			}
 		} else {
-			String msg = "入力に誤りがあります。";
+			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
 			mv.setViewName("profile");
 			mv.addObject("searchData", new SearchData());
 			mv.addObject("msg", new MessageDto("E", msg));
