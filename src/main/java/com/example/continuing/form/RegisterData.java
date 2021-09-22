@@ -2,6 +2,7 @@ package com.example.continuing.form;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Email;
@@ -38,7 +39,7 @@ public class RegisterData {
 	@AssertTrue
 	private boolean checked;
 	
-	public Users toEntity(PasswordEncoder passwordEncoder) {
+	public Users toEntity(PasswordEncoder passwordEncoder, Locale locale) {
 		Date date= new Date();
         Timestamp timestamp = new Timestamp(date.getTime());
         Users user = new Users();
@@ -46,6 +47,7 @@ public class RegisterData {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setContinuousDays(0);
+        user.setLanguage(locale.getLanguage());
         user.setCreatedAt(timestamp);
         user.setUpdatedAt(timestamp);
 		return user;
