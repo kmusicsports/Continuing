@@ -44,11 +44,12 @@ public class MainMeetingController {
 	@GetMapping("/Meeting/{meeting_id}")
 	public ModelAndView showMeetingDetail(ModelAndView mv, 
 			@PathVariable(name = "meeting_id") int meetingId,
-			RedirectAttributes redirectAttributes, Locale locale) {
+			RedirectAttributes redirectAttributes) {
+		
+		Integer myId = (Integer)session.getAttribute("user_id");
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		someMeeting
 			.ifPresentOrElse(meeting -> {
-				Integer myId = (Integer)session.getAttribute("user_id");
 				List<Meetings> myJoinMeetingList = joinService.getJoinMeetingList(myId);
 				List<Users> myFollowsList = followService.getFollowsList(myId);
 				
@@ -62,52 +63,60 @@ public class MainMeetingController {
 				mv.addObject("myFollowsList", myFollowsList);
 				mv.addObject("searchData", new SearchData());
 			}, () -> {
-				mv.setViewName("redirect:/home");
+				Users user = usersRepository.findById(myId).get();
+				Locale locale = new Locale(user.getLanguage());
 				String msg = messageSource.getMessage("msg.w.meeting_not_found", null, locale);
+				
+				mv.setViewName("redirect:/home");
 				redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			});
+		
 		return mv;
 	}
 	
 	@GetMapping("/Meeting/join/{meeting_id}")
 	public String joinMeeting(@PathVariable(name = "meeting_id") int meetingId,
-			HttpServletRequest request, 
-			RedirectAttributes redirectAttributes, Locale locale) {
+			HttpServletRequest request, RedirectAttributes redirectAttributes) {	
+		
+		Integer myId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(myId).get();
+		Locale locale = new Locale(user.getLanguage());
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
-			Integer myId = (Integer)session.getAttribute("user_id");
 			Meetings meeting = someMeeting.get();
 			Joins join = new Joins(myId, meeting);
 			joinsRepository.saveAndFlush(join);
 			
-			Users user = usersRepository.findById(myId).get();
 			meetingService.sendMail(meeting, user, "join", locale);
 		} else {
 			String msg = messageSource.getMessage("msg.w.meeting_not_found", null, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			return "redirect:/home";
 		}
+		
 		return "redirect:" + session.getAttribute("path");
 	}
 	
 	@GetMapping("/Meeting/leave/{meeting_id}")
 	public String leaveMeeting(@PathVariable(name = "meeting_id") int meetingId, 
-			HttpServletRequest request, 
-			RedirectAttributes redirectAttributes, Locale locale) {
+			HttpServletRequest request, RedirectAttributes redirectAttributes) {
+		
+		Integer myId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(myId).get();
+		Locale locale = new Locale(user.getLanguage());
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
-			Integer myId = (Integer)session.getAttribute("user_id");
 			Meetings meeting = someMeeting.get();
 			List<Joins> joinList = joinsRepository.findByUserIdAndMeeting(myId, meeting);
 			joinsRepository.deleteAll(joinList);
 			
-			Users user = usersRepository.findById(myId).get();
 			meetingService.sendMail(meeting, user, "leave", locale);
 		} else {
 			String msg = messageSource.getMessage("msg.w.meeting_not_found", null, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			return "redirect:/home";
 		}
+		
 		return "redirect:" + session.getAttribute("path");
 	}
 	
@@ -118,11 +127,14 @@ public class MainMeetingController {
 	
 	@GetMapping("/Meeting/check/{meeting_id}")
 	public String joinCheck(@PathVariable(name = "meeting_id") int meetingId,
-			RedirectAttributes redirectAttributes, Locale locale) {
+			RedirectAttributes redirectAttributes) {
+		
+		Integer myId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(myId).get();
+		Locale locale = new Locale(user.getLanguage());
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
 			Meetings meeting = someMeeting.get();
-			Integer myId = (Integer)session.getAttribute("user_id");
 			String warningMessage = meetingService.joinCheck(meeting, myId, locale);
 			if(warningMessage == null) {
 				if(meeting.getHost().getId() == myId) {

@@ -69,8 +69,11 @@ public class CreateMeetingController {
 	@PostMapping("/Meeting/create")
 	public ModelAndView createRedirect(@ModelAttribute @Validated MeetingData meetingData, 
 			BindingResult result, HttpServletResponse response,
-			ModelAndView mv, Locale locale) {
+			ModelAndView mv) {
 		// エラーチェック
+		Integer userId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(userId).get();
+		Locale locale = new Locale(user.getLanguage());
 		boolean isValid = meetingService.isValid(meetingData, true, result, locale);
 		if(!result.hasErrors() && isValid) {
 			System.out.println("-create meeting api request");
@@ -104,8 +107,11 @@ public class CreateMeetingController {
 	// callback
 	@RequestMapping(value = "/create/meeting/redirect", method = { RequestMethod.GET, RequestMethod.POST })
 	public String createMeeting(@RequestParam String code,
-			@RequestParam String state, ModelAndView mv, Locale locale, 
+			@RequestParam String state, ModelAndView mv, 
 			RedirectAttributes redirectAttributes) throws IOException {
+		Integer userId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(userId).get();
+		Locale locale = new Locale(user.getLanguage());
 		try {
 			System.out.println("Start creating the meeting.");
 			OAuth2AccessToken oauthToken = zoomApiIntegration.getAccessToken(session, code, state);
@@ -117,8 +123,6 @@ public class CreateMeetingController {
 			JSONObject jsonObject = (JSONObject) jsonParser.parse(apiResult);
 			System.out.println("JsonObject result: " + jsonObject);
 			
-			Integer userId = (Integer)session.getAttribute("user_id");
-			Users user = usersRepository.findById(userId).get();
 			Meetings meeting = meetingData.toEntity(jsonObject, user);
 			meetingsRepository.saveAndFlush(meeting);
 			

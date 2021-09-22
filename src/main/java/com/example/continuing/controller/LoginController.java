@@ -54,6 +54,7 @@ public class LoginController {
 			session.setAttribute("user_id", user.getId());
 			session.setAttribute("user_name", user.getName());
 			String[] args = {user.getName()};
+			locale = new Locale(user.getLanguage());
 			String msg = messageSource.getMessage("msg.s.login", args, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 			if(session.getAttribute("path") == null) {
@@ -70,7 +71,11 @@ public class LoginController {
 	}
 	
 	@GetMapping("/logout")
-	public String logout(RedirectAttributes redirectAttributes, Locale locale) {
+	public String logout(RedirectAttributes redirectAttributes) {
+		Integer userId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(userId).get();
+		Locale locale = new Locale(user.getLanguage());
+		
 		// セッション情報をクリアする
 		session.invalidate();
 		String msg = messageSource.getMessage("msg.i.logout", null, locale);
@@ -90,12 +95,13 @@ public class LoginController {
 	public ModelAndView registCheck(@ModelAttribute @Validated RegisterData registerData,
 			BindingResult result, ModelAndView mv, 
 			RedirectAttributes redirectAttributes, Locale locale) {
+		
 		// エラーチェック
 		if(!result.hasErrors()) {
 			boolean isValid = loginService.isValid(registerData, result, locale);
 			if(isValid) {
 				// ユーザー新規登録
-				Users newUser = registerData.toEntity(passwordEncoder);
+				Users newUser = registerData.toEntity(passwordEncoder, locale);
 				usersRepository.saveAndFlush(newUser);
 				loginService.sendMail(newUser.getEmail(), "welcome", locale);
 				

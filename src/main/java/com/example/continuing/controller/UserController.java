@@ -55,7 +55,8 @@ public class UserController {
 	
 	@GetMapping("/User/{user_id}")
 	public ModelAndView showUserDetail(@PathVariable(name = "user_id") int userId,
-			ModelAndView mv, RedirectAttributes redirectAttributes, Locale locale) {
+			ModelAndView mv, RedirectAttributes redirectAttributes) {
+		Integer myId = (Integer)session.getAttribute("user_id");
 		Optional<Users> someUser = usersRepository.findById(userId);
 		someUser
 			.ifPresentOrElse(user -> {
@@ -63,7 +64,6 @@ public class UserController {
 				List<Users> followersList = followService.getFollowersList(userId);
 				List<Meetings> meetingList = meetingService.getUserMeetingList(user);
 				
-				Integer myId = (Integer)session.getAttribute("user_id");
 				List<Users> myFollowsList = followService.getFollowsList(myId);
 				List<Meetings> myJoinMeetingList = joinService.getJoinMeetingList(myId);
 				
@@ -77,6 +77,9 @@ public class UserController {
 				mv.addObject("myJoinMeetingList", myJoinMeetingList);
 				mv.addObject("searchData", new SearchData());
 			}, () -> {
+				Users user = usersRepository.findById(myId).get();
+				Locale locale = new Locale(user.getLanguage());
+				
 				mv.setViewName("redirect:/home");
 				String msg = messageSource.getMessage("msg.w.user_not_found", null, locale);
 				redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
@@ -113,9 +116,10 @@ public class UserController {
 	}
 	
 	@GetMapping("/User/delete")
-	public String deleteUser(RedirectAttributes redirectAttributes, Locale locale) {
+	public String deleteUser(RedirectAttributes redirectAttributes) {
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();
+		Locale locale = new Locale(user.getLanguage());
 		followsRepository.deleteByFollowerId(userId);
 		followsRepository.deleteByFolloweeId(userId);
 		meetingsRepository.deleteByHost(user);
@@ -141,15 +145,19 @@ public class UserController {
 	@PostMapping("/User/update")
 	public ModelAndView updateProfile(@ModelAttribute @Validated ProfileData profileData,
 			BindingResult result, ModelAndView mv, 
-			RedirectAttributes redirectAttributes, Locale locale) {
+			RedirectAttributes redirectAttributes) {
+		
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users oldData = usersRepository.findById(userId).get();
+		Locale locale = new Locale(oldData.getLanguage());
+		
 		// エラーチェック
 		if(!result.hasErrors()) {
 			boolean isValid = userService.isValid(profileData, oldData, result, locale); 
 			if(isValid) {
 				// エラーなし -> 更新
 				Users user = profileData.toEntity(oldData, passwordEncoder);
+				locale = new Locale(user.getLanguage());
 				usersRepository.saveAndFlush(user);
 				userService.sendMail(profileData.getEmail(), locale);
 				
@@ -163,7 +171,7 @@ public class UserController {
 				mv.addObject("msg", new MessageDto("E", msg));
 			}
 		} else {
-			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
+			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, new Locale(oldData.getLanguage()));
 			mv.setViewName("profile");
 			mv.addObject("searchData", new SearchData());
 			mv.addObject("msg", new MessageDto("E", msg));

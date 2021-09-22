@@ -22,6 +22,7 @@ import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
 import com.example.continuing.repository.MeetingsRepository;
+import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.JoinService;
 import com.example.continuing.service.MeetingService;
 import com.example.continuing.zoom.ZoomApiIntegration;
@@ -41,14 +42,17 @@ public class DeleteMeetingController {
 	private final JoinService joinService;
 	private final MeetingService meetingService;
 	private final MessageSource messageSource;
+	private final UsersRepository usersRepository;
 
 	@GetMapping("/Meeting/delete/{id}")
     public ModelAndView createRedirect(@PathVariable(name = "id") int id, 
     		HttpServletResponse response, ModelAndView mv, 
-    		RedirectAttributes redirectAttributes, Locale locale) {
+    		RedirectAttributes redirectAttributes) {
+		Integer myId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(myId).get();
+		Locale locale = new Locale(user.getLanguage());
 		Optional<Meetings> someMeeting = meetingsRepository.findById(id);
 		if(someMeeting.isPresent()) {
-			Integer myId = (Integer)session.getAttribute("user_id");
 			if(someMeeting.get().getHost().getId().equals(myId)) {
 				System.out.println("--delete meeting api request");
 				
@@ -82,13 +86,14 @@ public class DeleteMeetingController {
 	
 	@RequestMapping(value = "/delete/meeting/redirect", method = { RequestMethod.GET, RequestMethod.POST })
 	public String deleteMeeting(@RequestParam String code,
-			@RequestParam String state, RedirectAttributes redirectAttributes,
-			Locale locale) throws IOException {
+			@RequestParam String state, 
+			RedirectAttributes redirectAttributes) throws IOException {
 		System.out.println("Start deleting the meeting.");
 
     	Meetings meeting = meetingsRepository.findById(id).get();
     	String meetingId = meeting.getMeetingId();
-    	
+    	Locale locale = new Locale(meeting.getHost().getLanguage());
+
 		OAuth2AccessToken oauthToken = ZoomApiIntegration.getAccessToken(session, code, state);
 		ZoomApiIntegration.deleteMeeting(oauthToken, meetingId);
 		

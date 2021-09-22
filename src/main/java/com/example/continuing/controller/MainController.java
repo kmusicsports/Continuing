@@ -122,6 +122,10 @@ public class MainController {
 		session.setAttribute("path", "/home");
 		mv.setViewName("home");
 		
+		if(userId != null) {
+			Users user = usersRepository.findById(userId).get();
+			locale = new Locale(user.getLanguage());
+		}
 		boolean isValid = meetingService.isValid(searchData, result, locale);
 		if (!result.hasErrors() && isValid) {			
 			Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, pageable);
@@ -135,12 +139,12 @@ public class MainController {
 			
 			if (meetingPage.getContent().size() == 0) {
 				// 該当なかったらメッセージを表示
-				String msg = "該当するミーティングはありません。";
+				String msg = messageSource.getMessage("msg.w.meeting_not_found", null, locale);
 				mv.addObject("msgMeeting", new MessageDto("W", msg));
 			} 
 			if(userList.size() == 0) {
 				// 該当なかったらメッセージを表示
-				String msg = "該当するユーザーアカウントはありません。";
+				String msg = messageSource.getMessage("msg.w.user_not_found", null, locale);
 				mv.addObject("msgAccount", new MessageDto("W", msg));
 			}
 		} else {
