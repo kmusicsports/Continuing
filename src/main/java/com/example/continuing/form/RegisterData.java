@@ -6,7 +6,6 @@ import java.util.Date;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.Length;
@@ -36,7 +35,6 @@ public class RegisterData {
 	@Pattern(regexp = "^[a-zA-Z0-9]+$")
 	private String passwordAgain;
 	
-	@NotNull
 	@AssertTrue
 	private boolean checked;
 	
