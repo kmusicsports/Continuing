@@ -20,7 +20,9 @@ public class MailService {
 	@Value("${spring.mail.username}")
 	private String FROM_ADDRESS;
 	
-	private final static String FROM_NAME = "Continuing";
+	@Value("${app.name}")
+	private String FROM_NAME;
+	
 	private final static String ENCODE = "UTF-8";
 	
 	@Async
