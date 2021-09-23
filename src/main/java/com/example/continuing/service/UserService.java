@@ -34,7 +34,7 @@ public class UserService {
 			BindingResult result, Locale locale) {
 		
 		if(!profileData.getNewPassword().equals("")) {
-			if(profileData.getNewPassword().length() < 8 || profileData.getNewPassword().length() > 16) {
+			if(profileData.getNewPassword().length() < 8 || profileData.getNewPassword().length() > 32) {
 				// パスワードの長さ
 				FieldError fieldError = new FieldError(
 						result.getObjectName(),
@@ -98,6 +98,12 @@ public class UserService {
 				result.addError(fieldError);
 				profileData.setEmail(null);
 				return false;
+			} else {
+				String subject = messageSource.getMessage("mail.subject.email_updated", null, locale);
+				String messageText = "<html><head></head><body>"
+						+ messageSource.getMessage("mail.msg.email_updated", null, locale)
+						+ "</body></html>";
+				mailService.sendMail(profileData.getEmail(), subject, messageText);
 			}
 		}
 		
@@ -123,14 +129,6 @@ public class UserService {
 		}
 		
 		return rankingMap;
-	}
-	
-	public void sendMail(String email, Locale locale) {
-		String subject = messageSource.getMessage("mail.subject.email_updated", null, locale);
-		String messageText = "<html><head></head><body>"
-				+ messageSource.getMessage("mail.msg.email_updated", null, locale)
-				+ "</body></html>";
-		mailService.sendMail(email, subject, messageText);
 	}
 	
 }

@@ -159,7 +159,6 @@ public class UserController {
 				Users user = profileData.toEntity(oldData, passwordEncoder);
 				locale = new Locale(user.getLanguage());
 				usersRepository.saveAndFlush(user);
-				userService.sendMail(profileData.getEmail(), locale);
 				
 				mv.setViewName("redirect:/User/mypage");
 				String msg = messageSource.getMessage("msg.s.user_updated", null, locale);
