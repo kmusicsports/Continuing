@@ -20,6 +20,7 @@ import lombok.Data;
 public class RegisterData {
 
 	@NotBlank
+	@Length(min = 1, max = 50)
 	private String name;
 	
 	@NotBlank
@@ -27,12 +28,12 @@ public class RegisterData {
 	private String email;
 	
 	@NotBlank
-	@Length(min = 8, max = 16)
+	@Length(min = 8, max = 32)
 	@Pattern(regexp = "^[a-zA-Z0-9]+$")
 	private String password;
 	
 	@NotBlank
-	@Length(min = 8, max = 16)
+	@Length(min = 8, max = 32)
 	@Pattern(regexp = "^[a-zA-Z0-9]+$")
 	private String passwordAgain;
 	
