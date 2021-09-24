@@ -1,10 +1,3 @@
-$(function () {
-    $('#datePicker').datetimepicker({locale: 'ja', dayViewHeaderFormat: 'YYYY年M月' ,format: 'YYYY/MM/DD'});
-    $('#timePicker1').datetimepicker({locale: 'ja', format: 'HH:mm'});
-    $('#timePicker2').datetimepicker({locale: 'ja', format: 'HH:mm'});
-});
-
-
 const meetingTab = document.getElementById("pills-meeting-tab");
 const accountTab = document.getElementById("pills-account-tab");
 const meetingTabContent = document.getElementById("pills-meeting");

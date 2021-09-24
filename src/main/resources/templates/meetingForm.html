@@ -11,7 +11,7 @@
     <!-- Tempus Dominus CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0/css/tempusdominus-bootstrap-4.min.css" />
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
-    <title>ミーティング - Continuing</title>
+    <title th:text="#{title.meeting_form} + ': ' + ${@environment.getProperty('app.name')}"></title>
 </head>
 <body>
     <nav th:replace="fragments :: navbar_area"></nav>
@@ -28,104 +28,98 @@
                         <div class="row">
                             <div class="p-5">
                                 <div class="text-center">
-                                    <h2 class="">ミーティング</h2>
+                                    <h2 th:text="#{text.meeting}"></h2>
                                 </div>
                                 <form th:action="@{/}" method="post" th:object="${meetingData}">
                                     <input type="hidden" th:field="*{id}">
                                     <div class="mt-4 row">
-                                        <label class="col-sm-2 col-form-label">トピック</label>
+                                        <label class="col-sm-2 col-form-label" th:text="#{label.topic}"></label>
                                         <div class="col-sm-10">
-                                            <select class="form-select" name="topicName">
-                                                <option value="" th:field="*{topicName}">選択してください</option>
-                                                <option th:each="topic : ${topicList}" th:value="${topic.name}" th:text="${topic.name}" th:field="*{topicName}" th:selected="${topicName == topic.name ? 'true' : 'flase'}"></option>
+                                            <select class="form-select" name="topic" >
+                                                <option value="0" th:field="*{topic}" th:text="#{option.none}"></option>
+                                                <option th:each="i : ${#numbers.sequence(1,__#{definition.number.topic}__)}" th:value="${i}" th:text="#{option.topic.__${i}__}" th:field="*{topic}" th:selected="${i == topic ? 'true' : 'flase'}"></option>
                                             </select>
-                                            <div th:if="${#fields.hasErrors('topicName')}" th:errors="*{topicName}" th:errorclass="invalid-feedback"></div>
+                                            <div th:if="${#fields.hasErrors('topic')}" th:errors="*{topic}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="mt-3 row">
-                                        <label class="col-sm-2 col-form-label">説明</label>
+                                        <label class="col-sm-2 col-form-label" th:text="#{label.agenda}"></label>
                                         <div class="col-sm-10">
-                                            <textarea class="form-control" rows="3" th:field="*{agenda}" th:value="*{agenda}" required></textarea>
+                                            <textarea class="form-control" rows="3" th:field="*{agenda}" th:value="*{agenda}" th:placeholder="#{placeholder.agenda}" required></textarea>
                                             <div th:if="${#fields.hasErrors('agenda')}" th:errors="*{agenda}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="mt-3 row">
-                                        <label class="col-sm-2 col-form-label">パスワード</label>
+                                        <label class="col-sm-2 col-form-label" th:text="#{label.password}"></label>
                                         <div class="col-sm-10">
-                                            <input type="password" class="form-control" name="password" th:value="*{password}" placeholder="10文字以内" required>
+                                            <input type="password" class="form-control" name="password" th:value="*{password}" th:placeholder="#{placeholder.meeting_password}" required>
                                             <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="mt-3 row">
-                                        <label class="col-sm-2 col-form-label">パスワードの確認</label>
+                                        <label class="col-sm-2 col-form-label" th:text="#{label.password_again}"></label>
                                         <div class="col-sm-10">
-                                            <input type="password" class="form-control" name="passwordAgain" th:value="*{passwordAgain}" required>
+                                            <input type="password" class="form-control" name="passwordAgain" th:value="*{passwordAgain}" th:placeholder="#{placeholder.password_again}" required>
                                             <div th:if="${#fields.hasErrors('passwordAgain')}" th:errors="*{passwordAgain}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="mt-3 row">
-                                        <span class="col-sm-2 col-form-label">人数 　　</span>
+                                        <span class="col-sm-2 col-form-label" th:text="#{label.number_people}"></span>
                                         <div class="col-sm-10 mt-2">
 		                                        <div class="form-check form-check-inline">
 		                                            <input class="form-check-input" type="radio" value="1" th:field="*{numberPeople}">
-		                                            <label class="form-check-label">1対1 　　</label>
+		                                            <label class="form-check-label me-5" th:text="#{label.one_on_one}"></label>
 		                                        </div>
 		                                        <div class="form-check form-check-inline">
 		                                            <input class="form-check-input" type="radio" value="2" th:field="*{numberPeople}">
-		                                            <label class="form-check-label">複数(～40分)</label>
+		                                            <label class="form-check-label" th:text="#{label.multiple}"></label>
 		                                        </div>                                        
                                             <div th:if="${#fields.hasErrors('numberPeople')}" th:errors="*{numberPeople}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="mt-3 row">
                                         <div class="input-group date mb-3" id="datePicker" data-target-input="nearest">
-                                            <label class="col-sm-2 col-12 col-form-label">日付</label>
+                                            <label class="col-sm-2 col-12 col-form-label" th:text="#{label.date}"></label>
                                             <div class="col-sm-10 col-12 d-flex">
-		                                            <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#datePicker" name="date" th:value="*{date}" required>
+		                                            <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#datePicker" name="date" th:value="*{date}" th:placeholder="#{placeholder.date}" required>
 		                                            <div class="input-group-append" data-target="#datePicker" data-toggle="datetimepicker">
 		                                                <div class="input-group-text"><i class="fa fa-calendar pt-1 pb-1"></i></div>
 		                                            </div>
                                             </div>
-		                                        <div th:if="${#fields.hasErrors('date')}" th:errors="*{date}" th:errorclass="invalid-feedback"></div>                                            
+		                                        <div class="text-end" th:if="${#fields.hasErrors('date')}" th:errors="*{date}" th:errorclass="invalid-feedback"></div>                                            
                                         </div>
                                     </div>
                                     <div class="mt-3 row">
                                         <div class="input-group date mb-3" id="startTimePicker" data-target-input="nearest">
-                                            <label class="col-sm-2 col-12 col-form-label">開始時刻</label>
+                                            <label class="col-sm-2 col-12 col-form-label" th:text="#{label.startTime}"></label>
                                             <div class="col-sm-10 col-12 d-flex">
-		                                            <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#startTimePicker" name="startTime" th:value="*{startTime}" required>
+		                                            <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#startTimePicker" name="startTime" th:value="*{startTime}" th:placeholder="#{placeholder.time}" required>
 		                                            <div class="input-group-text" data-target="#startTimePicker" data-toggle="datetimepicker">
 		                                                <i class="fa fa-clock"></i>
 		                                            </div>
                                             </div>
-		                                        <div th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" th:errorclass="invalid-feedback"></div>
+		                                        <div class="text-end" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                    </div>
                                    <div class="mt-3 row">
                                         <div class="input-group date mb-3" id="endTimePicker" data-target-input="nearest">
-                                            <label class="col-sm-2 col-12 col-form-label">終了時刻</label>
+                                            <label class="col-sm-2 col-12 col-form-label" th:text="#{label.endTime}"></label>
                                             <div class="col-sm-10 col-12 d-flex">
-                                                <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#endTimePicker" name="endTime" th:value="*{endTime}" required>
+                                                <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#endTimePicker" name="endTime" th:value="*{endTime}" th:placeholder="#{placeholder.time}" required>
                                                 <div class="input-group-text" data-target="#endTimePicker" data-toggle="datetimepicker">
                                                     <i class="fa fa-clock"></i>
                                                 </div>
                                             </div>
-                                            <div th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" th:errorclass="invalid-feedback"></div>
+                                            <div class="text-end" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                    </div>
                                    
                                    <div class="row ms-auto me-auto mt-5 mb-3">
                                        <div class="col-1"></div>          
-                                       <a th:href="@{/Meeting/cancel}" class="btn btn-secondary col-4 pt-2 pb-2">
-                                           キャンセル
-                                       </a>                
+                                       <a th:href="@{/Meeting/cancel}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="#{button.cancel}"></a>                
                                        <div class="col-2"></div>                         
-                                       <button type="submit" th:formaction="@{/Meeting/create}" class="btn btn-primary col-4 pt-2 pb-2" th:if="${session.mode == 'create'}">
-                                           作成する
-                                       </button>
-                                       <button type="submit" th:formaction="@{/Meeting/update}" class="btn btn-primary col-4 pt-2 pb-2" th:if="${session.mode == 'update'}">
-                                           変更する
-                                       </button>
+                                       <button type="submit" th:formaction="@{/Meeting/create}" class="btn btn-primary col-4 pt-2 pb-2" th:if="${session.mode == 'create'}" th:text="#{button.create}"></button>
+                                       <button type="submit" th:formaction="@{/Meeting/update}" class="btn btn-primary col-4 pt-2 pb-2" th:if="${session.mode == 'update'}" th:text="#{button.update}"></button>
                                    </div>
                                 </form>
                             </div>
@@ -151,12 +145,6 @@
     <!-- Moment.js -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0/js/tempusdominus-bootstrap-4.min.js"></script>
 
-    <script>
-        $(function () {
-            $('#datePicker').datetimepicker({locale: 'ja', dayViewHeaderFormat: 'YYYY年M月' ,format: 'YYYY/MM/DD'});
-            $('#startTimePicker').datetimepicker({locale: 'ja', format: 'HH:mm'});
-            $('#endTimePicker').datetimepicker({locale: 'ja', format: 'HH:mm'});
-        });
-    </script>
+    <script type="text/javascript" th:src="@{/js/datetimepicker.js}"></script>
 </body>
 </html>

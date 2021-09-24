@@ -3,10 +3,12 @@ package com.example.continuing.service;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -24,17 +26,20 @@ import lombok.AllArgsConstructor;
 public class UserService {
 
 	private final UsersRepository usersRepository;
+	private final MailService mailService;
+	private final MessageSource messageSource;
 
 	// プロフィール編集画面用のチェック
-	public boolean isValid(ProfileData profileData, Users oldData, BindingResult result) {
+	public boolean isValid(ProfileData profileData, Users oldData, 
+			BindingResult result, Locale locale) {
 		
 		if(!profileData.getNewPassword().equals("")) {
-			if(profileData.getNewPassword().length() < 8 || profileData.getNewPassword().length() > 16) {
+			if(profileData.getNewPassword().length() < 8 || profileData.getNewPassword().length() > 32) {
 				// パスワードの長さ
 				FieldError fieldError = new FieldError(
 						result.getObjectName(),
-						"newPasswordAgain",
-						"パスワードの文字数は8～16にしてください");
+						"newPassword",
+						messageSource.getMessage("Password.Length.newPassword", null, locale));
 				result.addError(fieldError);
 				profileData.setNewPassword(null);
 				profileData.setNewPasswordAgain(null);
@@ -47,7 +52,7 @@ public class UserService {
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"newPasswordAgain",
-					"パスワードが一致しません");
+					messageSource.getMessage("Unmatch.password", null, locale));
 			result.addError(fieldError);
 			profileData.setNewPassword(null);
 			profileData.setNewPasswordAgain(null);
@@ -63,7 +68,7 @@ public class UserService {
 				FieldError fieldError = new FieldError(
 						result.getObjectName(),
 						"name",
-						"既に使用されている名前です");
+						messageSource.getMessage("AlreadyUsed.name", null, locale));
 				result.addError(fieldError);
 				profileData.setName(null);
 				return false;
@@ -74,7 +79,7 @@ public class UserService {
 					FieldError fieldError = new FieldError(
 							result.getObjectName(),
 							"name",
-							"名前が全角スペースです");
+							messageSource.getMessage("DoubleSpace.name", null, locale));
 					result.addError(fieldError);
 					return false;
 				}
@@ -89,11 +94,17 @@ public class UserService {
 				FieldError fieldError = new FieldError(
 						result.getObjectName(),
 						"email",
-						"既に登録されているメールアドレスです");
+						messageSource.getMessage("AlreadyUsed.email", null, locale));
 				result.addError(fieldError);
 				profileData.setEmail(null);
 				return false;
-			}			
+			} else {
+				String subject = messageSource.getMessage("mail.subject.email_updated", null, locale);
+				String messageText = "<html><head></head><body>"
+						+ messageSource.getMessage("mail.msg.email_updated", null, locale)
+						+ "</body></html>";
+				mailService.sendMail(profileData.getEmail(), subject, messageText);
+			}
 		}
 		
 		return true;

@@ -31,7 +31,7 @@ public class Records {
 	private Users user;
 	
 	@Column(name = "topic")
-	private String topic;
+	private Integer topic;
 	
 	@Column(name = "days")
 	private Integer days;
@@ -43,7 +43,7 @@ public class Records {
 	private Timestamp updatedAt;
 	
 	
-	public Records(Users user, String topic) {
+	public Records(Users user, Integer topic) {
 		this.user = user;
 		this.topic = topic;
 		this.days = 0;

@@ -1,6 +1,7 @@
 package com.example.continuing.controller;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -8,6 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -22,10 +24,8 @@ import org.springframework.web.servlet.ModelAndView;
 import com.example.continuing.dao.MeetingsDaoImpl;
 import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Meetings;
-import com.example.continuing.entity.Topics;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.SearchData;
-import com.example.continuing.repository.TopicsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.JoinService;
@@ -40,11 +40,11 @@ public class MainController {
 
 	private final HttpSession session;
 	private final FollowService followService;
-	private final TopicsRepository topicsRepository;
 	private final JoinService joinService;
 	private final MeetingService meetingService;
 	private final UserService userService;
 	private final UsersRepository usersRepository;
+	private final MessageSource messageSource;
 	
 	@PersistenceContext
     private EntityManager entityManager;
@@ -81,7 +81,6 @@ public class MainController {
 		
 		Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, prevPageable);
 		List<Users> userList = userService.getSearchReuslt(searchData);
-		List<Topics> topicList = topicsRepository.findAll();
 		List<Users> userRanking = usersRepository.findTop3ByOrderByContinuousDaysDesc();
 		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userRanking);
 		
@@ -94,7 +93,6 @@ public class MainController {
 		mv.addObject("meetingPage", meetingPage);
 		mv.addObject("meetingList", meetingPage.getContent());
 		mv.addObject("userList", userList);
-		mv.addObject("topicList", topicList);
 		mv.addObject("myFollowsList", myFollowsList);
 		mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		mv.addObject("searchData", searchData);
@@ -106,9 +104,8 @@ public class MainController {
 	@PostMapping("/search")
 	public ModelAndView search(ModelAndView mv, 
 			@ModelAttribute @Validated SearchData searchData,
-			BindingResult result,
+			BindingResult result, Locale locale,
 			@PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
-		List<Topics> topicList = topicsRepository.findAll();
 		List<Users> userRanking = usersRepository.findTop3ByOrderByContinuousDaysDesc();
 		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userRanking);
 		
@@ -119,7 +116,11 @@ public class MainController {
 		session.setAttribute("path", "/home");
 		mv.setViewName("home");
 		
-		boolean isValid = meetingService.isValid(searchData, result);
+		if(userId != null) {
+			Users user = usersRepository.findById(userId).get();
+			locale = new Locale(user.getLanguage());
+		}
+		boolean isValid = meetingService.isValid(searchData, result, locale);
 		if (!result.hasErrors() && isValid) {			
 			Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, pageable);
 			List<Users> userList = userService.getSearchReuslt(searchData);
@@ -132,16 +133,16 @@ public class MainController {
 			
 			if (meetingPage.getContent().size() == 0) {
 				// 該当なかったらメッセージを表示
-				String msg = "該当するミーティングはありません。";
+				String msg = messageSource.getMessage("msg.w.meeting_not_found", null, locale);
 				mv.addObject("msgMeeting", new MessageDto("W", msg));
 			} 
 			if(userList.size() == 0) {
 				// 該当なかったらメッセージを表示
-				String msg = "該当するユーザーアカウントはありません。";
+				String msg = messageSource.getMessage("msg.w.user_not_found", null, locale);
 				mv.addObject("msgAccount", new MessageDto("W", msg));
 			}
 		} else {
-			String msg = "入力に誤りがあります。";
+			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
 			mv.addObject("meetingPage", null);
 			mv.addObject("meetingList", null);
 			mv.addObject("userList", null);
@@ -149,7 +150,6 @@ public class MainController {
 			mv.addObject("msgMeeting", new MessageDto("E", msg));
 		}
 		
-		mv.addObject("topicList", topicList);
 		mv.addObject("myFollowsList", myFollowsList);
 		mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		mv.addObject("searchData", searchData);

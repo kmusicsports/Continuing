@@ -17,7 +17,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ProfileData {
+	
 	@NotBlank
+	@Length(min = 0, max = 50)
 	private String name;
 	
 	@NotBlank
@@ -49,6 +51,8 @@ public class ProfileData {
 		user.setEmail(email);
 		user.setProfileImage(profileImage);
 		user.setProfileMessage(profileMessage);
+		user.setLanguage(oldData.getLanguage());		
+		
 		user.setContinuousDays(oldData.getContinuousDays());
 		user.setCreatedAt(oldData.getCreatedAt());
 		

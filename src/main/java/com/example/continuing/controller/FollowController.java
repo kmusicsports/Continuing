@@ -1,12 +1,13 @@
 package com.example.continuing.controller;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,48 +21,39 @@ import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.FollowsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
-import com.example.continuing.service.MailService;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Controller
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class FollowController {
 	
 	private final HttpSession session;
 	private final FollowsRepository followsRepository;
 	private final FollowService followService;
 	private final UsersRepository usersRepository;
-	private final MailService mailService;
-	
-	@Value("${app.url}")
-	private String APP_URL;
+	private final MessageSource messageSource;
 	
 	@GetMapping("/User/follow/{followee_id}")
 	public String follow(@PathVariable(name = "followee_id") int followeeId, 
 			HttpServletRequest request, RedirectAttributes redirectAttributes) {
+		
+		Integer followerId = (Integer)session.getAttribute("user_id");
+		Users follower = usersRepository.findById(followerId).get();
+		Locale locale = new Locale(follower.getLanguage());
 		Optional<Users> someUser = usersRepository.findById(followeeId);
 		if(someUser.isPresent()) {
-			Integer followerId = (Integer)session.getAttribute("user_id");
 			Follows follow = new Follows(followerId, followeeId);
 			followsRepository.saveAndFlush(follow);
 			
 			Users followee = someUser.get();
-			Users follower = usersRepository.findById(followerId).get();
 		
-			String messageText = "<html><head></head><html><head></head><body>"
-					+ "<a href='" + APP_URL + "/User/" + follower.getId() + "'>" + follower.getName() + "さんのページに行く</a>"
-					+ "</body></html>";
-			
-			mailService.sendMail(
-					followee.getEmail(), 
-					"Continuing - " + follower.getName() + "さんがあなたをフォローしました", 
-					messageText);
+			followService.sendMail(followee.getEmail(), follower, locale);
 			
 		    return "redirect:" + session.getAttribute("path");
 		} else {
-			String msg = "存在しないユーザーです。";
-			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
+			String msg = messageSource.getMessage("msg.w.user_not_found", null, locale);
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			return "redirect:/home";
 		}
 	}
@@ -69,28 +61,32 @@ public class FollowController {
 	@GetMapping("/User/unfollow/{followee_id}")
 	public String unfollow(@PathVariable(name = "followee_id") int followeeId, 
 			HttpServletRequest request, RedirectAttributes redirectAttributes) {
+		
+		Integer followerId = (Integer)session.getAttribute("user_id");
 		Optional<Users> someUser = usersRepository.findById(followeeId);
 		if(someUser.isPresent()) {
-			Integer followerId = (Integer)session.getAttribute("user_id");
 			List<Follows> follows = followsRepository.findByFollowerIdAndFolloweeId(followerId, followeeId);
 			followsRepository.deleteAll(follows);
 			return "redirect:" + session.getAttribute("path");
 		} else {
-			String msg = "存在しないユーザーです。";
-			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
+			Users follower = usersRepository.findById(followerId).get();
+			Locale locale = new Locale(follower.getLanguage());
+			String msg = messageSource.getMessage("msg.w.user_not_found", null, locale);
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			return "redirect:/home";
 		}
 	}
 	
 	@GetMapping("/User/{user_id}/list/follows")
 	public ModelAndView showUserFollows(@PathVariable(name = "user_id") int userId, 
-			ModelAndView mv, RedirectAttributes redirectAttributes) {
+		ModelAndView mv, RedirectAttributes redirectAttributes) {
+		
+		Integer myId = (Integer)session.getAttribute("user_id");
 		Optional<Users> someUser = usersRepository.findById(userId);
 		if(someUser.isPresent()) {
 			List<Users> followsList = followService.getFollowsList(userId);
 			List<Users> followersList = followService.getFollowersList(userId);
 			
-			Integer myId = (Integer)session.getAttribute("user_id");
 			List<Users> myFollowsList = followService.getFollowsList(myId);
 			
 			session.setAttribute("path", "/User/" + userId + "/list/follows");
@@ -100,11 +96,14 @@ public class FollowController {
 			mv.addObject("myFollowsList", myFollowsList);
 			mv.addObject("searchData", new SearchData());
 		} else {
-			String msg = "存在しないユーザーです。";
+			Users user = usersRepository.findById(myId).get();
+			Locale locale = new Locale(user.getLanguage());
+			
 			mv.setViewName("redirect:/home");
-			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
+			String msg = messageSource.getMessage("msg.w.user_not_found", null, locale);
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 		}
-		return mv;
 		
+		return mv;		
 	}
 }

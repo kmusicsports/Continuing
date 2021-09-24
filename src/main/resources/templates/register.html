@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,7 +7,7 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
-    <title>新規登録 - Continuing</title>
+    <title th:text="#{title.register} + ': ' + ${@environment.getProperty('app.name')}"></title>
 </head>
 <body>
     <nav th:replace="fragments :: navbar_area"></nav>
@@ -24,38 +24,41 @@
                         <div class="row">
                             <div class="p-5">
                                 <div class="text-center">
-                                    <h2 class="mb-4">新規登録</h2>
+                                    <h2 class="mb-4" th:text="#{text.register}"></h2>
                                 </div>
-                                <form th:action="@{/regist}" class="user" method="post" th:object="${registerData}">
+                                <form th:action="@{/regist}" method="post" th:object="${registerData}">
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="text" class="form-control" name="name" th:value="*{name}" placeholder="ユーザー名" required>
+                                        <label th:text="#{label.name}" class="mt-4"></label>
+                                        <input type="text" class="form-control" name="name" th:value="*{name}" th:placeholder="#{placeholder.name}" required>
                                         <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="email" class="form-control mt-3" name="email" th:value="*{email}"placeholder="メールアドレス" required>
+                                        <label th:text="#{label.email}" class="mt-4"></label>
+                                        <input type="email" class="form-control" name="email" th:value="*{email}" th:placeholder="#{placeholder.email}" required>
                                         <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="password" class="form-control mt-3" name="password" th:value="*{password}" placeholder="パスワード" required>
+                                        <label th:text="#{label.password}" class="mt-4"></label>
+                                        <input type="password" class="form-control" name="password" th:value="*{password}" th:placeholder="#{placeholder.register_password}" required>
                                         <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <input type="password" class="form-control mt-3" name="passwordAgain" th:value="*{passwordAgain}" placeholder="パスワードの確認" required>
+                                        <label th:text="#{label.password_again}" class="mt-4"></label>
+                                        <input type="password" class="form-control" name="passwordAgain" th:value="*{passwordAgain}" th:placeholder="#{placeholder.password_again}" required>
                                         <div th:if="${#fields.hasErrors('passwordAgain')}" th:errors="*{passwordAgain}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
                                         <div class="custom-control custom-checkbox mt-4">
                                             <input type="checkbox" th:field="*{checked}" class="custom-control-input">
                                             <label class="custom-control-label">
-                                                <a href="#">利用規約</a>に同意します。
+                                                <span th:text="#{text.agree_to} + ' '"></span>
+                                                <a href="#" th:text="#{link.terms_of_use}"></a>
                                             </label>
                                             <div th:if="${#fields.hasErrors('checked')}" th:errors="*{checked}" th:errorclass="invalid-feedback"></div>
                                         </div>
                                     </div>
                                     <div class="text-center mt-5">
-                                        <button type="submit" class="btn btn-primary ps-5 pe-5">
-                                            登録する
-                                        </button>
+                                        <button type="submit" class="btn btn-primary ps-5 pe-5" th:text="#{button.regist}"></button>
                                     </div>
                                 </form>
                             </div>
@@ -65,6 +68,7 @@
             </div>
         </div>
     </div>
+    
     <!-- Popper and Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js" integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/" crossorigin="anonymous"></script>

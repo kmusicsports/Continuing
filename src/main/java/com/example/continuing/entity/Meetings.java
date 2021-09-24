@@ -45,7 +45,7 @@ public class Meetings {
     private String uuid;
 	
 	@Column(name = "topic")
-    private String topic;
+    private Integer topic;
 	
 	@Column(name = "date")
     private Date date;
