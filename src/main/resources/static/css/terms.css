@@ -1,0 +1,44 @@
+body {
+     color:#333;
+     font-family: Verdana,sans-serif;
+     margin: 0;
+}
+
+header {
+     padding-top: 16px;
+     padding-bottom: 16px;
+}
+
+.info {
+     margin-left: 16px;
+     margin-right: 16px;
+}
+
+.info h1 {
+     font-size: 24px;
+     margin: 0;
+}
+
+.works {
+     margin-left: 16px;
+     margin-right: 16px;
+}
+
+.works section {
+     margin-bottom: 48px;
+}
+
+.works p {
+     line-height: 1.8;
+}
+
+.works ol {
+     padding-left: 20px;
+}
+
+footer p {
+     font-size: 14px;
+     margin-bottom: 60px;
+     margin-left: 16px;
+     color: gray;
+}
