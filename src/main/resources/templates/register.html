@@ -52,7 +52,7 @@
                                             <input type="checkbox" th:field="*{checked}" class="custom-control-input">
                                             <label class="custom-control-label">
                                                 <span th:text="#{text.agree_to} + ' '"></span>
-                                                <a href="#" th:text="#{link.terms_of_use}"></a>
+                                                <a th:href="@{/terms}" th:text="#{link.terms_of_use}" target="_blank" rel="noopener noreferrer"></a>
                                             </label>
                                             <div th:if="${#fields.hasErrors('checked')}" th:errors="*{checked}" th:errorclass="invalid-feedback"></div>
                                         </div>
