@@ -1,6 +1,7 @@
 package com.example.continuing.zoom;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.UUID;
 
 import javax.servlet.http.HttpSession;
@@ -16,6 +17,8 @@ import com.github.scribejava.core.model.OAuthRequest;
 import com.github.scribejava.core.model.Response;
 import com.github.scribejava.core.model.Verb;
 import com.github.scribejava.core.oauth.OAuth20Service;
+
+import lombok.RequiredArgsConstructor;
 
 @Component
 public class ZoomApiIntegration {
@@ -75,15 +78,27 @@ public class ZoomApiIntegration {
     	String zoom = ZoomDetails.getZOOM_STATE();
         String url = null;
     	
-        if(zoom.equals("zoom")){
-         	url = REDIRECT_URI;
-        }else if (zoom.equals("zoom_create")) {
-         	url = REDIRECT_URI_CREATE;
- 		}else if (zoom.equals("zoom_delete")) {
-			url = REDIRECT_URI_DELETE;
-		}else if (zoom.equals("zoom_update")) {
-			url = REDIRECT_URI_UPDATE;
-		}
+        if(zoom == null) {
+        	url = REDIRECT_URI;        	
+        }
+        
+        switch(zoom) {
+        	case "zoom":
+        		url = REDIRECT_URI;
+        		break;
+        	case "zoom_create":
+        		url = REDIRECT_URI_CREATE;
+        		break;
+        	case "zoom_delete":
+        		url = REDIRECT_URI_DELETE;
+        		break;
+        	case "zoom_update":
+        		url = REDIRECT_URI_UPDATE;
+        		break;
+        	default:
+        		url = REDIRECT_URI;
+        }
+        
         System.out.println("url: " +url);
         String sessionState = getSession(session);
         if(StringUtils.pathEquals(sessionState, state)){
@@ -164,6 +179,34 @@ public class ZoomApiIntegration {
         
         request.addHeader("Content-Type", "application/json;charset=UTF-8");
         JSONObject jsonOb = new JSONObject();
+        System.out.println("json output: " + jsonOb.toString());		
+        
+        request.addPayload(jsonOb.toString());
+        oauthService.signRequest(oauthToken, request);
+        request.send();
+    }
+    
+    // 会議の更新
+    public void updateMeeting(OAuth2AccessToken oauthToken, MeetingDto meetingDto, String meetingId) throws IOException{
+		System.out.println("-会議更新サービス");
+		System.out.println("API URL: " + DELETE_MEETING_API_URL + meetingId);
+        OAuth20Service oauthService = new ServiceBuilder()
+                .apiKey(CLIENT_ID)
+                .apiSecret(CLIENT_SECRET)
+                .callback(REDIRECT_URI).build(ZoomDetails.instance());
+        OAuthRequest request = new OAuthRequest(Verb.PATCH, DELETE_MEETING_API_URL + meetingId, oauthService);
+        JSONObject jsonOb = new JSONObject();
+
+        jsonOb.put("topic", meetingDto.getTopic());
+        jsonOb.put("type", meetingDto.getType());
+        jsonOb.put("start_time", meetingDto.getStartTime());
+        jsonOb.put("duration", meetingDto.getDuration());
+        jsonOb.put("password", meetingDto.getPassword());
+        jsonOb.put("agenda", meetingDto.getAgenda());
+        
+        System.out.println("json output: " + jsonOb.toString());
+        
+        request.addHeader("Content-Type", "application/json;charset=UTF-8");
         System.out.println("json output: " + jsonOb.toString());		
         
         request.addPayload(jsonOb.toString());
