@@ -2,10 +2,13 @@ package com.example.continuing.controller;
 
 import java.util.Locale;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.context.MessageSource;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +29,7 @@ import com.example.continuing.service.LoginService;
 import lombok.AllArgsConstructor;
 
 @Controller
-@AllArgsConstructor
+@AllArgsConstructor // 
 public class LoginController {
 	
 	private final UsersRepository usersRepository;
@@ -34,6 +37,7 @@ public class LoginController {
 	private final LoginService loginService;
 	private final PasswordEncoder passwordEncoder;
 	private final MessageSource messageSource;
+	private final CsrfTokenRepository csrfTokenRepository;
 
 	@GetMapping("/showLogin")
 	public ModelAndView showLogin(ModelAndView mv) {
@@ -45,12 +49,14 @@ public class LoginController {
 	
 	@PostMapping("/login")
 	public String login(@ModelAttribute @Validated LoginData loginData,
-			BindingResult result, ModelAndView mv, 
+			BindingResult result, ModelAndView mv, HttpServletRequest request,
 			RedirectAttributes redirectAttributes, Locale locale) {
 		
 		boolean isValid = loginService.isValid(loginData, result); 
 		if(!result.hasErrors() && isValid) { 
 			Users user = usersRepository.findByEmail(loginData.getEmail()).get();
+			CsrfToken csrfToken = csrfTokenRepository.generateToken(request);
+			session.setAttribute("csrf_token", csrfToken.getToken());
 			session.setAttribute("user_id", user.getId());
 			session.setAttribute("user_name", user.getName());
 			String[] args = {user.getName()};

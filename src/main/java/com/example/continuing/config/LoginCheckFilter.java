@@ -47,8 +47,26 @@ public class LoginCheckFilter implements Filter {
 					}
 					httpResponse.sendRedirect("/showLogin");
 				} else {
-					// loginしている -> コントローラーへリクエストを渡す
-					chain.doFilter(request, response);
+					if(httpRequest.getMethod().equals("POST")) {
+						String sessionToken = session.getAttribute("csrf_token").toString();
+						String clientToken = httpRequest.getParameter("_csrf");
+						if(clientToken != null && clientToken.equals(sessionToken)) {
+							// loginしている -> コントローラーへリクエストを渡す
+							chain.doFilter(request, response);							
+						} else {
+							if(requestURI.startsWith("/User/follow") || requestURI.startsWith("/Meeting/join") ) {
+								session.setAttribute("path", "/home");
+							} else {
+								session.setAttribute("path", requestURI);					
+							}
+							httpResponse.sendRedirect("/showLogin");
+						}
+					} else {
+						System.out.println(httpRequest.getMethod());
+						chain.doFilter(request, response);
+					}
+					
+					
 				}
 			} 
 		} else {

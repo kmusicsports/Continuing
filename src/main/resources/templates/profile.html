@@ -35,12 +35,13 @@
                                     </div>
                                 </div>
                                 <form th:action="@{/}" enctype="multipart/form-data" method="post">
+                                    <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
                                     <div class="form-group col-10 ms-auto me-auto mb-5">
                                         <input type="file" class="form-control" name="file" required>
                                     </div>
                                     <div class="row ms-auto me-auto">
                                         <div class="col-1"></div>
-                                        <button type="submit" th:formaction="@{/User/profileImage/delete}" class="btn btn-outline-danger col-4 pt-2 pb-2" th:text="#{button.img_delete}"></button>
+                                        <a th:href="@{/User/profileImage/delete}" class="btn btn-outline-danger col-4 pt-2 pb-2" th:text="#{button.img_delete}"></a>
                                         <div class="col-2"></div>                                    	                                    
                                         <button type="submit" th:formaction="@{/User/profileImage/upload}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="#{button.img_update}"></button>
                                     </div>
@@ -49,6 +50,7 @@
                                 <hr class="mt-5 mb-5">
                                 
                                 <form th:action="@{/User/update}" method="post">
+                                    <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
                                     <div class="form-group col-10 ms-auto me-auto">
                                         <label th:text="#{label.name}"></label>
                                         <input type="text" class="form-control" name="name" th:value="*{name}" th:placeholder="#{placeholder.name}">

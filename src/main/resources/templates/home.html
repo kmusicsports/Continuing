@@ -42,6 +42,7 @@
                     <div id="collapse" class="accordion-collapse collapse" aria-labelledby="heading" data-bs-parent="#accordionExample">
                         <div class="accordion-body row">
                             <form th:action="@{/search}" method="post" th:object="${searchData}">
+                                <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
 		                            <div class="col-5">
 		                                <h5 class="ms-1" th:text="#{label.keyword}"></h5>
 		                                <input class="form-control" type="search" name="keyword" th:value="*{keyword}">

@@ -159,6 +159,7 @@ public class UserController {
 				Users user = profileData.toEntity(oldData, passwordEncoder);
 				locale = new Locale(user.getLanguage());
 				usersRepository.saveAndFlush(user);
+				session.setAttribute("user_name", user.getName());
 				
 				mv.setViewName("redirect:/User/mypage");
 				String msg = messageSource.getMessage("msg.s.user_updated", null, locale);
@@ -195,7 +196,7 @@ public class UserController {
 		return "redirect:/User/updateForm";
     }
 	
-	@PostMapping("/User/profileImage/delete")
+	@GetMapping("/User/profileImage/delete")
 	public String deleteProfileImage() {
 		Integer id = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(id).get();
