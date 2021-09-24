@@ -12,21 +12,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
 
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
-    <title>ホーム - Continuing</title>
+    <title th:text="#{title.home} + ': ' + ${@environment.getProperty('app.name')}"></title>
 </head>
 <body>
     <nav th:replace="fragments :: navbar_area"></nav>
 
     <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link fs-5" id="pills-meeting-tab" data-bs-toggle="pill" data-bs-target="#pills-meeting" type="button" role="tab" aria-controls="pills-meeting">
-                ミーティング
-            </button>
+            <button class="nav-link fs-5" id="pills-meeting-tab" data-bs-toggle="pill" data-bs-target="#pills-meeting" type="button" role="tab" aria-controls="pills-meeting" th:text="#{button.meeting}"></button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fs-5" id="pills-account-tab" data-bs-toggle="pill" data-bs-target="#pills-account" type="button" role="tab" aria-controls="pills-account">
-                アカウント
-            </button>
+            <button class="nav-link fs-5" id="pills-account-tab" data-bs-toggle="pill" data-bs-target="#pills-account" type="button" role="tab" aria-controls="pills-account" th:text="#{button.account}"></button>
         </li>
     </ul>
     <hr class="mt-0">
@@ -40,39 +36,39 @@
                     <h2 class="accordion-header" id="heading">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse" aria-expanded="true" aria-controls="collapse">
                         <i class="fas fa-search me-2"></i>
-                        詳細検索
+                        <span th:text="#{button.search_detail}"></span>
                     </button>
                     </h2>
                     <div id="collapse" class="accordion-collapse collapse" aria-labelledby="heading" data-bs-parent="#accordionExample">
                         <div class="accordion-body row">
                             <form th:action="@{/search}" method="post" th:object="${searchData}">
 		                            <div class="col-5">
-		                                <h5 class="ms-1">キーワード検索</h5>
+		                                <h5 class="ms-1" th:text="#{label.keyword}"></h5>
 		                                <input class="form-control" type="search" name="keyword" th:value="*{keyword}">
 		                            </div>
 		                            
 		                            <div class="col-5">
-		                                <h5 class="ms-1 mt-4">トピック</h5>
-		                                <div th:each="topic : ${topicList}">
-				                                <input type="checkbox" name="topicList" th:value="${topic.name}" th:text="${topic.name}" th:field="*{topicList}">
+		                                <h5 class="ms-1 mt-4" th:text="#{label.topic}"></h5>
+		                                <div th:each="i : ${#numbers.sequence(1,__#{definition.number.topic}__)}">
+				                                <input type="checkbox" name="topicList" th:value="${i}" th:text="' ' + #{option.topic.__${i}__}" th:field="*{topicList}">
 		                                </div>
                                 </div>
         
-                                <h5 class="ms-1 mt-4">人数</h5>
+                                <h5 class="ms-1 mt-4" th:text="#{label.number_people}"></h5>
                                 <div class="form-check form-check-inline">
 	                                  <input class="form-check-input" type="radio" value="1" th:field="*{numberPeople}">
-	                                  <label class="form-check-label">1対1 　　</label>
+	                                  <label class="form-check-label me-5" th:text="#{label.one_on_one}"></label>
 	                              </div>
 	                              <div class="form-check form-check-inline">
 	                                  <input class="form-check-input" type="radio" value="2" th:field="*{numberPeople}">
-	                                  <label class="form-check-label">複数(～40分)</label>
+	                                  <label class="form-check-label" th:text="#{label.multiple}"></label>
 	                              </div>  
         
-                                <h5 class="ms-1 mt-4">日時</h5>
+                                <h5 class="ms-1 mt-4" th:text="#{label.datetime}"></h5>
                                 <div class="col-5">
 		                                <div class="input-group date col-5 mb-2" id="datePicker" data-target-input="nearest">
-		                                    <label class="mt-2 pr-2 me-2">日付:</label>
-		                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#datePicker" name="date" th:value="*{date}"/>
+		                                    <label class="mt-2 pr-2 me-2" th:text="#{label.date}"></label>
+		                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#datePicker" name="date" th:value="*{date}" th:placeholder="#{placeholder.date}">
 		                                    <div class="input-group-append" data-target="#datePicker" data-toggle="datetimepicker">
 		                                        <div class="input-group-text"><i class="fa fa-calendar pb-1"></i></div>
 		                                    </div>
@@ -82,20 +78,20 @@
 		                                
                                 <div class="col-12 d-flex">
                                     <div class="col-5">
-				                                <div class="input-group date mb-2" id="timePicker1" data-target-input="nearest">
-				                                    <label class="mt-1 pr-2 me-2">時間:</label>
-				                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#timePicker1" name="startTime" th:value="*{startTime}"/>
-				                                    <div class="input-group-text" data-target="#timePicker1" data-toggle="datetimepicker">
+				                                <div class="input-group date mb-2" id="startTimePicker" data-target-input="nearest">
+				                                    <label class="mt-1 pr-2 me-2" th:text="#{label.time}"></label>
+				                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#startTimePicker" name="startTime" th:value="*{startTime}" th:placeholder="#{placeholder.time}">
+				                                    <div class="input-group-text" data-target="#startTimePicker" data-toggle="datetimepicker">
 				                                        <i class="fa fa-clock"></i>
 				                                    </div>
 				                                    <div th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}" th:errorclass="invalid-feedback"></div>
 				                                </div>
 		                                </div>
 		                                <div class="col-5">
-				                                <div class="input-group col-5 date mb-5" id="timePicker2" data-target-input="nearest">
+				                                <div class="input-group col-5 date mb-5" id="endTimePicker" data-target-input="nearest">
 				                                    <label class="pt-1 pr-2 ms-2 me-2">～</label>
-				                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#timePicker2" name="endTime" th:value="*{endTime}"/>
-				                                    <div class="input-group-text" data-target="#timePicker2" data-toggle="datetimepicker">
+				                                    <input type="text" class="form-control form-control-sm datetimepicker-input" data-target="#endTimePicker" name="endTime" th:value="*{endTime}" th:placeholder="#{placeholder.time}">
+				                                    <div class="input-group-text" data-target="#endTimePicker" data-toggle="datetimepicker">
 				                                        <i class="fa fa-clock"></i>
 				                                    </div>
 				                                    <div th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}" th:errorclass="invalid-feedback"></div>
@@ -103,24 +99,23 @@
 		                                </div>
                                 </div>
         
-                                <button type="reset" class="btn btn-outline-primary">リセット</button>
-                                <button type="submit" class="btn btn-primary ms-1">検索</button>
+                                <button type="reset" class="btn btn-outline-primary" th:text="#{button.reset}"></button>
+                                <button type="submit" class="btn btn-primary ms-1" th:text="#{button.search}"></button>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <div th:replace="fragments :: msg_meeting_area"></div>
-            
-            <div th:replace="fragments :: meeting_list_area"></div>
+            <div th:replace="fragments :: msg_meeting_area"></div>            
             
             <div th:if="${meetingList != null && #lists.size(meetingList) != 0}">
-		            <p class="text-end me-2">
-		              <span th:text="|該当: 全 ${#lists.size(meetingList)} 中|"></span>
-		              <span th:text="|${#lists.size(meetingList) * meetingPage.getNumber() + 1 / meetingPage.getTotalPages()} 件|"></span>
+		            <p class="text-end mt-5 me-2">
+		              <span th:text="#{text.showing_results(${#lists.size(meetingList) * (meetingPage.getNumber() + 1) / meetingPage.getTotalPages()}, ${#lists.size(meetingList)})}"></span>
 		            </p>
 		            
+                <div th:replace="fragments :: meeting_list_area"></div>
+                
 		            <nav>
 		                <ul class="pagination justify-content-center mt-5" th:if="${meetingList != null && #lists.size(meetingList) != 0}">
 		                    <li class="page-item" th:classappend="${meetingPage.isFirst() ? 'disabled' : ''}">
@@ -146,7 +141,7 @@
 		                </ul>
 		            </nav>
             </div>
-
+            
         </div>
 
 
@@ -155,28 +150,29 @@
             <div th:replace="fragments :: msg_area"></div>
             
             <div class="m-5">
-                <h3 class="ms-2">継続日数ランキング</h3>
+                <h3 class="ms-2" th:text="#{text.ranking_total}"></h3>
                 <form th:action="@{/}" method="get">
                     <div class="row">
-                        <a th:href="@{/User/list/ranking}" class="text-end fs-6 mb-2">もっと見る</a>
+                        <a th:href="@{/User/list/ranking}" class="text-end fs-6 mb-2" th:text="#{link.see_more}"></a>
                         <div class="col-4 p-0" th:each="user, stat : ${userRanking}">
                             <div class="card">
                                 <div>
                                     <span th:if="${rankingMap.get(user.continuousDays) == 1}" class="badge bg-warning mb-3 col-3 pt-2 pb-2">1</span>
 								                    <span th:if="${rankingMap.get(user.continuousDays) == 2}" class="badge bg-secondary col-3 pt-2 pb-2 mb-3">2</span>
 								                    <span th:if="${rankingMap.get(user.continuousDays) == 3}" class="badge mb-3 col-3 pt-2 pb-2" style="background-color: saddlebrown;">3</span>
-                                    <span class="ms-1" th:text="${user.continuousDays}"></span> 日
+                                    <span class="ms-1" th:text="${user.continuousDays}"></span>
+                                    <span th:text="' ' + #{text.day}"></span>
                                 </div>
                                 <button class="card-body btn p-2" style="border-radius: 0">
                                     <div th:unless="${user.profileImage} == null">
-				                                <img th:src="${user.profileImage}" alt="プロフィール画像" class="avatar mb-2">
+				                                <img th:src="${user.profileImage}" th:alt="#{img.profile}" class="avatar mb-2">
 				                            </div>
 				                            <div th:if="${user.profileImage} == null">
 				                                <span class="avatar btn btn-light mb-2"></span>
 				                            </div>
                                     <h5 class="card-title mb-4" th:text="${user.name}"></h5>
-                                    <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
-                                    <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
+                                    <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" th:value="#{button.unfollow}" class="btn btn-primary ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
+                                    <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" th:value="#{button.follow}" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
                                     <div class="my-card" th:if="${session.user_id == user.id}"></div>
                                 </button>
                             </div>
@@ -192,14 +188,14 @@
                     <button type="submit" th:formaction="@{/User/__${user.id}__}" class="list-group-item list-group-item-action btn-send">
                         <div class="d-flex w-100">
                             <div th:unless="${user.profileImage} == null">
-                                <img th:src="${user.profileImage}" alt="プロフィール画像" class="avatar">
+                                <img th:src="${user.profileImage}" th:alt="#{img.profile}" class="avatar">
                             </div>
                             <div th:if="${user.profileImage} == null">
                                 <span class="avatar btn btn-light"></span>
                             </div>
                             <a th:href="@{/User/__${user.id}__}" class="text-reset fs-4 mt-2 ms-3" th:text="${user.name}"></a>
-                            <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
-                            <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
+                            <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" th:value="#{button.unfollow}" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
+                            <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" th:value="#{button.follow}" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
                         </div>
                         <p class="ms-5 me-5 mt-2" th:text="${user.profileMessage}"></p>
                     </button>
@@ -225,6 +221,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0/js/tempusdominus-bootstrap-4.min.js"></script>
 
     <script type="text/javascript" th:src="@{/js/main.js}"></script>
+    <script type="text/javascript" th:src="@{/js/datetimepicker.js}"></script>
     <script type="text/javascript" th:src="@{/js/home.js}"></script>
 </body>
 </html>

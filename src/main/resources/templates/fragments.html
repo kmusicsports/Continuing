@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,21 +7,21 @@
 <body>
     <nav th:fragment="navbar_area" class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold fs-3 text-secondary" th:href="@{/home}">Continuing</a>
+            <a class="navbar-brand fw-bold fs-3 text-secondary" th:href="@{/home}" th:text="${@environment.getProperty('app.name')}"></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <form th:action="@{/search}" method="post" class="ms-auto" th:object="${searchData}">
-                    <input class="form-control me-2" type="search" name="keyword" th:value="*{keyword}" placeholder="キーワード検索">
+                    <input class="form-control me-2" type="search" name="keyword" th:value="*{keyword}" th:placeholder="#{label.keyword}">
                 </form>
                 <div th:if="${session.user_id == null}">
                     <ul class="navbar-nav mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" th:href="@{/showLogin}">ログイン</a>
+                            <a class="nav-link active" aria-current="page" th:href="@{/showLogin}" th:text="#{link.login}"></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" th:href="@{/showRegister}">新規登録</a>
+                            <a class="nav-link" th:href="@{/showRegister}" th:text="#{link.register}"></a>
                         </li>
                     </ul>
                 </div>
@@ -35,11 +35,11 @@
                         <li class="nav-item dropdown">
                             <button type="button" class="btn btn-secondary dropdown-toggle" id="nav-dropdown" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" th:text="${session.user_name}"></button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
-                                <li><a class="dropdown-item" th:href="@{/User/mypage}">マイページ</a></li>
-                                <li><a class="dropdown-item" th:href="@{/Meeting/list/mine/today}">今日参加予定のミーティング</a></li>
-                                <li><a class="dropdown-item" th:href="@{/User/setting}">設定</a></li>
+                                <li><a class="dropdown-item" th:href="@{/User/mypage}" th:text="#{link.mypage}"></a></li>
+                                <li><a class="dropdown-item" th:href="@{/Meeting/list/mine/today}" th:text="#{link.today_my_meeting}"></a></li>
+                                <li><a class="dropdown-item" th:href="@{/User/setting}" th:text="#{link.setting}"></a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" th:href="@{/logout}">ログアウト</a></li>
+                                <li><a class="dropdown-item" th:href="@{/logout}" th:text="#{link.logout}"></a></li>
                             </ul>
                         </li>
                     </ul>
@@ -53,40 +53,40 @@
             <button type="submit" th:formaction="@{/Meeting/__${meeting.id}__}" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100">
                     <div th:unless="${meeting.host.profileImage} == null">
-                        <img th:src="${meeting.host.profileImage}" alt="プロフィール画像" class="avatar">
+                        <img th:src="${meeting.host.profileImage}" th:alt="#{img.profile}" class="avatar">
                     </div>
                     <div th:if="${meeting.host.profileImage} == null">
                         <span class="avatar btn btn-light"></span>
                     </div>
                     <a th:href="@{/User/__${meeting.host.id}__}" class="text-reset fs-4 mt-2 ms-2" th:text="${meeting.host.name}"></a>
                     <div class="ms-auto mt-2 me-2" th:if="${session.user_id != meeting.host.id}">
-                        <input type="submit" th:formaction="@{/Meeting/leave/__${meeting.id}__}" value="予約済み" class="btn btn-primary" th:if="${#lists.contains(myJoinMeetingList, meeting)}">
+                        <input type="submit" th:formaction="@{/Meeting/leave/__${meeting.id}__}" th:value="#{button.leave}" class="btn btn-primary" th:if="${#lists.contains(myJoinMeetingList, meeting)}">
                         <div th:unless="${#lists.contains(myJoinMeetingList, meeting)}">
-                            <input type="submit" th:formaction="@{/Meeting/join/__${meeting.id}__}" value="参加予約" class="btn btn-outline-primary" th:unless="${meeting.numberPeople == 1 && #lists.size(meeting.joinList) == 1}">
-                            <span class="text-danger" th:if="${meeting.numberPeople == 1 && #lists.size(meeting.joinList) == 1}">受付終了</span>                                                            
+                            <input type="submit" th:formaction="@{/Meeting/join/__${meeting.id}__}" th:value="#{button.join}" class="btn btn-outline-primary" th:unless="${meeting.numberPeople == 1 && #lists.size(meeting.joinList) == 1}">
+                            <span class="text-danger" th:if="${meeting.numberPeople == 1 && #lists.size(meeting.joinList) == 1}" th:text="#{text.closed}"></span>                                                            
                         </div>
                     </div>
                 </div>
                 <table class="table">
                     <tr>
-                        <th>トピック</th>
-                        <td th:text="${meeting.topic}"></td>
+                        <th th:text="#{label.topic}"></th>
+                        <td th:text="#{option.topic.__${meeting.topic}__}"></td>
                     </tr>
                     <tr>
-                        <th>説明</th>
+                        <th th:text="#{label.agenda}"></th>
                         <td th:text="${meeting.agenda}"></td>
                     </tr>
                     <tr>
-                        <th>人数</th>
-                        <td th:if="${meeting.numberPeople == 1}">１対１</td>
-                        <td th:if="${meeting.numberPeople == 2}">複数</td>
+                        <th th:text="#{label.number_people}"></th>
+                        <td th:if="${meeting.numberPeople == 1}" th:text="#{label.one_on_one}"></td>
+                        <td th:if="${meeting.numberPeople == 2}" th:text="#{label.multiple}"></td>
                     </tr>
                     <tr>
-                        <th>日付</th>
+                        <th th:text="#{label.date}"></th>
                         <td th:text="${#dates.format(meeting.date, 'yyyy/MM/dd')}"></td>
                     </tr>
                     <tr>
-                        <th>時間</th>
+                        <th th:text="#{label.time}"></th>
                         <td th:text="|${#dates.format(meeting.startTime, 'HH:mm')} ～ ${#dates.format(meeting.endTime, 'HH:mm')}|"></td>
                     </tr>
                 </table>

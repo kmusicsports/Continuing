@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,22 +9,18 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
 
-    <link  th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
-    <title>フォロー - Continuing</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
+    <title th:text="#{title.follows} + ': ' + ${@environment.getProperty('app.name')}"></title>
 </head>
 <body>
     <nav th:replace="fragments :: navbar_area"></nav>
     
     <ul class="nav nav-pills nav-fill" id="pills-tab" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link fs-5" id="pills-follows-tab" data-bs-toggle="pill" data-bs-target="#pills-follows" type="button" role="tab" aria-controls="pills-follow">
-                フォロー中
-            </button>
+            <button class="nav-link fs-5" id="pills-follows-tab" data-bs-toggle="pill" data-bs-target="#pills-follows" type="button" role="tab" aria-controls="pills-follow" th:text="#{button.following}"></button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link fs-5" id="pills-followers-tab" data-bs-toggle="pill" data-bs-target="#pills-followers" type="button" role="tab" aria-controls="pills-follower">
-                フォロワー
-            </button>
+            <button class="nav-link fs-5" id="pills-followers-tab" data-bs-toggle="pill" data-bs-target="#pills-followers" type="button" role="tab" aria-controls="pills-follower" th:text="#{button.follower}"></button>
         </li>
     </ul>
     <hr class="mt-0">
@@ -39,14 +35,14 @@
                     <button type="submit" th:formaction="@{/User/__${user.id}__}" class="list-group-item list-group-item-action btn-send">
                         <div class="d-flex w-100">
                             <div th:unless="${user.profileImage} == null">
-                                <img th:src="${user.profileImage}" alt="プロフィール画像" class="avatar">
+                                <img th:src="${user.profileImage}" th:alt="#{img.profile}" class="avatar">
                             </div>
                             <div th:if="${user.profileImage} == null">
                                 <span class="avatar btn btn-light"></span>
                             </div>
                             <a th:href="@{/User/__${user.id}__}" class="text-reset fs-4 mt-2 ms-3" th:text="${user.name}"></a>
-                            <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
-                            <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
+                            <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" th:value="#{button.unfollow}" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
+                            <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" th:value="#{button.follow}" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
                         </div>
                         <p class="ms-5 me-5 mt-2" th:text="${user.profileMessage}"></p>
                     </button>
@@ -63,14 +59,14 @@
                     <button type="submit" th:formaction="@{/User/__${user.id}__}" class="list-group-item list-group-item-action btn-send">
                         <div class="d-flex w-100">
                             <div th:unless="${user.profileImage} == null">
-                                <img th:src="${user.profileImage}" alt="プロフィール画像" class="avatar">
+                                <img th:src="${user.profileImage}" th:alt="#{img.profile}" class="avatar">
                             </div>
                             <div th:if="${user.profileImage} == null">
                                 <span class="avatar btn btn-light"></span>
                             </div>
                             <a th:href="@{/User/__${user.id}__}" class="text-reset fs-4 mt-2 ms-3" th:text="${user.name}"></a>
-                            <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
-                            <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
+                            <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" th:value="#{button.unfollow}" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
+                            <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" th:value="#{button.follow}" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
                         </div>
                         <p class="ms-5 me-5 mt-2" th:text="${user.profileMessage}"></p>
                     </button>

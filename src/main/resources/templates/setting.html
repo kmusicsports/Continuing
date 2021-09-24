@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<html　xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,31 +9,35 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
-    <title>設定 - Continuing</title>
+    <title th:text="#{title.setting} + ': ' + ${@environment.getProperty('app.name')}"></title>
 </head>
 <body>
     <nav th:replace="fragments :: navbar_area"></nav>
     
     <div th:replace="fragments :: msg_area"></div>
 
-    <p>Zoomアカウントに関する設定は<a href="https://zoom.us/profile/setting" target="_blank" rel="noopener noreferrer">こちら</a></p>
+    <p>
+      <span th:text="#{text.setting_zoom_start}"></span>
+      <a href="https://zoom.us/profile/setting" target="_blank" rel="noopener noreferrer" th:text="#{link.here}"></a>
+      <span th:text="#{text.setting_zoom_end}"></span>
+    </p>
     
-    <button class="btn btn-outline-danger" data-toggle="modal" data-target="#deletionConfirmationModal">アカウント削除</button>
+    <button class="btn btn-outline-danger" data-toggle="modal" data-target="#deletionConfirmationModal" th:text="#{button.user_delete}"></button>
 
     <!-- deletionConfirmationModal -->
     <div class="modal fade" id="deletionConfirmationModal" tabindex="-1" role="dialog" aria-labelledby="deletionConfirmationModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deletionConfirmationModalLabel">削除確認</h5>
+                    <h5 class="modal-title" id="deletionConfirmationModalLabel" th:text="#{button.delete_confirm}"></h5>
                 </div>
                 <div class="modal-body">
-                    本当に削除してもよろしいですか？<br>
-                    ※ Zoomアカウントの削除はご自身で行っていただくようお願いします。
+                    <p th:text="#{text.delete_really}"></p>
+                    <p th:text="#{text.delete_notes}"></p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
-                    <a th:href="@{/User/delete}" class="btn btn-danger">削除する</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{button.cancel}"></button>
+                    <a th:href="@{/User/delete}" class="btn btn-danger ms-3" th:text="#{button.delete}"></a>
                 </div>
             </div>
         </div>

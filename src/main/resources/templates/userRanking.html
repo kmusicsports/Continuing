@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,14 +9,14 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
-    <title>継続日数ランキング - Continuing</title>
+    <title th:text="#{title.user_ranking} + ': ' + ${@environment.getProperty('app.name')}"></title>
 </head>
 <body>
     <nav th:replace="fragments :: navbar_area"></nav>
     
     <div th:replace="fragments :: msg_area"></div>
 
-    <h4 class="text-center mt-2 text-decoration-underline">継続日数ランキング</h4>
+    <h4 class="text-center mt-2 text-decoration-underline" th:text="#{text.ranking_total}">継続日数ランキング</h4>
     <div class="list-group">
         <form th:action="@{/}" method="get">
 		        <button type="submit" th:formaction="@{/User/__${user.id}__}" class="list-group-item list-group-item-action" th:each="user, stat : ${userList}">   
@@ -25,21 +25,21 @@
                     <span th:if="${rankingMap.get(user.continuousDays) == 2}" class="badge bg-secondary mb-3">2</span>
 		                <span th:if="${rankingMap.get(user.continuousDays) == 3}" class="badge mb-3" style="background-color: saddlebrown;">3</span>
 		                <span th:if="${rankingMap.get(user.continuousDays) &gt; 3}" class="badge bg-light border text-dark mb-3" th:text="${rankingMap.get(user.continuousDays)}"></span>
-		                <span class="ms-1" th:text="${user.continuousDays}"></span> 日
+		                <span class="ms-1" th:text="${user.continuousDays}"></span>
+		                <span th:text="' ' + #{text.day}"></span>
 		            </div>
 		            <div class="d-flex w-100">
 		                <div th:unless="${user.profileImage} == null">
-		                    <img th:src="${user.profileImage}" alt="プロフィール画像" class="avatar">
+		                    <img th:src="${user.profileImage}" th:alt="#{img.profile}" class="avatar">
 		                </div>
 		                <div th:if="${user.profileImage} == null">
 		                    <span class="avatar btn btn-light"></span>
 		                </div>
 		                <a th:href="@{/User/__${user.id}__}" class="text-reset fs-4 mt-2 ms-3" th:text="${user.name}"></a>
-		                <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
-		                <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
+		                <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" th:value="#{button.unfollow}" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
+		                <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" th:value="#{button.follow}" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
 		            </div>
 		            <p class="ms-5 me-5 mt-2" th:text="${user.profileMessage}"></p>
-		       
 		        </button>
         </form>
     </div>

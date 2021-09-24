@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,14 +9,14 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
-    <title>今日参加予定のミーティング - Continuing</title>
+    <title th:text="#{title.today_my_meeting} + ': ' + ${@environment.getProperty('app.name')}"></title>
 </head>
 <body>
     <nav th:replace="fragments :: navbar_area"></nav>
     
     <div th:replace="fragments :: msg_area"></div>
 
-    <h4 class="text-center mt-2 text-decoration-underline">今日参加予定のミーティング</h4>
+    <h4 class="text-center mt-2 text-decoration-underline" th:text="#{text.today_my_meeting}"></h4>
     <div th:replace="fragments :: meeting_list_area"></div>
 
     <!-- Popper and Bootstrap 5 JS -->
