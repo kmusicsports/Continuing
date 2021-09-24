@@ -125,4 +125,23 @@ public class LoginController {
 		
 		return mv;
 	}
+	
+	@GetMapping("/terms")
+	public String showTerms(Locale locale) {
+		String language = locale.getLanguage();
+		
+		if(language == null){
+			return "/terms/terms";
+	    }
+		
+		switch(language) {
+			case "ja":
+				return "/terms/terms_ja";
+			case "en":
+				return "/terms/terms_en";
+			default:
+				return "/terms/terms";
+		}
+	}
+	
 }
