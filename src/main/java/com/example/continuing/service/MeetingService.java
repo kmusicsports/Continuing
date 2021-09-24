@@ -167,12 +167,14 @@ public class MeetingService {
 	
 	// ミーティングへの参加かどうかのチェック
 	public String joinCheck(Meetings meeting, Integer userId, Locale locale) {
-		final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 		final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
 		
-		String strMeetingDate = meeting.getDate().toString();
-		String strToday = sdf.format(new java.util.Date());
-		if(strMeetingDate.equals(strToday)) {
+		LocalDate localDate = LocalDate.parse(meeting.getDate().toString());
+		LocalDate localToday = LocalDate.now();
+		if(meeting.getHost().getId() == userId && meeting.getJoinList().isEmpty()) {
+			return messageSource.getMessage("msg.w.no_join", null, locale);
+		}
+		if(localDate.isEqual(localToday)) {
 			String strStartTime = stf.format(meeting.getStartTime());
 			String strNow = stf.format(new java.util.Date());
 			int duration = Utils.string2Int(strStartTime) - Utils.string2Int(strNow);
@@ -185,7 +187,7 @@ public class MeetingService {
 				}
 				if (session.getAttribute(strStartTime) == null) {
 					System.out.println("Join");
-					session.setAttribute(strStartTime, "not first");
+					session.setAttribute(strStartTime, "first join in this meeting");
 					session.setMaxInactiveInterval(24 * 60 - Utils.string2Int(strNow));
 					record.setDays(record.getDays() + 1);
 					
@@ -195,8 +197,8 @@ public class MeetingService {
 					
 					recordsRepository.saveAndFlush(record);
 					
-					if(session.getAttribute(strToday) == null) {
-						session.setAttribute(strToday, "not today's first");
+					if(session.getAttribute(localDate.toString()) == null) {
+						session.setAttribute(localDate.toString(), "today's first join");
 						user.setContinuousDays(user.getContinuousDays() + 1);
 						usersRepository.saveAndFlush(user);					
 					}					
@@ -204,11 +206,9 @@ public class MeetingService {
 				
 				return null;
 			} else {
-				// "You can join the meeting 15 minutes in advance."
 				return messageSource.getMessage("msg.w.advance_15", null, locale);
 			}
 		} else {
-			// "This meeting is not today."
 			return messageSource.getMessage("msg.w.meeting_not_today", null, locale);
 		}
 	}
@@ -221,16 +221,19 @@ public class MeetingService {
 				+ messageSource.getMessage("mail.msg.meeting_host", null, locale)
 				+ " : " + meeting.getHost().getName() + "<br>" 
 				+ messageSource.getMessage("mail.msg.meeting_topic", null, locale) 
-				+ " : " + meeting.getTopic() + "<br>"
+				+ " : " 
+				+ messageSource.getMessage("option.topic." + meeting.getTopic(), null, locale) 
+				+ "<br>"
 				+ messageSource.getMessage("mail.msg.meeting_date", null, locale)
 				+ " : " + Utils.date2str(meeting.getDate()) + "<br>"
 				+ messageSource.getMessage("mail.msg.meeting_time", null, locale)
 				+ " : " + Utils.time2str(meeting.getStartTime()) + "～" + Utils.time2str(meeting.getEndTime()) + "<br>"
 				+ "<br>";
+		
 		if(type.equals("create")) {
-			subject = meeting.getHost().getName() 
+			subject = meeting.getHost().getName() + " " 
 					+ messageSource.getMessage("mail.subject.meeting_created", null, locale);
-			messageText += meeting.getHost().getName() 
+			messageText += meeting.getHost().getName() + " " 
 					+ messageSource.getMessage("mail.msg.meeting_created", null, locale) 
 					+ "<br>"
 					+ meetingInfo
@@ -254,7 +257,7 @@ public class MeetingService {
 		} else if(type.equals("join")) {
 			subject = messageSource.getMessage("mail.subject.meeting_joined", null, locale);
 			messageText += messageSource.getMessage("mail.msg.meeting_joined_start", null, locale) 
-					+ username 
+					+ username + " "
 					+ messageSource.getMessage("mail.msg.meeting_joined_end", null, locale) 
 					+ "<br>"
 					+ meetingInfo
@@ -263,9 +266,9 @@ public class MeetingService {
 			
 			mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
 		} else if(type.equals("leave")) {
-			subject = username 
+			subject = username + " " 
 					+ messageSource.getMessage("mail.subject.meeting_left", null, locale);
-			messageText += username 
+			messageText += username + " " 
 					+ messageSource.getMessage("mail.msg.meeting_left", null, locale) 
 					+ "<br>"
 					+ meetingInfo
@@ -277,18 +280,20 @@ public class MeetingService {
 			messageText += messageSource.getMessage("mail.msg.operation_error", null, locale)
 					+ "</body></html>";
 			mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
-		}		
+		}
 	}
 	
 	public List<Meetings> getUserMeetingList(Users user) {
 		List<Meetings> userMeetingList = new ArrayList<>();
 		Date today = new Date(System.currentTimeMillis());
+		LocalDate localToday = LocalDate.now();
 		
 		List<Meetings> hostMeetingList = meetingsRepository.findByHostAndDateGreaterThanEqual(user, today);
 		List<Meetings> joinMeetingList = joinService.getJoinMeetingList(user.getId());
 		userMeetingList.addAll(hostMeetingList);
 		for(Meetings meeting : joinMeetingList) {
-			if(meeting.getDate().compareTo(today) == 1) {
+			LocalDate localDate = LocalDate.parse(meeting.getDate().toString());
+			if(!localDate.isBefore(localToday)) {
 				userMeetingList.add(meeting);
 			}
 		}
@@ -301,13 +306,15 @@ public class MeetingService {
 	public List<Meetings> getTodayMeetingList(Users user) {
 		List<Meetings> todayMeetingList = new ArrayList<>();
 		Date today = new Date(System.currentTimeMillis());
+		LocalDate localToday = LocalDate.now();
 		
 		List<Meetings> todayHostMeetingList = meetingsRepository.findByHostAndDate(user, today);
 		List<Meetings> joinMeetingList = joinService.getJoinMeetingList(user.getId());  
 		
 		todayMeetingList.addAll(todayHostMeetingList);
 		for(Meetings meeting : joinMeetingList) {
-			if(meeting.getDate().compareTo(today) == 0) {
+			LocalDate localDate = LocalDate.parse(meeting.getDate().toString());
+			if(localDate.isEqual(localToday)) {
 				todayMeetingList.add(meeting);
 			}
 		}

@@ -80,16 +80,15 @@ public class MainMeetingController {
 		
 		Integer myId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(myId).get();
-		Locale locale = new Locale(user.getLanguage());
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
 			Meetings meeting = someMeeting.get();
 			Joins join = new Joins(myId, meeting);
 			joinsRepository.saveAndFlush(join);
 			
-			meetingService.sendMail(meeting, user, "join", locale);
+			meetingService.sendMail(meeting, user, "join", new Locale(meeting.getHost().getLanguage()));
 		} else {
-			String msg = messageSource.getMessage("msg.w.meeting_not_found", null, locale);
+			String msg = messageSource.getMessage("msg.w.meeting_not_found", null, new Locale(user.getLanguage()));
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			return "redirect:/home";
 		}
@@ -103,16 +102,15 @@ public class MainMeetingController {
 		
 		Integer myId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(myId).get();
-		Locale locale = new Locale(user.getLanguage());
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
 			Meetings meeting = someMeeting.get();
 			List<Joins> joinList = joinsRepository.findByUserIdAndMeeting(myId, meeting);
 			joinsRepository.deleteAll(joinList);
 			
-			meetingService.sendMail(meeting, user, "leave", locale);
+			meetingService.sendMail(meeting, user, "leave", new Locale(meeting.getHost().getLanguage()));
 		} else {
-			String msg = messageSource.getMessage("msg.w.meeting_not_found", null, locale);
+			String msg = messageSource.getMessage("msg.w.meeting_not_found", null, new Locale(user.getLanguage()));
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			return "redirect:/home";
 		}

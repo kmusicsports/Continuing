@@ -12,8 +12,8 @@ import com.example.continuing.entity.Users;
 @Repository
 public interface RecordsRepository extends JpaRepository<Records, Integer> {
 
-	List<Records> findByUserOrderByDays(String topic);
-	List<Records> findByTopicOrderByDays(String topic);
-	Optional<Records> findByUserAndTopic(Users user, String topic);
+	List<Records> findByUserOrderByDays(Users user);
+	List<Records> findByTopicOrderByDays(Integer topic);
+	Optional<Records> findByUserAndTopic(Users user, Integer topic);
 	
 }

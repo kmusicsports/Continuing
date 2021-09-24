@@ -24,12 +24,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Meetings;
-import com.example.continuing.entity.Topics;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.MeetingData;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.MeetingsRepository;
-import com.example.continuing.repository.TopicsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.MeetingService;
@@ -43,7 +41,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CreateMeetingController {
 	
-	private final TopicsRepository topicsRepository;
 	private final MeetingService meetingService;
 	private final HttpSession session;
 	private final MeetingsRepository meetingsRepository;
@@ -55,11 +52,9 @@ public class CreateMeetingController {
 	
 	@GetMapping("/Meeting/showCreateForm")
 	public ModelAndView createMeetingForm(ModelAndView mv) {
-		List<Topics> topicList = topicsRepository.findAll();
 		
 		session.setAttribute("mode", "create");
 		mv.setViewName("meetingForm");
-		mv.addObject("topicList", topicList);
 		mv.addObject("meetingData", new MeetingData());
 		mv.addObject("searchData", new SearchData());
 		return mv;
@@ -70,6 +65,7 @@ public class CreateMeetingController {
 	public ModelAndView createRedirect(@ModelAttribute @Validated MeetingData meetingData, 
 			BindingResult result, HttpServletResponse response,
 			ModelAndView mv) {
+		
 		// エラーチェック
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();
@@ -92,12 +88,10 @@ public class CreateMeetingController {
 			
 			return null;
 		} else {
-			List<Topics> topicList = topicsRepository.findAll();
 			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
 			
 			session.setAttribute("mode", "create");
 			mv.setViewName("meetingForm");
-			mv.addObject("topicList", topicList);
 			mv.addObject("searchData", new SearchData());
 			mv.addObject("msg", new MessageDto("E", msg));
 			return mv;
@@ -109,13 +103,14 @@ public class CreateMeetingController {
 	public String createMeeting(@RequestParam String code,
 			@RequestParam String state, ModelAndView mv, 
 			RedirectAttributes redirectAttributes) throws IOException {
+		
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();
 		Locale locale = new Locale(user.getLanguage());
 		try {
 			System.out.println("Start creating the meeting.");
 			OAuth2AccessToken oauthToken = zoomApiIntegration.getAccessToken(session, code, state);
-			String apiResult = zoomApiIntegration.createMeeting(oauthToken, meetingData.toDto());
+			String apiResult = zoomApiIntegration.createMeeting(oauthToken, meetingData.toDto(messageSource, locale));
 			System.out.println("apiResult: " + apiResult);
 			
 			// Json 配列から Json Objectに変換
@@ -128,7 +123,7 @@ public class CreateMeetingController {
 			
 			List<Users> followersList = followService.getFollowersList(userId);
 			for(Users follower : followersList) {
-				meetingService.sendMail(meeting, follower, "create", locale);			
+				meetingService.sendMail(meeting, follower, "create", new Locale(follower.getLanguage()));			
 			}
 			
 			String msg = messageSource.getMessage("msg.s.meeting_created", null, locale);

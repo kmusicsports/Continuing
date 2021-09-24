@@ -24,10 +24,8 @@ import org.springframework.web.servlet.ModelAndView;
 import com.example.continuing.dao.MeetingsDaoImpl;
 import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Meetings;
-import com.example.continuing.entity.Topics;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.SearchData;
-import com.example.continuing.repository.TopicsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.JoinService;
@@ -42,7 +40,6 @@ public class MainController {
 
 	private final HttpSession session;
 	private final FollowService followService;
-	private final TopicsRepository topicsRepository;
 	private final JoinService joinService;
 	private final MeetingService meetingService;
 	private final UserService userService;
@@ -84,7 +81,6 @@ public class MainController {
 		
 		Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, prevPageable);
 		List<Users> userList = userService.getSearchReuslt(searchData);
-		List<Topics> topicList = topicsRepository.findAll();
 		List<Users> userRanking = usersRepository.findTop3ByOrderByContinuousDaysDesc();
 		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userRanking);
 		
@@ -97,7 +93,6 @@ public class MainController {
 		mv.addObject("meetingPage", meetingPage);
 		mv.addObject("meetingList", meetingPage.getContent());
 		mv.addObject("userList", userList);
-		mv.addObject("topicList", topicList);
 		mv.addObject("myFollowsList", myFollowsList);
 		mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		mv.addObject("searchData", searchData);
@@ -111,7 +106,6 @@ public class MainController {
 			@ModelAttribute @Validated SearchData searchData,
 			BindingResult result, Locale locale,
 			@PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
-		List<Topics> topicList = topicsRepository.findAll();
 		List<Users> userRanking = usersRepository.findTop3ByOrderByContinuousDaysDesc();
 		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userRanking);
 		
@@ -156,7 +150,6 @@ public class MainController {
 			mv.addObject("msgMeeting", new MessageDto("E", msg));
 		}
 		
-		mv.addObject("topicList", topicList);
 		mv.addObject("myFollowsList", myFollowsList);
 		mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		mv.addObject("searchData", searchData);

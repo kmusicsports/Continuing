@@ -2,6 +2,7 @@ package com.example.continuing.form;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -9,6 +10,7 @@ import javax.validation.constraints.Pattern;
 
 import org.hibernate.validator.constraints.Length;
 import org.json.simple.JSONObject;
+import org.springframework.context.MessageSource;
 
 import com.example.continuing.common.Utils;
 import com.example.continuing.dto.MeetingDto;
@@ -24,8 +26,8 @@ public class MeetingData {
 
 	private int id;
 	
-	@NotBlank
-    private String topicName;
+	@Min(value = 1)
+    private int topic;
 	
 	@Min(value = 1)
     private int numberPeople;
@@ -57,7 +59,7 @@ public class MeetingData {
 	
 	public MeetingData(Meetings meeting) {
 		id = meeting.getId();
-		topicName = meeting.getTopic();
+		topic = meeting.getTopic();
 		numberPeople = meeting.getNumberPeople();
 		date = meeting.getDate().toString();
 		startTime = meeting.getStartTime().toString();
@@ -67,8 +69,9 @@ public class MeetingData {
 		agenda = meeting.getAgenda();
 	}
 	
-	public MeetingDto toDto() {
+	public MeetingDto toDto(MessageSource messageSource, Locale locale) {
 		MeetingDto meetingDto = new MeetingDto();
+		String topicName = messageSource.getMessage("option.topic." + topic, null, locale);
 		meetingDto.setTopic(topicName);
 		meetingDto.setStartTime(date.replace("/", "-") + "T" + startTime + ":00");
 		
@@ -87,7 +90,7 @@ public class MeetingData {
 		meeting.setNumberPeople(numberPeople);
 		meeting.setMeetingId(jsonObject.get("id").toString());
 		meeting.setUuid(jsonObject.get("uuid").toString());
-		meeting.setTopic(topicName);
+		meeting.setTopic(topic);
 		meeting.setDate(Utils.str2date(date.replace("/", "-")));
 		meeting.setStartTime(Utils.str2time(startTime));
 		meeting.setEndTime(Utils.str2time(endTime));
@@ -105,7 +108,7 @@ public class MeetingData {
 	}
 	
 	public Meetings toEntity(Meetings meeting) {
-		meeting.setTopic(topicName);
+		meeting.setTopic(topic);
 		meeting.setNumberPeople(numberPeople);
 		meeting.setDate(Utils.str2date(date.replace("/", "-")));
 		meeting.setStartTime(Utils.str2time(startTime));
