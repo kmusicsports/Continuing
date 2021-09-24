@@ -230,56 +230,65 @@ public class MeetingService {
 				+ " : " + Utils.time2str(meeting.getStartTime()) + "～" + Utils.time2str(meeting.getEndTime()) + "<br>"
 				+ "<br>";
 		
-		if(type.equals("create")) {
-			subject = meeting.getHost().getName() + " " 
-					+ messageSource.getMessage("mail.subject.meeting_created", null, locale);
-			messageText += meeting.getHost().getName() + " " 
-					+ messageSource.getMessage("mail.msg.meeting_created", null, locale) 
-					+ "<br>"
-					+ meetingInfo
-					+ "<a href='" + APP_URL + "/Meeting/" + meeting.getId() + "'>" 
-					+ messageSource.getMessage("mail.msg.go_join", null, locale) 
-					+ "</a>"
-					+ "</body></html>";
-			
-			mailService.sendMail(user.getEmail(), subject, messageText);
-		} else if (type.equals("delete")) {
-			subject = messageSource.getMessage("mail.subject.meeting_deleted", null, locale);
-			messageText += messageSource.getMessage("mail.msg.meeting_deleted", null, locale)
-					+ "<br>"
-					+ meetingInfo
-					+ "<a href='" + APP_URL + "/home'>" 
-					+ messageSource.getMessage("mail.msg.go_find_replacement", null, locale) 
-					+ "</a>"
-					+ "</body></html>";
-			
-			mailService.sendMail(user.getEmail(), subject, messageText);
-		} else if(type.equals("join")) {
-			subject = messageSource.getMessage("mail.subject.meeting_joined", null, locale);
-			messageText += messageSource.getMessage("mail.msg.meeting_joined_start", null, locale) 
-					+ username + " "
-					+ messageSource.getMessage("mail.msg.meeting_joined_end", null, locale) 
-					+ "<br>"
-					+ meetingInfo
+		if(type == null) {
+			type = "error";
+		}
+		
+		switch(type) {
+			case "create":
+				subject = meeting.getHost().getName() + " " 
+						+ messageSource.getMessage("mail.subject.meeting_created", null, locale);
+				messageText += meeting.getHost().getName() + " " 
+						+ messageSource.getMessage("mail.msg.meeting_created", null, locale) 
+						+ "<br>"
+						+ meetingInfo
+						+ "<a href='" + APP_URL + "/Meeting/" + meeting.getId() + "'>" 
+						+ messageSource.getMessage("mail.msg.go_join", null, locale) 
+						+ "</a>"
+						+ "</body></html>";
+				
+				mailService.sendMail(user.getEmail(), subject, messageText);
+				break;
+			case "delete":
+				subject = messageSource.getMessage("mail.subject.meeting_deleted", null, locale);
+				messageText += messageSource.getMessage("mail.msg.meeting_deleted", null, locale)
+						+ "<br>"
+						+ meetingInfo
+						+ "<a href='" + APP_URL + "/home'>" 
+						+ messageSource.getMessage("mail.msg.go_find_replacement", null, locale) 
+						+ "</a>"
+						+ "</body></html>";
+				
+				mailService.sendMail(user.getEmail(), subject, messageText);
+				break;
+			case "join":
+				subject = messageSource.getMessage("mail.subject.meeting_joined", null, locale);
+				messageText += messageSource.getMessage("mail.msg.meeting_joined_start", null, locale) 
+						+ username + " "
+						+ messageSource.getMessage("mail.msg.meeting_joined_end", null, locale) 
+						+ "<br>"
+						+ meetingInfo
 //					+ "参加を拒否する場合は<a href='https://" + APP_URL + "/'>こちら</a>";
-					+ "</body></html>";
-			
-			mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
-		} else if(type.equals("leave")) {
-			subject = username + " " 
-					+ messageSource.getMessage("mail.subject.meeting_left", null, locale);
-			messageText += username + " " 
-					+ messageSource.getMessage("mail.msg.meeting_left", null, locale) 
-					+ "<br>"
-					+ meetingInfo
-					+ "</body></html>";
-			
-			mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
-		} else {
-			subject = messageSource.getMessage("mail.subject.error", null, locale);
-			messageText += messageSource.getMessage("mail.msg.operation_error", null, locale)
-					+ "</body></html>";
-			mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
+						+ "</body></html>";
+				
+				mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
+				break;
+			case "leave":
+				subject = username + " " 
+						+ messageSource.getMessage("mail.subject.meeting_left", null, locale);
+				messageText += username + " " 
+						+ messageSource.getMessage("mail.msg.meeting_left", null, locale) 
+						+ "<br>"
+						+ meetingInfo
+						+ "</body></html>";
+				
+				mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
+				break;
+			default:
+				subject = messageSource.getMessage("mail.subject.error", null, locale);
+				messageText += messageSource.getMessage("mail.msg.operation_error", null, locale)
+						+ "</body></html>";
+				mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);		
 		}
 	}
 	
