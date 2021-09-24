@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -57,8 +58,13 @@ public class MainController {
 	
 	
 	@GetMapping("/")
-	public String showHome() {
-		return "redirect:/home";
+	public String showHome(Model model) {
+		Integer userId = (Integer)session.getAttribute("user_id");
+		if(userId == null) {
+			model.addAttribute("searchData", new SearchData());
+			return "welcome";
+		}
+ 		return "redirect:/home";
 	}
 	
 	@GetMapping("/home")
