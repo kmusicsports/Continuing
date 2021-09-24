@@ -12,10 +12,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <form th:action="@{/search}" method="post" class="ms-auto" th:object="${searchData}">
-                    <input class="form-control me-2" type="search" name="keyword" th:value="*{keyword}" th:placeholder="#{label.keyword}">
-                </form>
-                <div th:if="${session.user_id == null}">
+                <div class="ms-auto" th:if="${session.user_id == null}">
                     <ul class="navbar-nav mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link active" aria-current="page" th:href="@{/showLogin}" th:text="#{link.login}"></a>
@@ -25,7 +22,11 @@
                         </li>
                     </ul>
                 </div>
-                <div th:unless="${session.user_id == null}">
+                <div th:unless="${session.user_id == null}" class="ms-auto d-flex">
+		                <form th:action="@{/search}" method="post" th:object="${searchData}">
+		                    <input class="form-control me-2" type="search" name="keyword" th:value="*{keyword}" th:placeholder="#{label.keyword}">
+		                    <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
+		                </form>
                     <ul class="navbar-nav mb-2 mb-lg-0">
                         <li class="nav-item">
                             <a class="nav-link ms-2 me-2" aria-current="page" th:href="@{/Meeting/showCreateForm}">
