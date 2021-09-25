@@ -26,7 +26,7 @@ public class MailService {
 	private final static String ENCODE = "UTF-8";
 	
 	@Async
-	public boolean sendMail(String mailAddress, String subject, String text) {
+	public void sendMail(String mailAddress, String subject, String text) {
 		
 		MimeMessage message = sender.createMimeMessage();
 	    MimeMessageHelper helper = null;
@@ -41,10 +41,8 @@ public class MailService {
 			helper.setText(text, true);
 
 			sender.send(message);
-			return true;
 		} catch(Exception e) {
 			e.printStackTrace();
-			return false;
 		}
 		
 	}
