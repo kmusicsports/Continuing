@@ -62,3 +62,7 @@ th {
 .invalid-feedback {
 	display: block;
 }
+
+.app-icon {
+	width: 60px;
+}
