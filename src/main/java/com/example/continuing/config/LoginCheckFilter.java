@@ -62,11 +62,8 @@ public class LoginCheckFilter implements Filter {
 							httpResponse.sendRedirect("/showLogin");
 						}
 					} else {
-						System.out.println(httpRequest.getMethod());
 						chain.doFilter(request, response);
-					}
-					
-					
+					}	
 				}
 			} 
 		} else {

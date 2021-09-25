@@ -92,19 +92,18 @@ public class DeleteMeetingController {
 
     	Meetings meeting = meetingsRepository.findById(id).get();
     	String meetingId = meeting.getMeetingId();
-    	Locale locale = new Locale(meeting.getHost().getLanguage());
 
 		OAuth2AccessToken oauthToken = ZoomApiIntegration.getAccessToken(session, code, state);
 		ZoomApiIntegration.deleteMeeting(oauthToken, meetingId);
+				
+		List<Users> joinUserList = joinService.getJoinUserList(meeting);
+		for(Users user : joinUserList) {
+			meetingService.sendMail(meeting, user, "delete", new Locale(user.getLanguage()));			
+		}
 		
 		meetingsRepository.deleteById(id);		
 		
-		List<Users> joinUserList = joinService.getJoinUserList(meeting);
-		for(Users user : joinUserList) {
-			meetingService.sendMail(meeting, user, "delete", locale);			
-		}
-		
-		String msg = messageSource.getMessage("msg.s.meeting_deleted", null, locale);
+		String msg = messageSource.getMessage("msg.s.meeting_deleted", null, new Locale(meeting.getHost().getLanguage()));
 		redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 		return "redirect:/User/mypage";
 	}
