@@ -20,7 +20,49 @@
 
     <nav th:replace="fragments :: navbar_area"></nav>
     
-        
+    <div class="container">
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10">
+                <div class="card o-hidden border-0 shadow-lg my-5">
+                    <div class="card-body p-0">
+                        <!-- Nested Row within Card Body -->
+                        <div class="row">
+                            <div class="p-5">
+                                <h2 class="text-center mb-5">お問い合わせ</h2>
+                                <div class="col-10 ms-auto me-auto mb-5">
+                                    <span th:text="お客様のご意見は今後の参考にさせていただきます。頂いたお問い合わせに対し、個別の回答ができない場合や回答にお時間をいただく場合がございますが、ご理解いただきますようお願いします。"></span>
+                                    <p th:text="ご意見はいずれもサービスの改善に活用させていただきます。"></p>
+                                </div>
+                                <form th:action="@{/User/update}" method="post">
+                                    <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
+                                    <div class="form-group col-10 ms-auto me-auto">
+                                        <label th:text="#{label.name}"></label>
+                                        <input type="text" class="form-control">
+                                    </div>
+                                    <div class="form-group col-10 ms-auto me-auto">
+                                        <label th:text="#{label.email}" class="mt-4"></label>
+                                        <input type="email" class="form-control" th:placeholder="#{placeholder.email}">
+                                    </div>
+                                    <div class="form-group col-10 ms-auto me-auto mb-3">
+                                        <label class="mt-4">内容</label>
+                                        <textarea class="form-control" rows="6" cols="40" th:placeholder="ここにお問い合わせの内容を入力してください"></textarea>
+                                    </div>
+                                    
+                                    <div class="row ms-auto me-auto mt-5">
+                                        <div class="col-1"></div>
+                                        <a th:href="@{/User/setting}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="戻る"></a>
+                                        <div class="col-2"></div>
+                                        <button type="submit" class="btn btn-primary col-4 pt-2 pb-2">送信する</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
 
     <!-- Popper and Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
