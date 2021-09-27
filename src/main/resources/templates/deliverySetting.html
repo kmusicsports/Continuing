@@ -14,13 +14,69 @@
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
     <link th:href="@{/css/welcome.css}" rel="stylesheet" type="text/css">
     
-    <title th:text="${@environment.getProperty('app.name')} + ' - ' + #{title.welcome}"></title>
+    <title th:text="メール配信設定 + ': ' + ${@environment.getProperty('app.name')}"></title>
 </head>
 <body>
 
     <nav th:replace="fragments :: navbar_area"></nav>
     
-    
+    <div class="container">
+        <!-- Outer Row -->
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="card o-hidden border-0 shadow-lg my-5">
+                    <div class="card-body p-0">
+                        <!-- Nested Row within Card Body -->
+                        <div class="row" th:object="${profileData}">
+                            <div class="p-5">
+                                <div class="text-center mb-5">
+                                    <h2>配信の登録・解除</h2>
+                                </div>
+                                <form th:action="@{/User/setting/mailDelivery/update}" enctype="multipart/form-data" method="post">
+                                    <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
+                                
+                                    <div class="ms-4">
+		                                    <div class="form-check form-switch mt-3">
+																				  <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+																				  <label class="form-check-label" for="flexSwitchCheckDefault">フォロー新着</label>
+																				</div>
+																				<div class="form-check form-switch mt-3">
+																				  <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
+																				  <label class="form-check-label" for="flexSwitchCheckChecked">フォロー中ユーザーのミーティング新着</label>
+																				</div>                          
+																        <div class="form-check form-switch mt-3">
+                                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+                                          <label class="form-check-label" for="flexSwitchCheckDefault">参加予約したミーティングの削除</label>
+                                        </div>
+                                        <div class="form-check form-switch mt-3">
+                                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
+                                          <label class="form-check-label" for="flexSwitchCheckChecked">ミーティングへの参加予約</label>
+                                        </div>
+                                        <div class="form-check form-switch mt-3">
+                                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
+                                          <label class="form-check-label" for="flexSwitchCheckChecked">ミーティングへの参加予約取り消し</label>
+                                        </div>
+                                        <div class="form-check form-switch mt-3">
+                                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
+                                          <label class="form-check-label" for="flexSwitchCheckChecked">今日参加予定のミーティング</label>
+                                        </div>                                    
+                                    </div>
+                                    
+                                    <div class="row ms-auto me-auto mt-5 mb-3">
+                                        <div class="col-1"></div>
+                                        <a th:href="@{/User/setting}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="#{button.cancel}"></a>
+                                        <div class="col-2"></div>
+                                        <button type="submit" class="btn btn-primary col-4 pt-2 pb-2" th:text="#{button.update}"></button>
+                                    </div>
+                                    
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Popper and Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
