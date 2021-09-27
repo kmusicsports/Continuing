@@ -108,13 +108,6 @@ public class UserController {
 		return mv;
 	}
 	
-	@GetMapping("/User/setting")
-	public ModelAndView setting(ModelAndView mv) {
-		mv.setViewName("setting");
-		mv.addObject("searchData", new SearchData());
-		return mv;
-	}
-	
 	@GetMapping("/User/delete")
 	public String deleteUser(RedirectAttributes redirectAttributes) {
 		Integer userId = (Integer)session.getAttribute("user_id");
@@ -226,4 +219,11 @@ public class UserController {
 		return mv;
 	}
 	
+	@GetMapping("/User/setting")
+	public ModelAndView showSetting(ModelAndView mv) {
+		mv.setViewName("setting");
+		mv.addObject("searchData", new SearchData());
+		return mv;
+	}
+		
 }
