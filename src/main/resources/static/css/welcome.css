@@ -1,0 +1,19 @@
+body {
+  font-family: "Merriweather", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+.btn-xl {
+  font-weight: 700;
+}
+
+header {
+  background: linear-gradient(to bottom, #A0A5A7 0%, #b5b6bb 100%);
+}
+
+.section-urls {
+  display:none;	
+}
+
+@media screen and (max-width: 460px){
+.section-urls {display:block;}
+}
