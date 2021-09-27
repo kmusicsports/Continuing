@@ -39,8 +39,7 @@ public class FollowController {
 			HttpServletRequest request, RedirectAttributes redirectAttributes) {
 		
 		Integer followerId = (Integer)session.getAttribute("user_id");
-		Users follower = usersRepository.findById(followerId).get();
-		Locale locale = new Locale(follower.getLanguage());
+		Users follower = usersRepository.findById(followerId).get(); 
 		Optional<Users> someUser = usersRepository.findById(followeeId);
 		if(someUser.isPresent()) {
 			Follows follow = new Follows(followerId, followeeId);
@@ -48,11 +47,11 @@ public class FollowController {
 			
 			Users followee = someUser.get();
 		
-			followService.sendMail(followee.getEmail(), follower, locale);
+			followService.sendMail(followee, follower, new Locale(followee.getLanguage()));
 			
 		    return "redirect:" + session.getAttribute("path");
 		} else {
-			String msg = messageSource.getMessage("msg.w.user_not_found", null, locale);
+			String msg = messageSource.getMessage("msg.w.user_not_found", null, new Locale(follower.getLanguage()));
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			return "redirect:/home";
 		}

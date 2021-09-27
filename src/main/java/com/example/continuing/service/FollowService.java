@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
+import com.example.continuing.entity.Deliveries;
 import com.example.continuing.entity.Follows;
 import com.example.continuing.entity.Users;
+import com.example.continuing.repository.DeliveriesRepository;
 import com.example.continuing.repository.FollowsRepository;
 import com.example.continuing.repository.UsersRepository;
 
@@ -23,6 +25,7 @@ public class FollowService {
 	private final UsersRepository usersRepository;
 	private final MailService mailService;
 	private final MessageSource messageSource;
+	private final DeliveriesRepository deliveriesRepository;
 
 	@Value("${app.url}")
 	private String APP_URL;
@@ -55,19 +58,20 @@ public class FollowService {
 		return followersList;
 	}
 	
-	public void sendMail(String followeeEmail, Users follower, Locale locale) {
-		String subject = follower.getName() + " "
-				// has followed you.
-				+ messageSource.getMessage("mail.subject.followed_you", null, locale);
-		String messageText = "<html><head></head><html><head></head><body>"
-				+ "<a href='" + APP_URL + "/User/" + follower.getId() + "'>" 
-				+ follower.getName() 
-				// 's page
-				+ messageSource.getMessage("mail.msg.follower_page", null, locale)
-				+ "</a>"
-				+ "</body></html>";
-		
-		mailService.sendMail(followeeEmail, subject, messageText);
+	public void sendMail(Users followee, Users follower, Locale locale) {
+		Deliveries deliveries = deliveriesRepository.findByUserId(followee.getId()).get();
+		if(deliveries.getFollowed() == 1) {
+			String subject = follower.getName() + " "
+					+ messageSource.getMessage("mail.subject.followed_you", null, locale);
+			String messageText = "<html><head></head><html><head></head><body>"
+					+ "<a href='" + APP_URL + "/User/" + follower.getId() + "'>" 
+					+ follower.getName()
+					+ messageSource.getMessage("mail.msg.follower_page", null, locale)
+					+ "</a>"
+					+ "</body></html>";
+			
+			mailService.sendMail(followee.getEmail(), subject, messageText);			
+		}
 	}
 	
 }

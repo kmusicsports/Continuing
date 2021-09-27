@@ -21,11 +21,13 @@ import org.springframework.validation.FieldError;
 
 import com.example.continuing.common.Utils;
 import com.example.continuing.comparator.MeetingsComparator;
+import com.example.continuing.entity.Deliveries;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Records;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.MeetingData;
 import com.example.continuing.form.SearchData;
+import com.example.continuing.repository.DeliveriesRepository;
 import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.RecordsRepository;
 import com.example.continuing.repository.UsersRepository;
@@ -44,6 +46,7 @@ public class MeetingService {
 	private final MeetingsComparator meetingsComparator;
 	private final MailService mailService;
 	private final MessageSource messageSource;
+	private final DeliveriesRepository deliveriesRepository;
 	
 	@Value("${app.url}")
 	private String APP_URL;
@@ -214,6 +217,7 @@ public class MeetingService {
 	}
 	
 	public void sendMail(Meetings meeting, Users user, String type, Locale locale) {
+		Deliveries deliveries = null;
 		String username = user.getName();
 		String subject = null;
 		String messageText = "<html><head></head><body>";
@@ -236,53 +240,65 @@ public class MeetingService {
 		
 		switch(type) {
 			case "create":
-				subject = meeting.getHost().getName() + " " 
-						+ messageSource.getMessage("mail.subject.meeting_created", null, locale);
-				messageText += meeting.getHost().getName() + " " 
-						+ messageSource.getMessage("mail.msg.meeting_created", null, locale) 
-						+ "<br>"
-						+ meetingInfo
-						+ "<a href='" + APP_URL + "/Meeting/" + meeting.getId() + "'>" 
-						+ messageSource.getMessage("mail.msg.go_join", null, locale) 
-						+ "</a>"
-						+ "</body></html>";
-				
-				mailService.sendMail(user.getEmail(), subject, messageText);
+				deliveries = deliveriesRepository.findByUserId(user.getId()).get();
+				if(deliveries.getMeetingCreated() == 1) {
+					subject = meeting.getHost().getName() + " " 
+							+ messageSource.getMessage("mail.subject.meeting_created", null, locale);
+					messageText += meeting.getHost().getName() + " " 
+							+ messageSource.getMessage("mail.msg.meeting_created", null, locale) 
+							+ "<br>"
+							+ meetingInfo
+							+ "<a href='" + APP_URL + "/Meeting/" + meeting.getId() + "'>" 
+							+ messageSource.getMessage("mail.msg.go_join", null, locale) 
+							+ "</a>"
+							+ "</body></html>";
+					
+					mailService.sendMail(user.getEmail(), subject, messageText);					
+				}
 				break;
 			case "delete":
-				subject = messageSource.getMessage("mail.subject.meeting_deleted", null, locale);
-				messageText += messageSource.getMessage("mail.msg.meeting_deleted", null, locale)
-						+ "<br>"
-						+ meetingInfo
-						+ "<a href='" + APP_URL + "/home'>" 
-						+ messageSource.getMessage("mail.msg.go_find_replacement", null, locale) 
-						+ "</a>"
-						+ "</body></html>";
-				
-				mailService.sendMail(user.getEmail(), subject, messageText);
+				deliveries = deliveriesRepository.findByUserId(user.getId()).get();
+				if(deliveries.getMeetingDeleted() == 1) {
+					subject = messageSource.getMessage("mail.subject.meeting_deleted", null, locale);
+					messageText += messageSource.getMessage("mail.msg.meeting_deleted", null, locale)
+							+ "<br>"
+							+ meetingInfo
+							+ "<a href='" + APP_URL + "/home'>" 
+							+ messageSource.getMessage("mail.msg.go_find_replacement", null, locale) 
+							+ "</a>"
+							+ "</body></html>";
+					
+					mailService.sendMail(user.getEmail(), subject, messageText);					
+				}
 				break;
 			case "join":
-				subject = messageSource.getMessage("mail.subject.meeting_joined", null, locale);
-				messageText += messageSource.getMessage("mail.msg.meeting_joined_start", null, locale) 
-						+ username + " "
-						+ messageSource.getMessage("mail.msg.meeting_joined_end", null, locale) 
-						+ "<br>"
-						+ meetingInfo
+				deliveries = deliveriesRepository.findByUserId(meeting.getHost().getId()).get();
+				if(deliveries.getMeetingJoined() == 1) {
+					subject = messageSource.getMessage("mail.subject.meeting_joined", null, locale);
+					messageText += messageSource.getMessage("mail.msg.meeting_joined_start", null, locale) 
+							+ username + " "
+							+ messageSource.getMessage("mail.msg.meeting_joined_end", null, locale) 
+							+ "<br>"
+							+ meetingInfo
 //					+ "参加を拒否する場合は<a href='https://" + APP_URL + "/'>こちら</a>";
-						+ "</body></html>";
-				
-				mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
+							+ "</body></html>";
+					
+					mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);					
+				}
 				break;
 			case "leave":
-				subject = username + " " 
-						+ messageSource.getMessage("mail.subject.meeting_left", null, locale);
-				messageText += username + " " 
-						+ messageSource.getMessage("mail.msg.meeting_left", null, locale) 
-						+ "<br>"
-						+ meetingInfo
-						+ "</body></html>";
-				
-				mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);
+				deliveries = deliveriesRepository.findByUserId(meeting.getHost().getId()).get();
+				if(deliveries.getMeetingLeft() == 1) {
+					subject = username + " " 
+							+ messageSource.getMessage("mail.subject.meeting_left", null, locale);
+					messageText += username + " " 
+							+ messageSource.getMessage("mail.msg.meeting_left", null, locale) 
+							+ "<br>"
+							+ meetingInfo
+							+ "</body></html>";
+					
+					mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);					
+				}
 				break;
 			default:
 				subject = messageSource.getMessage("mail.subject.error", null, locale);

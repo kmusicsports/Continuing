@@ -26,6 +26,7 @@ import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.ProfileData;
 import com.example.continuing.form.SearchData;
+import com.example.continuing.repository.DeliveriesRepository;
 import com.example.continuing.repository.FollowsRepository;
 import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.UsersRepository;
@@ -52,6 +53,7 @@ public class UserController {
 	private final PasswordEncoder passwordEncoder;
 	private final MeetingService meetingService;
 	private final MessageSource messageSource;
+	private final DeliveriesRepository deliveriesRepository;
 	
 	@GetMapping("/User/{user_id}")
 	public ModelAndView showUserDetail(@PathVariable(name = "user_id") int userId,
@@ -108,13 +110,6 @@ public class UserController {
 		return mv;
 	}
 	
-	@GetMapping("/User/setting")
-	public ModelAndView setting(ModelAndView mv) {
-		mv.setViewName("setting");
-		mv.addObject("searchData", new SearchData());
-		return mv;
-	}
-	
 	@GetMapping("/User/delete")
 	public String deleteUser(RedirectAttributes redirectAttributes) {
 		Integer userId = (Integer)session.getAttribute("user_id");
@@ -122,6 +117,7 @@ public class UserController {
 		Locale locale = new Locale(user.getLanguage());
 		followsRepository.deleteByFollowerId(userId);
 		followsRepository.deleteByFolloweeId(userId);
+		deliveriesRepository.deleteByUserId(userId);
 		meetingsRepository.deleteByHost(user);
 		usersRepository.deleteById(userId);		
 		// セッション情報をクリアする
@@ -223,6 +219,13 @@ public class UserController {
 		mv.addObject("userList", userList);
 		mv.addObject("myFollowsList", myFollowsList);
 		mv.addObject("rankingMap", rankingMap);
+		return mv;
+	}
+	
+	@GetMapping("/User/setting")
+	public ModelAndView showSetting(ModelAndView mv) {
+		mv.setViewName("setting");
+		mv.addObject("searchData", new SearchData());
 		return mv;
 	}
 	

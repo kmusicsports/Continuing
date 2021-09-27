@@ -19,10 +19,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.continuing.dto.MessageDto;
+import com.example.continuing.entity.Deliveries;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.LoginData;
 import com.example.continuing.form.RegisterData;
 import com.example.continuing.form.SearchData;
+import com.example.continuing.repository.DeliveriesRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.LoginService;
 
@@ -38,6 +40,7 @@ public class LoginController {
 	private final PasswordEncoder passwordEncoder;
 	private final MessageSource messageSource;
 	private final CsrfTokenRepository csrfTokenRepository;
+	private final DeliveriesRepository deliveriesRepository;
 
 	@GetMapping("/showLogin")
 	public ModelAndView showLogin(ModelAndView mv) {
@@ -76,7 +79,7 @@ public class LoginController {
 		}
 	}
 	
-	@GetMapping("/logout")
+	@GetMapping("/User/logout")
 	public String logout(RedirectAttributes redirectAttributes) {
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();
@@ -109,6 +112,8 @@ public class LoginController {
 				// ユーザー新規登録
 				Users newUser = registerData.toEntity(passwordEncoder, locale);
 				usersRepository.saveAndFlush(newUser);
+				Deliveries deliveries = new Deliveries(newUser.getId());
+				deliveriesRepository.saveAndFlush(deliveries);
 				loginService.sendMail(newUser.getEmail(), "welcome", locale);
 				
 				mv.setViewName("redirect:/showLogin");
