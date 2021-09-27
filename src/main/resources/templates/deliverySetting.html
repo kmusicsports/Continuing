@@ -14,7 +14,7 @@
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
     <link th:href="@{/css/welcome.css}" rel="stylesheet" type="text/css">
     
-    <title th:text="メール配信設定 + ': ' + ${@environment.getProperty('app.name')}"></title>
+    <title th:text="#{title.email_delivery_settings} + ': ' + ${@environment.getProperty('app.name')}"></title>
 </head>
 <body>
 
@@ -30,41 +30,46 @@
                         <div class="row" th:object="${profileData}">
                             <div class="p-5">
                                 <div class="text-center mb-5">
-                                    <h2>配信の登録・解除</h2>
+                                    <h2 th:text="#{text.email_delivery_settings}"></h2>
                                 </div>
-                                <form th:action="@{/User/setting/mailDelivery/update}" enctype="multipart/form-data" method="post">
+                                <form th:action="@{/User/setting/emailDelivery/update}" method="post" th:object="${deliveryData}">
                                     <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
-                                
                                     <div class="ms-4">
 		                                    <div class="form-check form-switch mt-3">
-																				  <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-																				  <label class="form-check-label" for="flexSwitchCheckDefault">フォロー新着</label>
+																					  <input class="form-check-input" type="checkbox" value="1" th:field="*{followed}">
+																					  <input type="hidden" name="!followed" value="0" />
+																					  <label class="form-check-label" th:text="#{label.followed}"></label>
 																				</div>
 																				<div class="form-check form-switch mt-3">
-																				  <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
-																				  <label class="form-check-label" for="flexSwitchCheckChecked">フォロー中ユーザーのミーティング新着</label>
+																					  <input class="form-check-input" type="checkbox" value="1" th:field="*{meetingCreated}">
+	                                          <input type="hidden" name="!meetingCreated" value="0" />
+																					  <label class="form-check-label" th:text="#{label.meeting_created}"></label>
 																				</div>                          
 																        <div class="form-check form-switch mt-3">
-                                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-                                          <label class="form-check-label" for="flexSwitchCheckDefault">参加予約したミーティングの削除</label>
+	                                          <input class="form-check-input" type="checkbox" value="1" th:field="*{meetingDeleted}">
+	                                          <input type="hidden" name="!meetingDeleted" value="0" />
+	                                          <label class="form-check-label" th:text="#{label.meeting_deleted}"></label>
                                         </div>
                                         <div class="form-check form-switch mt-3">
-                                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
-                                          <label class="form-check-label" for="flexSwitchCheckChecked">ミーティングへの参加予約</label>
+	                                          <input class="form-check-input" type="checkbox" value="1" th:field="*{meetingJoined}">
+	                                          <input type="hidden" name="!meetingJoined" value="0" />
+	                                          <label class="form-check-label" th:text="#{label.meeting_joined}"></label>
                                         </div>
                                         <div class="form-check form-switch mt-3">
-                                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
-                                          <label class="form-check-label" for="flexSwitchCheckChecked">ミーティングへの参加予約取り消し</label>
+	                                          <input class="form-check-input" type="checkbox" value="1" th:field="*{meetingLeft}">
+	                                          <input type="hidden" name="!meetingLeft" value="0" />
+	                                          <label class="form-check-label" th:text="#{label.meeting_left}"></label>
                                         </div>
                                         <div class="form-check form-switch mt-3">
-                                          <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked" checked>
-                                          <label class="form-check-label" for="flexSwitchCheckChecked">今日参加予定のミーティング</label>
+	                                          <input class="form-check-input" type="checkbox" value="1" th:field="*{todayMeetings}">
+	                                          <input type="hidden" name="!todayMeetings" value="0" />
+	                                          <label class="form-check-label" th:text="#{label.today_meetings}"></label>
                                         </div>                                    
                                     </div>
                                     
                                     <div class="row ms-auto me-auto mt-5 mb-3">
                                         <div class="col-1"></div>
-                                        <a th:href="@{/User/setting}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="#{button.cancel}"></a>
+                                        <a th:href="@{/User/setting}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="#{button.return}"></a>
                                         <div class="col-2"></div>
                                         <button type="submit" class="btn btn-primary col-4 pt-2 pb-2" th:text="#{button.update}"></button>
                                     </div>
