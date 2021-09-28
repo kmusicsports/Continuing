@@ -14,7 +14,7 @@
     <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
     <link th:href="@{/css/welcome.css}" rel="stylesheet" type="text/css">
     
-    <title th:text="お問い合わせ + ': ' + ${@environment.getProperty('app.name')}"></title>
+    <title th:text="#{title.contactForm} + ': ' + ${@environment.getProperty('app.name')}"></title>
 </head>
 <body>
 
@@ -29,31 +29,35 @@
                         <!-- Nested Row within Card Body -->
                         <div class="row">
                             <div class="p-5">
-                                <h2 class="text-center mb-5">お問い合わせ</h2>
+                                <h2 class="text-center mb-5" th:text="#{text.contact}"></h2>
                                 <div class="col-10 ms-auto me-auto mb-5">
-                                    <span th:text="お客様のご意見は今後の参考にさせていただきます。頂いたお問い合わせに対し、個別の回答ができない場合や回答にお時間をいただく場合がございますが、ご理解いただきますようお願いします。"></span>
-                                    <p th:text="ご意見はいずれもサービスの改善に活用させていただきます。"></p>
+                                    <span th:text="#{text.contactForm.request_understanding}"></span>
+                                    <p th:text="#{text.contactForm.use_improve_service}"></p>
                                 </div>
-                                <form th:action="@{/User/update}" method="post">
+                                <form th:action="@{/User/setting/contact}" method="post" th:object="${contactData}">
                                     <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
                                     <div class="form-group col-10 ms-auto me-auto">
                                         <label th:text="#{label.name}"></label>
-                                        <input type="text" class="form-control">
+                                        <input type="text" class="form-control" name="name" th:value="*{name}" required>
+                                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="invalid-feedback"></div>
+                                        
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
                                         <label th:text="#{label.email}" class="mt-4"></label>
-                                        <input type="email" class="form-control" th:placeholder="#{placeholder.email}">
+                                        <input type="email" class="form-control" name="email" th:value="*{email}" th:placeholder="#{placeholder.email}" required>
+                                        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto mb-3">
-                                        <label class="mt-4">内容</label>
-                                        <textarea class="form-control" rows="6" cols="40" th:placeholder="ここにお問い合わせの内容を入力してください"></textarea>
+                                        <label class="mt-4" th:text="#{label.contents}"></label>
+                                        <textarea class="form-control" rows="6" cols="40" th:field="*{contents}" th:placeholder="#{placeholder.contactForm.contents}" required></textarea>
+                                        <div th:if="${#fields.hasErrors('contents')}" th:errors="*{contents}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     
                                     <div class="row ms-auto me-auto mt-5">
                                         <div class="col-1"></div>
-                                        <a th:href="@{/User/setting}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="戻る"></a>
+                                        <a th:href="@{/User/setting}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="#{button.return}"></a>
                                         <div class="col-2"></div>
-                                        <button type="submit" class="btn btn-primary col-4 pt-2 pb-2">送信する</button>
+                                        <button type="submit" class="btn btn-primary col-4 pt-2 pb-2" th:text="#{button.send}"></button>
                                     </div>
                                 </form>
                             </div>
