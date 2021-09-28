@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -15,20 +16,24 @@ import org.springframework.validation.FieldError;
 
 import com.example.continuing.common.Utils;
 import com.example.continuing.entity.Users;
+import com.example.continuing.form.ContactData;
 import com.example.continuing.form.ProfileData;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.UsersRepository;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserService {
 
 	private final UsersRepository usersRepository;
 	private final MailService mailService;
 	private final MessageSource messageSource;
 
+	@Value("${spring.mail.username}")
+	private String FROM_ADDRESS;
+	
 	// プロフィール編集画面用のチェック
 	public boolean isValid(ProfileData profileData, Users oldData, 
 			BindingResult result, Locale locale) {
@@ -129,6 +134,45 @@ public class UserService {
 		}
 		
 		return rankingMap;
+	}
+	
+	// お問い合わせフォーム用のチェック
+	public boolean isValid(ContactData contactData, Users user, BindingResult result, Locale locale) {
+		boolean answer = true;
+		
+		if(!contactData.getName().equals(user.getName())) {
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"name",
+					messageSource.getMessage("Unmatch.name", null, locale)
+					);
+			result.addError(fieldError);
+			contactData.setName(null);
+			answer = false;
+		}
+		
+		if(!contactData.getEmail().equals(user.getEmail())) {
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"email",
+					messageSource.getMessage("Unmatch.email", null, locale)
+					);
+			result.addError(fieldError);
+			contactData.setEmail(null);
+			answer = false;
+		}
+		
+		return answer;
+	}
+	
+	public void sendContactMail(ContactData contactData) {
+		String messageText = "<html><head></head><body>"
+				+ "Username: " + contactData.getName() + "<br>"
+				+ "Email address: " + contactData.getEmail() + "<br>"
+				+ "Contents: " + contactData.getContents() + "<br>"
+//				+ "Version: " + VERSION"
+				+ "</body></html>";
+		mailService.sendMail(FROM_ADDRESS, "Contact", messageText);
 	}
 	
 }
