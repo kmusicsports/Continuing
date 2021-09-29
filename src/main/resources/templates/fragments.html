@@ -27,23 +27,24 @@
                 </div>
                 <div th:unless="${session.user_id == null}" class="ms-auto d-flex">
 		                <form th:action="@{/search}" method="post" th:object="${searchData}">
-		                    <input class="form-control me-2" type="search" name="keyword" th:value="*{keyword}" th:placeholder="#{label.keyword}">
+		                    <input class="form-control me-2 p-2" type="search" name="keyword" th:value="*{keyword}" th:placeholder="#{label.keyword}">
 		                    <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
 		                </form>
                     <ul class="navbar-nav mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link ms-2 me-2" aria-current="page" th:href="@{/Meeting/showCreateForm}">
+                            <a class="nav-link ms-2 me-2 btn btn-outline-secondary" aria-current="page" th:href="@{/Meeting/showCreateForm}">
                                 <i class="fas fa-plus"></i>
+                                <span>ミーティング作成</span>
                             </a>
                         </li>
                         <li class="nav-item dropdown">
-                            <button type="button" class="btn btn-secondary dropdown-toggle" id="nav-dropdown" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" th:text="${session.user_name}"></button>
+                            <button type="button" class="btn btn-secondary dropdown-toggle p-2" id="nav-dropdown" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" th:text="${session.user_name}"></button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
                                 <li><a class="dropdown-item" th:href="@{/User/mypage}" th:text="#{link.mypage}"></a></li>
                                 <li><a class="dropdown-item" th:href="@{/Meeting/list/mine/today}" th:text="#{link.today_my_meeting}"></a></li>
                                 <li><a class="dropdown-item" th:href="@{/User/setting}" th:text="#{link.setting}"></a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" th:href="@{/logout}" th:text="#{link.logout}"></a></li>
+                                <li><a class="dropdown-item" th:href="@{/User/logout}" th:text="#{link.logout}"></a></li>
                             </ul>
                         </li>
                     </ul>
