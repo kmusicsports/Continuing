@@ -92,6 +92,15 @@ public class LoginService {
 			}
 		}
 		
+		if(name.toLowerCase().contains("continuing")) {
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"name",
+					messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
+			result.addError(fieldError);
+			return false;
+		}
+		
 		someUser = usersRepository.findByEmail(registerData.getEmail());		
 		if(someUser.isPresent()) {
 			// 既にemailアドレスが登録されている ->　別のemailアドレスで登録してください
@@ -113,22 +122,17 @@ public class LoginService {
 		String messageText = "<html><head></head><body>";
 		if(type.equals("welcome")) {
 			subject = messageSource.getMessage("mail.subject.regist_thanks", null, locale);
-			messageText += "<h3>"
-					// "Welcome to " 
+			messageText += "<h3>" 
 					+ messageSource.getMessage("mail.msg.welcome_start", null, locale)
 					+ " " + APP_NAME
-					// "!"
 					+ messageSource.getMessage("mail.msg.welcome_end", null, locale) 
 					+ "</h3>"
-					// "You're officially a Continuing user."
 					+ messageSource.getMessage("mail.msg.regist_successful", null, locale)
 					+ "<br>"
 					+ "<br>"
 					+ "<a href='" + APP_URL + "/User/mypage'>"
-					// "Go to"
 					+ messageSource.getMessage("mail.msg.go_app_start", null, locale)
-					+ " " + APP_NAME 
-					// "!"
+					+ " " + APP_NAME
 					+ messageSource.getMessage("mail.msg.go_app_end", null, locale)
 					+ "</a>";
 		} else {
