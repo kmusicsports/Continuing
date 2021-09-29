@@ -246,7 +246,7 @@ public class UserController {
 		Locale locale = new Locale(user.getLanguage());
 		boolean isValid = userService.isValid(contactData, user, result, locale);
 		if(!result.hasErrors() && isValid) {
-			userService.sendContactMail(contactData);
+			userService.sendContactEmail(contactData);
 			String msg = messageSource.getMessage("msg.s.contact", null, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 			mv.setViewName("redirect:/User/setting");
