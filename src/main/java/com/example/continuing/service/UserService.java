@@ -34,6 +34,9 @@ public class UserService {
 	@Value("${spring.mail.username}")
 	private String FROM_ADDRESS;
 	
+	@Value("${app.version}")
+	private String APP_VERSION;
+	
 	// プロフィール編集画面用のチェック
 	public boolean isValid(ProfileData profileData, Users oldData, 
 			BindingResult result, Locale locale) {
@@ -78,6 +81,7 @@ public class UserService {
 				profileData.setName(null);
 				return false;
 			}
+			
 			// 名前が全角スペースだけで構成されていたらエラー
 			if (!Utils.isBlank(newName)) {
 				if (Utils.isAllDoubleSpace(newName)) {
@@ -88,6 +92,15 @@ public class UserService {
 					result.addError(fieldError);
 					return false;
 				}
+			}
+			
+			if(newName.toLowerCase().contains("continuing")) {
+				FieldError fieldError = new FieldError(
+						result.getObjectName(),
+						"name",
+						messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
+				result.addError(fieldError);
+				return false;
 			}
 		}
 		
@@ -165,12 +178,13 @@ public class UserService {
 		return answer;
 	}
 	
-	public void sendContactMail(ContactData contactData) {
+	public void sendContactEmail(ContactData contactData) {
 		String messageText = "<html><head></head><body>"
 				+ "Username: " + contactData.getName() + "<br>"
 				+ "Email address: " + contactData.getEmail() + "<br>"
 				+ "Contents: " + contactData.getContents() + "<br>"
-//				+ "Version: " + VERSION"
+				+ "<br>"
+				+ "Version: " + APP_VERSION
 				+ "</body></html>";
 		mailService.sendMail(FROM_ADDRESS, "Contact", messageText);
 	}

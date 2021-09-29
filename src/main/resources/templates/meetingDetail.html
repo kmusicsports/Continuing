@@ -73,9 +73,9 @@
                         <td class="meeting-url">
                             <div th:unless="${#lists.contains(myJoinMeetingList, meeting)}">
 		                            <span class="hide-text" th:unless="${session.user_id == meeting.host.Id}" th:text="#{text.hidden}"></span>
-		                            <a th:if="${session.user_id == meeting.host.Id}" th:href="@{/Meeting/check/__${meeting.id}__}" th:text="${meeting.startUrl}" target="_blank" rel="noopener noreferrer"></a>
+		                            <a th:if="${session.user_id == meeting.host.Id}" th:href="@{/Meeting/check/__${meeting.id}__}" th:text="${meeting.startUrl}" data-toggle="modal" data-target="#meetingRulesModal"></a>
                             </div>
-                            <a th:if="${#lists.contains(myJoinMeetingList, meeting) && session.user_id != meeting.host.Id}" th:href="@{/Meeting/check/__${meeting.id}__}" th:text="${meeting.joinUrl}" target="_blank" rel="noopener noreferrer"></a>                            
+                            <a th:if="${#lists.contains(myJoinMeetingList, meeting) && session.user_id != meeting.host.Id}" th:href="@{/Meeting/check/__${meeting.id}__}" th:text="${meeting.joinUrl}" data-toggle="modal" data-target="#meetingRulesModal"></a>                            
                         </td>
                     </tr>
                     <tr>
@@ -104,6 +104,32 @@
                 </div>
             </div>
             
+            <div class="modal fade" id="meetingRulesModal" tabindex="-1" role="dialog" aria-labelledby="meetingRulesModalLabel" aria-hidden="true">
+                <!-- meetingRulesModal -->
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="meetingRulesModalLabel" th:text="#{text.meeting_rules}"></h5>
+                        </div>
+                        <div class="modal-body">
+                            <h6 th:text="'1. ' + #{text.meeting_rules.camera}"></h6>
+                            <br>
+                            <h6 th:text="'2. ' + #{text.meeting_rules.microphone}"></h6>
+                            <br>
+                            <h6 th:text="'3. ' + #{text.meeting_rules.opening}"></h6>
+                            <br>
+                            <h6 th:text="'4. ' + #{text.meeting_rules.leave_seat}"></h6>
+                            <br>
+                            <h6 th:text="'5. ' + #{text.meeting_rules.ending}"></h6>         
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{button.close}" ></button>
+                            <a th:href="@{/Meeting/check/__${meeting.id}__}" class="btn btn-primary ms-2" th:text="#{button.enter}" target="_blank" rel="noopener noreferrer"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
         </form>
     </div>
 
@@ -119,8 +145,8 @@
                         <span class="avatar btn btn-light"></span>
                     </div>
                     <a th:href="@{/User/__${user.id}__}" class="text-reset fs-4 mt-2 ms-3" th:text="${user.name}"></a>
-                    <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" value="フォロー中" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
-                    <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" value="フォロー" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
+                    <input type="submit" th:formaction="@{/User/unfollow/__${user.id}__}" th:value="#{button.unfollow}" class="btn btn-primary mt-2 ms-auto me-2" th:if="${#lists.contains(myFollowsList, user)}">
+                    <input type="submit" th:formaction="@{/User/follow/__${user.id}__}" th:value="#{button.follow}" class="btn btn-outline-primary ms-auto me-2" th:if="${!#lists.contains(myFollowsList, user) && session.user_id != user.id}">
                 </div>
                 <p class="ms-5 me-5 mt-2" th:text="${user.profileMessage}"></p>
             </button>
