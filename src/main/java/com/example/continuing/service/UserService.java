@@ -81,6 +81,7 @@ public class UserService {
 				profileData.setName(null);
 				return false;
 			}
+			
 			// 名前が全角スペースだけで構成されていたらエラー
 			if (!Utils.isBlank(newName)) {
 				if (Utils.isAllDoubleSpace(newName)) {
@@ -91,6 +92,15 @@ public class UserService {
 					result.addError(fieldError);
 					return false;
 				}
+			}
+			
+			if(newName.toLowerCase().contains("continuing")) {
+				FieldError fieldError = new FieldError(
+						result.getObjectName(),
+						"name",
+						messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
+				result.addError(fieldError);
+				return false;
 			}
 		}
 		
