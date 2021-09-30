@@ -2,6 +2,7 @@ package com.example.continuing.service;
 
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -111,29 +112,41 @@ public class LoginService {
 		String token = null;
 		String subject = null;;
 		String messageText = "<html><head></head><body>";
-		if(type.equals("welcome")) {
-			subject = messageSource.getMessage("mail.subject.regist_thanks", null, locale);
-			messageText += "<h3>"
-					// "Welcome to " 
-					+ messageSource.getMessage("mail.msg.welcome_start", null, locale)
-					+ " " + APP_NAME
-					// "!"
-					+ messageSource.getMessage("mail.msg.welcome_end", null, locale) 
-					+ "</h3>"
-					// "You're officially a Continuing user."
-					+ messageSource.getMessage("mail.msg.regist_successful", null, locale)
-					+ "<br>"
-					+ "<br>"
-					+ "<a href='" + APP_URL + "/User/mypage'>"
-					// "Go to"
-					+ messageSource.getMessage("mail.msg.go_app_start", null, locale)
-					+ " " + APP_NAME 
-					// "!"
-					+ messageSource.getMessage("mail.msg.go_app_end", null, locale)
-					+ "</a>";
-		} else {
-			subject = messageSource.getMessage("mail.subject.error", null, locale);
-			messageText += messageSource.getMessage("mail.msg.operation_error", null, locale);
+		switch(type) {
+			case "welcome":
+				subject = messageSource.getMessage("mail.subject.regist_thanks", null, locale);
+				messageText += "<h3>" 
+						+ messageSource.getMessage("mail.msg.welcome_start", null, locale)
+						+ " " + APP_NAME
+						+ messageSource.getMessage("mail.msg.welcome_end", null, locale) 
+						+ "</h3>"
+						+ messageSource.getMessage("mail.msg.regist_successful", null, locale)
+						+ "<br>"
+						+ "<br>"
+						+ "<a href='" + APP_URL + "/User/mypage'>"
+						+ messageSource.getMessage("mail.msg.go_app_start", null, locale)
+						+ " " + APP_NAME
+						+ messageSource.getMessage("mail.msg.go_app_end", null, locale)
+						+ "</a>";
+				break;
+			case "reset-password":
+				token = UUID.randomUUID().toString();
+				subject = messageSource.getMessage("mail.subject.reset_password", null, locale);
+				messageText += messageSource.getMessage("mail.msg.reset_password", null, locale)
+						+ "<br>"
+						+ "<br>"
+						+ "<a href='" + APP_URL + "/reset-password"
+						+ "/email/" + email 
+						+ "/token/" + token
+						+ "'>"
+						+ APP_URL + "/reset-password"
+						+ "/email/" + email 
+						+ "/token/" + token
+						+ "</a>";
+				break;
+			default:
+				subject = messageSource.getMessage("mail.subject.error", null, locale);
+				messageText += messageSource.getMessage("mail.msg.operation_error", null, locale);
 		}
 		
 		messageText += "</body></html>";
