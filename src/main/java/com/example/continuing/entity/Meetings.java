@@ -56,9 +56,6 @@ public class Meetings {
 	@Column(name = "end_time")
     private Time endTime;
 	
-	@Column(name = "duration")
-    private Long duration;
-    
 	@Column(name = "password")
 	private String password;
 	
