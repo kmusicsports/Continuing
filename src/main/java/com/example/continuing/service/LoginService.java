@@ -125,6 +125,11 @@ public class LoginService {
 		String token = null;
 		String subject = null;;
 		String messageText = "<html><head></head><body>";
+		
+		if(type == null) {
+			type = "error";
+		}
+		
 		switch(type) {
 			case "welcome":
 				subject = messageSource.getMessage("mail.subject.regist_thanks", null, locale);
