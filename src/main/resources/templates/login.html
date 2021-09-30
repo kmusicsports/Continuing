@@ -49,11 +49,36 @@
                                 </form>
                                 <hr>
                                 <div class="text-center">
-                                    <a class="small" href="#" th:text="#{link.login_guest}"></a>
+                                    <a class="small" href="#" th:text="#{link.forget_password}" data-toggle="modal" data-target="#resetPasswordModal"></a>
                                 </div>
                                 <div class="text-center">
                                     <a class="small" th:href="@{/showRegister}" th:text="#{link.first_use}"></a>
                                 </div>
+                                
+                                <div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+										                <!-- resetPasswordModal -->
+										                <div class="modal-dialog modal-dialog-centered" role="document">
+										                    <div class="modal-content">
+										                        <form th:action="@{/login/reset-password}" method="post" th:object="${emailData}">										                        
+												                        <div class="modal-header">
+												                            <h5 class="modal-title" id="resetPasswordModalLabel" th:text="#{text.reset_password}"></h5>
+												                        </div>
+												                        <div class="modal-body">
+												                            <h6 th:text="#{text.reset_password.send_email}"></h6>
+												                            <div class="mt-3">
+														                            <label th:text="#{label.email}"></label>
+														                            <input type="email" class="form-control" th:placeholder="#{placeholder.email}" name="email" th:value="*{email}" required>
+                                                        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:errorclass="invalid-feedback"></div>
+												                            </div>
+												                        </div>
+												                        <div class="modal-footer">
+												                            <button type="button" class="btn btn-secondary" data-dismiss="modal" th:text="#{button.close}"></button>
+												                            <button type="submit" class="btn btn-primary ms-3" th:text="#{button.send}"></button>
+												                        </div>
+										                        </form>
+										                    </div>
+										                </div>
+										            </div>
                             </div>
                         </div>
                     </div>
@@ -66,5 +91,10 @@
 		<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
 	  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js" integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/" crossorigin="anonymous"></script>
 
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap 4 JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 </body>
 </html>
