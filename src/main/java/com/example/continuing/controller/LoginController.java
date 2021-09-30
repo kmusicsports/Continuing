@@ -57,6 +57,7 @@ public class LoginController {
 		mv.setViewName("login");
 		mv.addObject("loginData", new LoginData());
 		mv.addObject("searchData", new SearchData());
+		mv.addObject("emailData", new EmailData());
 		return mv;
 	}
 	
@@ -164,7 +165,7 @@ public class LoginController {
 				return "/terms/terms";
 		}
 	}
-	
+
 	@PostMapping("/login/reset-password")
 	public String sendResetPasswordEmail(@ModelAttribute @Validated EmailData emailData,
 			BindingResult result, Locale locale, RedirectAttributes redirectAttributes) {
