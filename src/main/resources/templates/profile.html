@@ -13,7 +13,8 @@
     <link rel="icon" th:href="@{/icons/favicon.ico}" id="favicon">
     <link rel="apple-touch-icon" sizes="180x180" th:href="@{/icons/app_icon.svg}"> 
     
-    <title th:text="#{title.profile} + ': ' + ${@environment.getProperty('app.name')}"></title>
+    <title th:if="${session.mode == 'profile'}" th:text="#{title.profile} + ': ' + ${@environment.getProperty('app.name')}"></title>
+    <title th:if="${session.mode == 'reset-password'}" th:text="#{title.reset_password} + ': ' + ${@environment.getProperty('app.name')}"></title>
 </head>
 <body>
     <nav th:replace="fragments :: navbar_area"></nav>
@@ -29,66 +30,82 @@
                         <!-- Nested Row within Card Body -->
                         <div class="row" th:object="${profileData}">
                             <div class="p-5">
-                                <div class="text-center mb-3">
-                                    <h2 class="mb-5" th:text="#{text.profile}"></h2>
-                                    <div th:unless="*{profileImage} == null">
-  			                                <img th:src="*{profileImage}" th:alt="#{img.profile}" class="avatar mb-3">
-                                    </div>
-                                    <div th:if="*{profileImage} == null">
-                                        <span class="avatar btn btn-light mb-3"></span>
-                                    </div>
+                                <div th:if="${session.mode == 'profile'}">
+		                                <div class="text-center mb-3">
+		                                    <h2 class="mb-5" th:text="#{text.profile}"></h2>
+		                                    <div th:unless="*{profileImage} == null">
+		  			                                <img th:src="*{profileImage}" th:alt="#{img.profile}" class="avatar mb-3">
+		                                    </div>
+		                                    <div th:if="*{profileImage} == null">
+		                                        <span class="avatar btn btn-light mb-3"></span>
+		                                    </div>
+		                                </div>
+		                                <form th:action="@{/}" enctype="multipart/form-data" method="post">
+		                                    <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
+		                                    <div class="form-group col-10 ms-auto me-auto mb-5">
+		                                        <input type="file" class="form-control" name="file" required>
+		                                    </div>
+		                                    <div class="row ms-auto me-auto">
+		                                        <div class="col-1"></div>
+		                                        <a th:href="@{/User/profileImage/delete}" class="btn btn-outline-danger col-4 pt-2 pb-2" th:text="#{button.img_delete}"></a>
+		                                        <div class="col-2"></div>                                    	                                    
+		                                        <button type="submit" th:formaction="@{/User/profileImage/upload}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="#{button.img_update}"></button>
+		                                    </div>
+		                                </form>
+		                                
+		                                <hr class="mt-5 mb-5">                                
                                 </div>
-                                <form th:action="@{/}" enctype="multipart/form-data" method="post">
-                                    <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
-                                    <div class="form-group col-10 ms-auto me-auto mb-5">
-                                        <input type="file" class="form-control" name="file" required>
-                                    </div>
-                                    <div class="row ms-auto me-auto">
-                                        <div class="col-1"></div>
-                                        <a th:href="@{/User/profileImage/delete}" class="btn btn-outline-danger col-4 pt-2 pb-2" th:text="#{button.img_delete}"></a>
-                                        <div class="col-2"></div>                                    	                                    
-                                        <button type="submit" th:formaction="@{/User/profileImage/upload}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="#{button.img_update}"></button>
-                                    </div>
-                                </form>
                                 
-                                <hr class="mt-5 mb-5">
-                                
-                                <form th:action="@{/User/update}" method="post">
+                                <form th:action="@{/}" method="post">
                                     <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
-                                    <div class="form-group col-10 ms-auto me-auto">
-                                        <label th:text="#{label.name}"></label>
-                                        <input type="text" class="form-control" name="name" th:value="*{name}" th:placeholder="#{placeholder.name}">
-                                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="invalid-feedback"></div>
-                                    </div>
-                                    <div class="form-group col-10 ms-auto me-auto">
-                                        <label th:text="#{label.email}" class="mt-4"></label>
-                                        <input type="email" class="form-control" name="email" th:value="*{email}" th:placeholder="#{placeholder.email}">
-                                        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:errorclass="invalid-feedback"></div>
-                                    </div>
-                                    <div class="form-group col-10 ms-auto me-auto mb-3">
-                                        <label th:text="#{label.profile_message}" class="mt-4"></label>
-                                        <textarea class="form-control" th:field="*{profileMessage}" th:placeholder="#{placeholder.profile_message}"></textarea>
-                                        <div th:if="${#fields.hasErrors('profileMessage')}" th:errors="*{profileMessage}" th:errorclass="invalid-feedback"></div>
+                                    <div th:if="${session.mode == 'profile'}">
+		                                    <div class="form-group col-10 ms-auto me-auto">
+		                                        <label th:text="#{label.name}"></label>
+		                                        <input type="text" class="form-control" name="name" th:value="*{name}" th:placeholder="#{placeholder.name}" required/>
+		                                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="invalid-feedback"></div>
+		                                    </div>
+		                                    <div class="form-group col-10 ms-auto me-auto">
+		                                        <label th:text="#{label.email}" class="mt-4"></label>
+		                                        <input type="email" class="form-control" name="email" th:value="*{email}" th:placeholder="#{placeholder.email}" required>
+		                                        <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" th:errorclass="invalid-feedback"></div>
+		                                    </div>
+		                                    <div class="form-group col-10 ms-auto me-auto mb-3">
+		                                        <label th:text="#{label.profile_message}" class="mt-4"></label>
+		                                        <textarea class="form-control" th:field="*{profileMessage}" th:placeholder="#{placeholder.profile_message}"></textarea>
+		                                        <div th:if="${#fields.hasErrors('profileMessage')}" th:errors="*{profileMessage}" th:errorclass="invalid-feedback"></div>
+		                                    </div>
+		                                    
+		                                    <div class="text-center mt-5">
+				                                    <p th:text="#{text.new_password_notes}"></p>
+		                                    </div>
                                     </div>
                                     
-                                    <div class="text-center mt-5">
-		                                    <p th:text="#{text.new_password_notes}"></p>
+                                    <div th:if="${session.mode == 'reset-password'}">
+                                        <h2 class="text-center mb-5" th:text="#{text.reset_password}"></h2>
+	                                      <input type="hidden" name="name" th:value="*{name}"/>
+	                                      <input type="hidden" name="email" th:value="*{email}">
+	                                      <input type="hidden" name="profileMessage" th:value="*{profileMessage}"/>
                                     </div>
+                                    
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <label th:text="#{label.password}"></label>
+                                        <label th:text="#{label.new_password}"></label>
                                         <input type="password" class="form-control" name="newPassword" th:value="*{newPassword}" th:placeholder="#{placeholder.profile_password}">
                                         <div th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     <div class="form-group col-10 ms-auto me-auto">
-                                        <label th:text="#{label.password_again}" class="mt-4"></label>
+                                        <label th:text="#{label.new_password_again}" class="mt-4"></label>
                                         <input type="password" class="form-control" name="newPasswordAgain" th:value="*{newPasswordAgain}" th:placeholder="#{placeholder.password_again}">
                                         <div th:if="${#fields.hasErrors('newPasswordAgain')}" th:errors="*{newPasswordAgain}" th:errorclass="invalid-feedback"></div>
                                     </div>
-                                    <div class="row ms-auto me-auto mt-5">
+                                    
+                                    <div class="row ms-auto me-auto mt-5" th:if="${session.mode == 'profile'}"> 
                                         <div class="col-1"></div>
                                         <a th:href="@{/User/mypage}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="#{button.cancel}"></a>
                                         <div class="col-2"></div>
-                                        <button type="submit" class="btn btn-primary col-4 pt-2 pb-2" th:text="#{button.update}"></button>
+                                        <button type="submit" th:formaction="@{/User/update}" class="btn btn-primary col-4 py-2" th:text="#{button.update}"></button>
+                                    </div>
+                                    <div th:if="${session.mode == 'reset-password'}" class="text-center mt-5">
+                                        <button type="submit" th:formaction="@{/reset-password/reset}" class="btn btn-primary px-5" th:text="#{button.update}"></button>
                                     </div>
                                 </form>
                             </div>
