@@ -135,6 +135,7 @@ public class UserController {
 		Users user = usersRepository.findById(userId).get();
 		
 		session.setAttribute("path", "/User/updateForm");
+		session.setAttribute("mode", "profile");
 		mv.setViewName("profile");
 		mv.addObject("profileData", new ProfileData(user));
 		mv.addObject("searchData", new SearchData());
@@ -167,6 +168,7 @@ public class UserController {
 				String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
 				
 				session.setAttribute("path", "/User/updateForm");
+				session.setAttribute("mode", "profile");
 				mv.setViewName("profile");
 				mv.addObject("searchData", new SearchData());
 				mv.addObject("msg", new MessageDto("E", msg));
@@ -175,6 +177,7 @@ public class UserController {
 			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, new Locale(oldData.getLanguage()));
 			
 			session.setAttribute("path", "/User/updateForm");
+			session.setAttribute("mode", "profile");
 			mv.setViewName("profile");
 			mv.addObject("searchData", new SearchData());
 			mv.addObject("msg", new MessageDto("E", msg));
