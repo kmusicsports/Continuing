@@ -133,6 +133,8 @@ public class UserController {
 	public ModelAndView updateProfileForm(ModelAndView mv) {
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();
+		
+		session.setAttribute("path", "/User/updateForm");
 		mv.setViewName("profile");
 		mv.addObject("profileData", new ProfileData(user));
 		mv.addObject("searchData", new SearchData());
@@ -163,12 +165,16 @@ public class UserController {
 				redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));					
 			} else {
 				String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
+				
+				session.setAttribute("path", "/User/updateForm");
 				mv.setViewName("profile");
 				mv.addObject("searchData", new SearchData());
 				mv.addObject("msg", new MessageDto("E", msg));
 			}
 		} else {
 			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, new Locale(oldData.getLanguage()));
+			
+			session.setAttribute("path", "/User/updateForm");
 			mv.setViewName("profile");
 			mv.addObject("searchData", new SearchData());
 			mv.addObject("msg", new MessageDto("E", msg));
@@ -225,6 +231,7 @@ public class UserController {
 	
 	@GetMapping("/User/setting")
 	public ModelAndView showSetting(ModelAndView mv) {
+		session.setAttribute("path", "/User/setting");
 		mv.setViewName("setting");
 		mv.addObject("searchData", new SearchData());
 		return mv;
@@ -232,6 +239,7 @@ public class UserController {
 	
 	@GetMapping("/User/setting/contactForm")
 	public ModelAndView showContactForm(ModelAndView mv) {
+		session.setAttribute("path", "/User/setting/contactForm");
 		mv.setViewName("contactForm");
 		mv.addObject("searchData", new SearchData());
 		mv.addObject("contactData", new ContactData());
@@ -241,17 +249,20 @@ public class UserController {
 	@PostMapping("/User/setting/contact")
 	public ModelAndView contact(@ModelAttribute @Validated ContactData contactData,
 			BindingResult result, ModelAndView mv, RedirectAttributes redirectAttributes) {
+		
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();
 		Locale locale = new Locale(user.getLanguage());
 		boolean isValid = userService.isValid(contactData, user, result, locale);
 		if(!result.hasErrors() && isValid) {
-			userService.sendContactMail(contactData);
+			userService.sendContactEmail(contactData);
 			String msg = messageSource.getMessage("msg.s.contact", null, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 			mv.setViewName("redirect:/User/setting");
 		} else {
 			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
+			
+			session.setAttribute("path", "/User/setting/contactForm");
 			mv.setViewName("contactForm");
 			mv.addObject("searchData", new SearchData());
 			mv.addObject("msg", new MessageDto("E", msg));

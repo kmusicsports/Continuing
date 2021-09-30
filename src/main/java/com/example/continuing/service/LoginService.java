@@ -97,6 +97,15 @@ public class LoginService {
 			}
 		}
 		
+		if(name.toLowerCase().contains("continuing")) {
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"name",
+					messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
+			result.addError(fieldError);
+			return false;
+		}
+		
 		someUser = usersRepository.findByEmail(registerData.getEmail());		
 		if(someUser.isPresent()) {
 			// 既にemailアドレスが登録されている ->　別のemailアドレスで登録してください

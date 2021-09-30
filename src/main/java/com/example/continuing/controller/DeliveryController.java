@@ -33,6 +33,8 @@ public class DeliveryController {
 	public ModelAndView showSettingForm(ModelAndView mv, HttpSession session) {
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Deliveries deliveries = deliveriesRepository.findByUserId(userId).get();
+		
+		session.setAttribute("path", "/User/setting/emailDelivery");
 		mv.setViewName("deliverySetting");
 		mv.addObject("searchData", new SearchData());
 		mv.addObject("deliveryData", new DeliveryData(deliveries));
