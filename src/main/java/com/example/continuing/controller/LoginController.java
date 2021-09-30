@@ -153,16 +153,16 @@ public class LoginController {
 		String language = locale.getLanguage();
 		
 		if(language == null){
-			return "/terms/terms";
+			return "terms/terms";
 	    }
 		
 		switch(language) {
 			case "ja":
-				return "/terms/terms_ja";
+				return "terms/terms_ja";
 			case "en":
-				return "/terms/terms_en";
+				return "terms/terms_en";
 			default:
-				return "/terms/terms";
+				return "terms/terms";
 		}
 	}
 
