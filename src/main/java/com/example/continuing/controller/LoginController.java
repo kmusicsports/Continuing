@@ -1,6 +1,7 @@
 package com.example.continuing.controller;
 
 import java.util.Locale;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -20,11 +21,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Deliveries;
+import com.example.continuing.entity.Temporaries;
 import com.example.continuing.entity.Users;
+import com.example.continuing.form.EmailData;
 import com.example.continuing.form.LoginData;
 import com.example.continuing.form.RegisterData;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.DeliveriesRepository;
+import com.example.continuing.repository.TemporariesRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.LoginService;
 
@@ -41,6 +45,7 @@ public class LoginController {
 	private final MessageSource messageSource;
 	private final CsrfTokenRepository csrfTokenRepository;
 	private final DeliveriesRepository deliveriesRepository;
+	private final TemporariesRepository temporariesRepository;
 
 	@GetMapping("/showLogin")
 	public ModelAndView showLogin(ModelAndView mv) {
@@ -153,6 +158,31 @@ public class LoginController {
 			default:
 				return "/terms/terms";
 		}
+	}
+	
+	@PostMapping("/login/reset-password")
+	public String sendResetPasswordEmail(@ModelAttribute @Validated EmailData emailData,
+			BindingResult result, Locale locale, RedirectAttributes redirectAttributes) {
+	
+		if(!result.hasErrors()) {
+			String email = emailData.getEmail();
+			Optional<Users> someUser = usersRepository.findByEmail(email);
+			
+			if(someUser.isPresent()) {
+				Users user = someUser.get();
+				String token = loginService.sendMail(email, "reset-password", locale);
+				Temporaries temporaries = new Temporaries(user, token);
+				temporariesRepository.saveAndFlush(temporaries);
+			}
+			
+			String msg = messageSource.getMessage("msg.s.send_reset_password_email", null, locale);
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
+		} else {
+			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
+		}
+		
+		return "redirect:/showLogin";
 	}
 	
 }
