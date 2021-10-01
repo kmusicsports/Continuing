@@ -39,7 +39,7 @@ import com.example.continuing.service.UserService;
 import lombok.AllArgsConstructor;
 
 @Controller
-@AllArgsConstructor // 
+@AllArgsConstructor
 public class LoginController {
 	
 	private final UsersRepository usersRepository;
@@ -137,6 +137,37 @@ public class LoginController {
 		
 		return mv;
 	}
+	
+	@GetMapping("/register/email/{email}/token/{token}")
+	public String fullRegister(@PathVariable(name = "email") String email,
+			@PathVariable(name = "token") String token, Locale locale,
+			RedirectAttributes redirectAttributes) {
+		
+		boolean isValid = loginService.isValid(email, token);
+		if(isValid) {
+			// ユーザー本登録
+			List<Temporaries> temporariesList = temporariesRepository.findByEmailOrderByCreatedAtDesc(email);
+			Temporaries latestTemporaries = temporariesList.get(0);
+			Users user = new Users(latestTemporaries, locale);
+			usersRepository.saveAndFlush(user);
+			
+			List<Temporaries> temporaryList = temporariesRepository.findByEmailOrderByCreatedAtDesc(user.getEmail());
+			temporariesRepository.deleteAll(temporaryList);
+			
+			Deliveries deliveries = new Deliveries(user.getId());
+			deliveriesRepository.saveAndFlush(deliveries);
+			loginService.sendMail(user.getEmail(), "welcome", locale);
+			
+			String msg = messageSource.getMessage("msg.s.register", null, locale);
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
+			return "redirect:/showLogin"; 
+		} else {
+			String msg = messageSource.getMessage("msg.e.register", null, locale);
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
+			return "redirect:/showRegister";
+		}
+	}
+	
 	
 	@GetMapping("/terms")
 	public String showTerms(Locale locale) {
