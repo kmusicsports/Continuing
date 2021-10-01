@@ -112,31 +112,21 @@ public class LoginController {
 	}
 	
 	@PostMapping("/regist")
-	public ModelAndView registCheck(@ModelAttribute @Validated RegisterData registerData,
+	public ModelAndView temporarilyRegister(@ModelAttribute @Validated RegisterData registerData,
 			BindingResult result, ModelAndView mv, 
 			RedirectAttributes redirectAttributes, Locale locale) {
 		
 		// エラーチェック
-		if(!result.hasErrors()) {
-			boolean isValid = loginService.isValid(registerData, result, locale);
-			if(isValid) {
-				// ユーザー新規登録
-				Users newUser = registerData.toEntity(passwordEncoder, locale);
-				usersRepository.saveAndFlush(newUser);
-				Deliveries deliveries = new Deliveries(newUser.getId());
-				deliveriesRepository.saveAndFlush(deliveries);
-				loginService.sendMail(newUser.getEmail(), "welcome", locale);
-				
-				mv.setViewName("redirect:/showLogin");
-				String msg = messageSource.getMessage("msg.s.regist", null, locale);
-				redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
-			} else {
-				String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
-				registerData.setChecked(false);
-				mv.setViewName("register");
-				mv.addObject("searchData", new SearchData());
-				mv.addObject("msg",new MessageDto("E", msg));
-			}
+		boolean isValid = loginService.isValid(registerData, result, locale);
+		if(!result.hasErrors() && isValid) {
+			// ユーザー仮登録
+			String token = loginService.sendMail(registerData.getEmail(), "registration", locale);
+			Temporaries temporary = registerData.toEntity(passwordEncoder, token);
+			temporariesRepository.saveAndFlush(temporary);
+			
+			mv.setViewName("redirect:/showLogin");
+			String msg = messageSource.getMessage("msg.s.temporary_register", null, locale);
+			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 		} else {
 			registerData.setChecked(false);
 			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
