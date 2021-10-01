@@ -12,6 +12,7 @@ import javax.validation.constraints.Pattern;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.example.continuing.entity.Temporaries;
 import com.example.continuing.entity.Users;
 
 import lombok.Data;
@@ -53,5 +54,19 @@ public class RegisterData {
         user.setUpdatedAt(timestamp);
 		return user;
 	}
+	
+	public Temporaries toEntity(PasswordEncoder passwordEncoder, String token) {
+		Temporaries temporary = new Temporaries();
+		temporary.setName(name);
+		temporary.setEmail(email);
+		temporary.setPassword(passwordEncoder.encode(password));
+		temporary.setToken(token);
+
+        Date date= new Date();
+        Timestamp timestamp = new Timestamp(date.getTime());
+        temporary.setCreatedAt(timestamp);
+		return temporary;
+	}
+	
 }
 
