@@ -41,24 +41,28 @@ public class LoginService {
 	
 	// ログインチェック
 	public boolean isValid(LoginData loginData, BindingResult result) {
+		boolean isValid = true;
+		
 		Optional<Users> someUser = usersRepository.findByEmail(loginData.getEmail());
     	if(!someUser.isPresent()) {
     		// 登録されていない
 			System.out.println("email is wrong");
-			return false;
+			isValid = false;
     	}
     	
     	// パスワードが正しいか？ 
     	if (!passwordEncoder.matches(loginData.getPassword(), someUser.get().getPassword())) {
     		System.out.println("password is wrong");
-    		return false;
+			isValid = false;
     	}
     	
-    	return true;
+    	return isValid;
 	}
 	
 	// 登録画面用のチェック
 	public boolean isValid(RegisterData registerData, BindingResult result, Locale locale) {
+		boolean isValid = true; 
+		
 		if(!registerData.getPassword().equals(registerData.getPasswordAgain())) {
 			// パスワード不一致
 			FieldError fieldError = new FieldError(
@@ -68,7 +72,7 @@ public class LoginService {
 			result.addError(fieldError);
 			registerData.setPassword(null);
 			registerData.setPasswordAgain(null);
-			return false;
+			isValid = false;
 		}
 		
 		Optional<Users> someUser;
@@ -82,7 +86,7 @@ public class LoginService {
 					messageSource.getMessage("AlreadyUsed.name", null, locale));
 			result.addError(fieldError);
 			registerData.setName(null);
-			return false;
+			isValid = false;
 		}
 		
 		// 名前が全角スペースだけで構成されていたらエラー
@@ -93,7 +97,7 @@ public class LoginService {
 						"name",
 						messageSource.getMessage("DoubleSpace.name", null, locale));
 				result.addError(fieldError);
-				return false;
+				isValid = false;
 			}
 		}
 		
@@ -103,7 +107,7 @@ public class LoginService {
 					"name",
 					messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
 			result.addError(fieldError);
-			return false;
+			isValid = false;
 		}
 		
 		someUser = usersRepository.findByEmail(registerData.getEmail());		
@@ -115,10 +119,10 @@ public class LoginService {
 					messageSource.getMessage("AlreadyUsed.email", null, locale));
 			result.addError(fieldError);
 			registerData.setEmail(null);
-			return false;
+			isValid = false;
 		}
 		
-		return true;
+		return isValid;
 	}
 
 	public String sendMail(String email, String type, Locale locale) {
@@ -162,6 +166,23 @@ public class LoginService {
 						+ "/token/" + token
 						+ "</a>";
 				break;
+			case "registration":
+				token = UUID.randomUUID().toString();
+				subject = messageSource.getMessage("mail.subject.registration", null, locale);
+				messageText += messageSource.getMessage("mail.msg.register_thanks", null, locale)
+						+ "<br>"
+						+ messageSource.getMessage("mail.msg.full_registration", null, locale)
+						+ "<br>"
+						+ "<br>"
+						+ "<a href='" + APP_URL + "/register"
+						+ "/email/" + email 
+						+ "/token/" + token
+						+ "'>"
+						+ APP_URL + "/register"
+						+ "/email/" + email 
+						+ "/token/" + token
+						+ "</a>";
+				break;
 			default:
 				subject = messageSource.getMessage("mail.subject.error", null, locale);
 				messageText += messageSource.getMessage("mail.msg.operation_error", null, locale);
@@ -179,7 +200,7 @@ public class LoginService {
 			Temporaries latestTemporaries = temporariesList.get(0);
 			return latestTemporaries.getToken().equals(token);
 		} else {
-			System.out.println("");
+			System.out.println("There is no data in the temporaries table.");
 			return false;
 		}
 	}
