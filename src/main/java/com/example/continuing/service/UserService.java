@@ -17,6 +17,7 @@ import org.springframework.validation.FieldError;
 import com.example.continuing.common.Utils;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.ContactData;
+import com.example.continuing.form.EmailData;
 import com.example.continuing.form.ProfileData;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.UsersRepository;
@@ -41,6 +42,8 @@ public class UserService {
 	public boolean isValid(ProfileData profileData, Users oldData, 
 			BindingResult result, Locale locale) {
 		
+		boolean isValid = true;
+		
 		if(!profileData.getNewPassword().equals("")) {
 			if(profileData.getNewPassword().length() < 8 || profileData.getNewPassword().length() > 32) {
 				// パスワードの長さ
@@ -51,7 +54,7 @@ public class UserService {
 				result.addError(fieldError);
 				profileData.setNewPassword(null);
 				profileData.setNewPasswordAgain(null);
-				return false;
+				isValid =  false;
 			}			
 		}
 		
@@ -64,7 +67,7 @@ public class UserService {
 			result.addError(fieldError);
 			profileData.setNewPassword(null);
 			profileData.setNewPasswordAgain(null);
-			return false;
+			isValid =  false;
 		}
 		
 		String newName = profileData.getName(); 
@@ -79,7 +82,7 @@ public class UserService {
 						messageSource.getMessage("AlreadyUsed.name", null, locale));
 				result.addError(fieldError);
 				profileData.setName(null);
-				return false;
+				isValid =  false;
 			}
 			
 			// 名前が全角スペースだけで構成されていたらエラー
@@ -90,7 +93,7 @@ public class UserService {
 							"name",
 							messageSource.getMessage("DoubleSpace.name", null, locale));
 					result.addError(fieldError);
-					return false;
+					isValid =  false;
 				}
 			}
 			
@@ -100,29 +103,23 @@ public class UserService {
 						"name",
 						messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
 				result.addError(fieldError);
-				return false;
+				isValid =  false;
 			}
 		}
 		
-		if (!profileData.getEmail().equals(oldData.getEmail())) {
-			// emailアドレスが変更されている
-			Optional<Users> emailUser = usersRepository.findByEmail(profileData.getEmail());		
-			if(emailUser.isPresent()) {
-				// 既にemailアドレスが登録されている ->　別のemailアドレスで登録してください
-				FieldError fieldError = new FieldError(
-						result.getObjectName(),
-						"email",
-						messageSource.getMessage("AlreadyUsed.email", null, locale));
-				result.addError(fieldError);
-				profileData.setEmail(null);
-				return false;
-			} else {
-				String subject = messageSource.getMessage("mail.subject.email_updated", null, locale);
-				String messageText = "<html><head></head><body>"
-						+ messageSource.getMessage("mail.msg.email_updated", null, locale)
-						+ "</body></html>";
-				mailService.sendMail(profileData.getEmail(), subject, messageText);
-			}
+		return isValid;
+	}
+	
+	public boolean isValid (EmailData emailData, BindingResult result, Locale locale) {	
+		Optional<Users> emailUser = usersRepository.findByEmail(emailData.getEmail());		
+		if(emailUser.isPresent()) {
+			// 既にemailアドレスが登録されている ->　別のemailアドレスで登録してください
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"email",
+					messageSource.getMessage("AlreadyUsed.email", null, locale));
+			result.addError(fieldError);
+			return false;
 		}
 		
 		return true;
