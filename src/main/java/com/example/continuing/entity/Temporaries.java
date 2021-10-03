@@ -54,4 +54,16 @@ public class Temporaries {
 		this.createdAt = timestamp;
 	}
 	
+	public Temporaries(String email, Users user, String token) {
+		this.userId = user.getId();
+		this.name = user.getName();
+		this.email = email;
+		this.password = user.getPassword();
+		this.token = token;
+		
+		Date date = new Date();
+		Timestamp timestamp = new Timestamp(date.getTime());
+		this.createdAt = timestamp;
+	}
+	
 }

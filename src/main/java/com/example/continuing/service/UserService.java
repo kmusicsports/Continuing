@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -17,6 +18,7 @@ import org.springframework.validation.FieldError;
 import com.example.continuing.common.Utils;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.ContactData;
+import com.example.continuing.form.EmailData;
 import com.example.continuing.form.ProfileData;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.UsersRepository;
@@ -37,9 +39,14 @@ public class UserService {
 	@Value("${app.version}")
 	private String APP_VERSION;
 	
+	@Value("${app.url}")
+	private String APP_URL;
+	
 	// プロフィール編集画面用のチェック
 	public boolean isValid(ProfileData profileData, Users oldData, 
 			BindingResult result, Locale locale) {
+		
+		boolean isValid = true;
 		
 		if(!profileData.getNewPassword().equals("")) {
 			if(profileData.getNewPassword().length() < 8 || profileData.getNewPassword().length() > 32) {
@@ -51,7 +58,7 @@ public class UserService {
 				result.addError(fieldError);
 				profileData.setNewPassword(null);
 				profileData.setNewPasswordAgain(null);
-				return false;
+				isValid =  false;
 			}			
 		}
 		
@@ -64,7 +71,7 @@ public class UserService {
 			result.addError(fieldError);
 			profileData.setNewPassword(null);
 			profileData.setNewPasswordAgain(null);
-			return false;
+			isValid =  false;
 		}
 		
 		String newName = profileData.getName(); 
@@ -79,7 +86,7 @@ public class UserService {
 						messageSource.getMessage("AlreadyUsed.name", null, locale));
 				result.addError(fieldError);
 				profileData.setName(null);
-				return false;
+				isValid =  false;
 			}
 			
 			// 名前が全角スペースだけで構成されていたらエラー
@@ -90,7 +97,7 @@ public class UserService {
 							"name",
 							messageSource.getMessage("DoubleSpace.name", null, locale));
 					result.addError(fieldError);
-					return false;
+					isValid =  false;
 				}
 			}
 			
@@ -100,29 +107,23 @@ public class UserService {
 						"name",
 						messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
 				result.addError(fieldError);
-				return false;
+				isValid =  false;
 			}
 		}
 		
-		if (!profileData.getEmail().equals(oldData.getEmail())) {
-			// emailアドレスが変更されている
-			Optional<Users> emailUser = usersRepository.findByEmail(profileData.getEmail());		
-			if(emailUser.isPresent()) {
-				// 既にemailアドレスが登録されている ->　別のemailアドレスで登録してください
-				FieldError fieldError = new FieldError(
-						result.getObjectName(),
-						"email",
-						messageSource.getMessage("AlreadyUsed.email", null, locale));
-				result.addError(fieldError);
-				profileData.setEmail(null);
-				return false;
-			} else {
-				String subject = messageSource.getMessage("mail.subject.email_updated", null, locale);
-				String messageText = "<html><head></head><body>"
-						+ messageSource.getMessage("mail.msg.email_updated", null, locale)
-						+ "</body></html>";
-				mailService.sendMail(profileData.getEmail(), subject, messageText);
-			}
+		return isValid;
+	}
+	
+	public boolean isValid (EmailData emailData, BindingResult result, Locale locale) {	
+		Optional<Users> emailUser = usersRepository.findByEmail(emailData.getEmail());		
+		if(emailUser.isPresent()) {
+			// 既にemailアドレスが登録されている ->　別のemailアドレスで登録してください
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"email",
+					messageSource.getMessage("AlreadyUsed.email", null, locale));
+			result.addError(fieldError);
+			return false;
 		}
 		
 		return true;
@@ -187,6 +188,23 @@ public class UserService {
 				+ "Version: " + APP_VERSION
 				+ "</body></html>";
 		mailService.sendMail(FROM_ADDRESS, "Contact", messageText);
+	}
+	
+	public String sendAuthenticationEmail(String email, Locale locale) {		 
+		String token = UUID.randomUUID().toString();
+		String subject = messageSource.getMessage("mail.subject.authentication_email", null, locale);
+		String messageText = messageSource.getMessage("mail.msg.authentication_email", null, locale)
+				+ "<br>"
+				+ "<a href='" + APP_URL + "/updateEmail"
+				+ "/email/" + email 
+				+ "/token/" + token
+				+ "'>"
+				+ APP_URL + "/updateEmail"
+				+ "/email/" + email 
+				+ "/token/" + token
+				+ "</a>";
+		mailService.sendMail(email, subject, messageText);
+		return token;
 	}
 	
 }

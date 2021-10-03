@@ -2,7 +2,9 @@ package com.example.continuing.entity;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,12 +17,14 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Entity
 @Table(name = "users")
 @Data
 @ToString(exclude = {"meetingList", "recordList"})
+@NoArgsConstructor
 public class Users {
 
 	@Id
@@ -62,4 +66,19 @@ public class Users {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @OrderBy("id asc")
     private List<Records> recordList = new ArrayList<>();
+    
+    public Users (Temporaries temporary, Locale locale) {
+    	this.name = temporary.getName();
+    	this.email = temporary.getEmail();
+    	this.password = temporary.getPassword();
+    	this.continuousDays = 0;
+    	this.language = locale.getLanguage();
+    	
+    	Date date= new Date();
+        Timestamp timestamp = new Timestamp(date.getTime());
+
+        this.createdAt = timestamp;
+        this.updatedAt = timestamp;
+    }
+    
 }

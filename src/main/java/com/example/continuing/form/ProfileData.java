@@ -3,7 +3,6 @@ package com.example.continuing.form;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 import org.hibernate.validator.constraints.Length;
@@ -22,10 +21,6 @@ public class ProfileData {
 	@Length(min = 0, max = 50)
 	private String name;
 	
-	@NotBlank
-	@Email
-	private String email;
-	
 	private String profileImage;
 	
 	@Length(min = 0, max = 140)
@@ -37,7 +32,6 @@ public class ProfileData {
 	
 	public ProfileData(Users user) {
 		this.name = user.getName();
-		this.email = user.getEmail();
 		this.profileImage = user.getProfileImage();
 		this.profileMessage = user.getProfileMessage();
 		this.newPassword = null;
@@ -48,7 +42,7 @@ public class ProfileData {
 		Users user = new Users();
 		user.setId(oldData.getId());
 		user.setName(name);
-		user.setEmail(email);
+		user.setEmail(oldData.getEmail());
 		user.setProfileImage(profileImage);
 		user.setProfileMessage(profileMessage);
 		user.setLanguage(oldData.getLanguage());		

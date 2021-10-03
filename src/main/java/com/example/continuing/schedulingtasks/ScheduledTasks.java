@@ -13,6 +13,7 @@ import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
 import com.example.continuing.repository.DeliveriesRepository;
 import com.example.continuing.repository.RecordsRepository;
+import com.example.continuing.repository.TemporariesRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.MailService;
 import com.example.continuing.service.MeetingService;
@@ -29,6 +30,7 @@ public class ScheduledTasks {
 	private final MailService mailService;
 	private final MessageSource messageSource;
 	private final DeliveriesRepository deliveriesRepository;
+	private final TemporariesRepository temporariesRepository;
 	
 	@Value("${app.url}")
 	private String APP_URL;
@@ -74,4 +76,10 @@ public class ScheduledTasks {
 			}					
 		}
 	}
+	
+	@Scheduled(cron = "${cron.every.day}")
+	public void dailyDataDeletion() {
+		temporariesRepository.deleteAll();
+	}
+	
 }
