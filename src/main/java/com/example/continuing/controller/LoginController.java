@@ -34,6 +34,7 @@ import com.example.continuing.repository.DeliveriesRepository;
 import com.example.continuing.repository.TemporariesRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.LoginService;
+import com.example.continuing.service.TemporaryService;
 import com.example.continuing.service.UserService;
 
 import lombok.AllArgsConstructor;
@@ -51,6 +52,7 @@ public class LoginController {
 	private final DeliveriesRepository deliveriesRepository;
 	private final TemporariesRepository temporariesRepository;
 	private final UserService userService;
+	private final TemporaryService temporaryService;
 
 	@GetMapping("/showLogin")
 	public ModelAndView showLogin(ModelAndView mv) {
@@ -143,7 +145,7 @@ public class LoginController {
 			@PathVariable(name = "token") String token, Locale locale,
 			RedirectAttributes redirectAttributes) {
 		
-		boolean isValid = loginService.isValid(email, token);
+		boolean isValid = temporaryService.isValid(email, token);
 		if(isValid) {
 			// ユーザー本登録
 			List<Temporaries> temporariesList = temporariesRepository.findByEmailOrderByCreatedAtDesc(email);
@@ -217,7 +219,7 @@ public class LoginController {
 			@PathVariable(name = "token") String token, ModelAndView mv,
 			Locale locale, RedirectAttributes redirectAttributes) {
 		
-		boolean isValid = loginService.isValid(email, token);
+		boolean isValid = temporaryService.isValid(email, token);
 		if(isValid) {
 			Users user = usersRepository.findByEmail(email).get();
 			
@@ -237,7 +239,7 @@ public class LoginController {
 	public ModelAndView resetPassword(@ModelAttribute @Validated ProfileData profileData,
 			BindingResult result, ModelAndView mv, RedirectAttributes redirectAttributes) {
 		
-		Users oldData = usersRepository.findByEmail(profileData.getEmail()).get();
+		Users oldData = usersRepository.findByName(profileData.getName()).get();
 		Locale locale = new Locale(oldData.getLanguage());
 		
 		boolean isValid = userService.isValid(profileData, oldData, result, locale);

@@ -1,6 +1,5 @@
 package com.example.continuing.service;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
@@ -13,11 +12,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import com.example.continuing.common.Utils;
-import com.example.continuing.entity.Temporaries;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.LoginData;
 import com.example.continuing.form.RegisterData;
-import com.example.continuing.repository.TemporariesRepository;
 import com.example.continuing.repository.UsersRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +28,6 @@ public class LoginService {
 	private final PasswordEncoder passwordEncoder;
 	private final MailService mailService;
 	private final MessageSource messageSource;
-	private final TemporariesRepository temporariesRepository;
 
 	@Value("${app.name}")
 	private String APP_NAME;
@@ -192,17 +188,6 @@ public class LoginService {
 		mailService.sendMail(email, subject, messageText);
 		
 		return token;
-	}
-	
-	public boolean isValid(String email, String token) {
-		List<Temporaries> temporariesList = temporariesRepository.findByEmailOrderByCreatedAtDesc(email);
-		if(temporariesList.size() != 0) {
-			Temporaries latestTemporaries = temporariesList.get(0);
-			return latestTemporaries.getToken().equals(token);
-		} else {
-			System.out.println("There is no data in the temporaries table.");
-			return false;
-		}
 	}
 	
 }
