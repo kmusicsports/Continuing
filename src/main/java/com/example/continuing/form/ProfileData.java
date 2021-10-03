@@ -43,7 +43,7 @@ public class ProfileData {
 		user.setId(oldData.getId());
 		user.setName(name);
 		user.setEmail(oldData.getEmail());
-		user.setProfileImage(profileImage);
+		user.setProfileImage(oldData.getProfileImage());
 		user.setProfileMessage(profileMessage);
 		user.setLanguage(oldData.getLanguage());		
 		
