@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -37,6 +38,9 @@ public class UserService {
 	
 	@Value("${app.version}")
 	private String APP_VERSION;
+	
+	@Value("${app.url}")
+	private String APP_URL;
 	
 	// プロフィール編集画面用のチェック
 	public boolean isValid(ProfileData profileData, Users oldData, 
@@ -184,6 +188,23 @@ public class UserService {
 				+ "Version: " + APP_VERSION
 				+ "</body></html>";
 		mailService.sendMail(FROM_ADDRESS, "Contact", messageText);
+	}
+	
+	public String sendAuthenticationEmail(String email, Locale locale) {		 
+		String token = UUID.randomUUID().toString();
+		String subject = messageSource.getMessage("mail.subject.authentication_email", null, locale);
+		String messageText = messageSource.getMessage("mail.msg.authentication_email", null, locale)
+				+ "<br>"
+				+ "<a href='" + APP_URL + "/updateEmail"
+				+ "/email/" + email 
+				+ "/token/" + token
+				+ "'>"
+				+ APP_URL + "/updateEmail"
+				+ "/email/" + email 
+				+ "/token/" + token
+				+ "</a>";
+		mailService.sendMail(email, subject, messageText);
+		return token;
 	}
 	
 }
