@@ -126,6 +126,18 @@ public class UserService {
 			return false;
 		}
 		
+		String email = emailData.getEmail();
+		String address = email.substring(email.lastIndexOf("@") + 1); 
+		if(address.equals("icloud.com") || address.equals("mac.com") || address.equals("me.com")) {
+			// Apple系のメールアドレス
+			FieldError fieldError = new FieldError(
+					result.getObjectName(),
+					"email",
+					messageSource.getMessage("AppleBased.email", null, locale));
+			result.addError(fieldError);
+			return false;
+		}
+		
 		return true;
 	}
 	
