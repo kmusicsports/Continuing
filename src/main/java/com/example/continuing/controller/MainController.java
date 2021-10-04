@@ -164,4 +164,9 @@ public class MainController {
 		return mv;
 	}
 	
+	@GetMapping("/privacy")
+	public String showPrivacyPolicy() {
+		return "privacy/privacyPolicy_ja";
+	}
+	
 }
