@@ -169,4 +169,9 @@ public class MainController {
 		return "privacy/privacyPolicy_ja";
 	}
 	
+	@GetMapping("/zoomverify/verifyzoom.html")
+	public String showVerifyZoom() {
+		return "verifyzoom";
+	}
+	
 }
