@@ -162,38 +162,8 @@ public class UserService {
 		return rankingMap;
 	}
 	
-	// お問い合わせフォーム用のチェック
-	public boolean isValid(ContactData contactData, Users user, BindingResult result, Locale locale) {
-		boolean answer = true;
-		
-		if(!contactData.getName().equals(user.getName())) {
-			FieldError fieldError = new FieldError(
-					result.getObjectName(),
-					"name",
-					messageSource.getMessage("Unmatch.name", null, locale)
-					);
-			result.addError(fieldError);
-			contactData.setName(null);
-			answer = false;
-		}
-		
-		if(!contactData.getEmail().equals(user.getEmail())) {
-			FieldError fieldError = new FieldError(
-					result.getObjectName(),
-					"email",
-					messageSource.getMessage("Unmatch.email", null, locale)
-					);
-			result.addError(fieldError);
-			contactData.setEmail(null);
-			answer = false;
-		}
-		
-		return answer;
-	}
-	
 	public void sendContactEmail(ContactData contactData) {
 		String messageText = "<html><head></head><body>"
-				+ "Username: " + contactData.getName() + "<br>"
 				+ "Email address: " + contactData.getEmail() + "<br>"
 				+ "Contents: " + contactData.getContents() + "<br>"
 				+ "<br>"
