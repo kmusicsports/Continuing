@@ -25,6 +25,8 @@ import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.JoinService;
 import com.example.continuing.service.MeetingService;
+import com.example.continuing.zoom.ZoomApiIntegration;
+import com.example.continuing.zoom.ZoomDetails;
 
 import lombok.AllArgsConstructor;
 
@@ -40,6 +42,7 @@ public class MainMeetingController {
 	private final MeetingService meetingService;
 	private final UsersRepository usersRepository;
 	private final MessageSource messageSource;
+	private final ZoomApiIntegration zoomApiIntegration;
 	
 	@GetMapping("/Meeting/{meeting_id}")
 	public ModelAndView showMeetingDetail(ModelAndView mv, 
@@ -164,4 +167,21 @@ public class MainMeetingController {
 		mv.addObject("searchData", new SearchData());
 		return mv;
 	}
+	
+	@GetMapping("/integrations/zoom")
+	public ModelAndView zoomIntegrations(ModelAndView mv) {
+		mv.setViewName("zoomIntegrations");
+		mv.addObject("searchData", new SearchData());
+		return mv;
+	}
+	
+	@GetMapping("/zoom")
+    public String redirect() {
+    	System.out.println("--zoom api 接続　要求");
+    	//ミーティング情報
+    	ZoomDetails.setZOOM_STATE("zoom");
+        String zoomAuthUrl = zoomApiIntegration.getAuthorizationUrl(session);
+        System.out.println("-ZoomAuthUrl: " + zoomAuthUrl);
+        return "redirect:/home";
+    }
 }
