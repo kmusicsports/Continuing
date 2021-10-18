@@ -238,32 +238,29 @@ public class UserController {
 		return mv;
 	}
 	
-	@GetMapping("/User/setting/contactForm")
+	@GetMapping("/contactForm")
 	public ModelAndView showContactForm(ModelAndView mv) {
-		session.setAttribute("path", "/User/setting/contactForm");
+		session.setAttribute("path", "/contactForm");
 		mv.setViewName("contactForm");
 		mv.addObject("searchData", new SearchData());
 		mv.addObject("contactData", new ContactData());
 		return mv;
 	}
 	
-	@PostMapping("/User/setting/contact")
+	@PostMapping("/contact")
 	public ModelAndView contact(@ModelAttribute @Validated ContactData contactData,
-			BindingResult result, ModelAndView mv, RedirectAttributes redirectAttributes) {
+			BindingResult result, ModelAndView mv, Locale locale,
+			RedirectAttributes redirectAttributes) {
 		
-		Integer userId = (Integer)session.getAttribute("user_id");
-		Users user = usersRepository.findById(userId).get();
-		Locale locale = new Locale(user.getLanguage());
-		boolean isValid = userService.isValid(contactData, user, result, locale);
-		if(!result.hasErrors() && isValid) {
+		if(!result.hasErrors()) {
 			userService.sendContactEmail(contactData);
 			String msg = messageSource.getMessage("msg.s.contact", null, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
-			mv.setViewName("redirect:/User/setting");
+			mv.setViewName("redirect:/contactForm");
 		} else {
 			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
 			
-			session.setAttribute("path", "/User/setting/contactForm");
+			session.setAttribute("path", "/contactForm");
 			mv.setViewName("contactForm");
 			mv.addObject("searchData", new SearchData());
 			mv.addObject("msg", new MessageDto("E", msg));
