@@ -1,5 +1,6 @@
 package com.example.continuing.controller.meeting;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -11,6 +12,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -182,6 +186,18 @@ public class MainMeetingController {
     	ZoomDetails.setZOOM_STATE("zoom");
         String zoomAuthUrl = zoomApiIntegration.getAuthorizationUrl(session);
         System.out.println("-ZoomAuthUrl: " + zoomAuthUrl);
-        return "redirect:/home";
+        
+        return "redirect:" + zoomAuthUrl;
     }
+	
+	@RequestMapping(value = "/redirect", method = { RequestMethod.GET, RequestMethod.POST })
+    public String callback(ModelAndView mv, @RequestParam String code, 
+    		@RequestParam String state, HttpServletRequest request, 
+    		Locale locale, RedirectAttributes redirectAttributes)
+            throws IOException {
+		
+		String msg = messageSource.getMessage("msg.s.zoom_Integrated", null, locale);
+		redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
+        return "redirect:/home";
+	}
 }
