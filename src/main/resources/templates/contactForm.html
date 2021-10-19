@@ -20,6 +20,8 @@
 
     <nav th:replace="fragments :: navbar_area"></nav>
     
+    <div th:replace="fragments :: msg_area"></div>
+    
     <div class="container">
         <!-- Outer Row -->
         <div class="row justify-content-center">
@@ -34,14 +36,7 @@
                                     <span th:text="#{text.contactForm.request_understanding}"></span>
                                     <p th:text="#{text.contactForm.use_improve_service}"></p>
                                 </div>
-                                <form th:action="@{/User/setting/contact}" method="post" th:object="${contactData}">
-                                    <input type="hidden" name="_csrf" th:value="${session.csrf_token}"/>
-                                    <div class="form-group col-10 ms-auto me-auto">
-                                        <label th:text="#{label.name}"></label>
-                                        <input type="text" class="form-control" name="name" th:value="*{name}" required>
-                                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" th:errorclass="invalid-feedback"></div>
-                                        
-                                    </div>
+                                <form th:action="@{/contact}" method="post" th:object="${contactData}">
                                     <div class="form-group col-10 ms-auto me-auto">
                                         <label th:text="#{label.email}" class="mt-4"></label>
                                         <input type="email" class="form-control" name="email" th:value="*{email}" th:placeholder="#{placeholder.email}" required>
@@ -53,11 +48,8 @@
                                         <div th:if="${#fields.hasErrors('contents')}" th:errors="*{contents}" th:errorclass="invalid-feedback"></div>
                                     </div>
                                     
-                                    <div class="row ms-auto me-auto mt-5">
-                                        <div class="col-1"></div>
-                                        <a th:href="@{/User/setting}" class="btn btn-secondary col-4 pt-2 pb-2" th:text="#{button.return}"></a>
-                                        <div class="col-2"></div>
-                                        <button type="submit" class="btn btn-primary col-4 pt-2 pb-2" th:text="#{button.send}"></button>
+                                    <div class="text-center mt-5">
+                                        <button type="submit" class="btn btn-primary px-4 py-2" th:text="#{button.send}"></button>
                                     </div>
                                 </form>
                             </div>

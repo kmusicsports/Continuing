@@ -20,7 +20,7 @@
     
     <div th:replace="fragments :: msg_area"></div>
   
-    <h4 class="text-center mt-4 mb-3 ps-5 text-decoration-underline">設定</h4>
+    <h4 class="text-center mt-4 mb-3 ps-5 text-decoration-underline"　th:text="#{text.setting}"></h4>
     <div class="list-group">
 		  <a th:href="@{/User/updateForm}" class="list-group-item list-group-item-action p-5">
 	        <h5 class="mb-3" th:text="#{text.setting_profile}"></h5>
@@ -34,8 +34,12 @@
           <h5 class="mb-3" th:text="#{text.setting_zoom}"></h5>
           <span class="ms-3" th:text="#{text.setting_zoom_description}"></span>
       </a>
-		  <a th:href="@{/User/setting/contactForm}" class="list-group-item list-group-item-action p-5">
-		      <h5 class="mb-3" th:text="#{text.setting_contact}"></h5>
+      <a th:href="@{/help}" class="list-group-item list-group-item-action p-5">
+          <h5 class="mb-3" th:text="#{text.help}"></h5>
+          <span class="ms-3" th:text="#{text.setting_help_description}"></span>
+      </a>
+		  <a th:href="@{/contactForm}" class="list-group-item list-group-item-action p-5">
+		      <h5 class="mb-3" th:text="#{text.contact}"></h5>
 		      <span class="ms-3" th:text="#{text.setting_contact_description}"></span>
 		  </a>
 		</div>

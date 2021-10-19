@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    
+    <link rel="icon" th:href="@{/icons/favicon.ico}" id="favicon">
+    <link rel="apple-touch-icon" sizes="180x180" th:href="@{/icons/app_icon.svg}">
+    <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
+    
+    <title th:text="#{title.zoomIntegrations} + ': ' + ${@environment.getProperty('app.name')}"></title>
+</head>
+<body>
+
+    <nav th:replace="fragments :: navbar_area"></nav>
+
+    <h4 class="text-center mt-5" th:text="#{text.install_app}"></h4>
+    <div class="text-center mt-5">
+		    <a th:href="@{/zoom}" class="btn btn-primary px-4 py-2" th:text="#{button.install_app}"></a>    
+    </div>
+    
+    <!-- Popper and Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js" integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css" integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog==" crossorigin="anonymous" />
+    
+    <link rel="icon" th:href="@{/icons/favicon.ico}" id="favicon">
+    <link rel="apple-touch-icon" sizes="180x180" th:href="@{/icons/app_icon.svg}">
+    <link th:href="@{/css/style.css}" rel="stylesheet" type="text/css">
+    
+    <title th:text="#{title.help} + ': ' + ${@environment.getProperty('app.name')}"></title>
+</head>
+<body>
+    <nav th:replace="fragments :: navbar_area"></nav>
+    
+    <div th:replace="fragments :: msg_area"></div>
+  
+    <h4 class="text-center mt-4 mb-3 ps-5 text-decoration-underline" th:text="#{text.help}"></h4>
+    <div class="accordion accordion-flush" id="accordionFlushExample">
+			  <div class="accordion-item">
+				    <h2 class="accordion-header" id="flush-heading1">
+					      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse1" aria-expanded="false" aria-controls="flush-collapse1" th:text="#{text.help.zoom}"></button>
+				    </h2>
+				    <div id="flush-collapse1" class="accordion-collapse collapse" aria-labelledby="flush-heading1" data-bs-parent="#accordionFlushExample">
+					      <div class="accordion-body">
+					          <h6 th:text="#{text.zoom_prerequisites}"></h6>
+					          <ol>
+					              <li th:text="#{text.have_continuing_account}"></li>
+					              <li th:text="#{text.have_zoom_account}"></li>
+					          </ol>
+					          
+					          <h6 class="mt-5" th:text="#{text.zoom_integration}"></h6>
+					          <ol>
+                        <li>
+                            <span th:text="#{text.access_start} + ' '"></span>
+                            <a th:href="@{/integrations/zoom}" th:text="#{link.here}"></a>
+                            <span th:text="#{text.access_end}"></span>
+                        </li>
+                        <li th:text="#{text.zoom_integration_2}"></li>
+                        <li th:text="#{text.zoom_integration_3}"></li>
+                    </ol>
+					          
+					          <h6 class="mt-5" th:text="#{text.start_meeting}"></h6>
+					          <ol>
+                        <li th:text="#{text.login_app}"></li>
+                        <li th:text="#{text_start_meeting_2}"></li>
+                        <li th:text="#{text_start_meeting_3}"></li>
+                    </ol>
+					          
+					          <h6 class="mt-5" th:text="#{text.join_meeting}"></h6>
+                    <ol>
+                        <li th:text="#{text.login_app}"></li>
+                        <li th:text="#{text.join_meeting_2}"></li>
+                        <li th:text="#{text.join_meeting_3}"></li>
+                        <li th:text="#{text.join_meeting_4}"></li>
+                    </ol>
+					          
+					          <h6 class="mt-5" th:text="#{text.create_meeting}"></h6>
+					          <ol>
+                        <li th:text="#{text.login_app}"></li>
+                        <li th:text="#{text.create_meeting_2}"></li>
+                        <li th:text="#{text.create_meeting_3}"></li>
+                        <li th:text="#{text.create_meeting_4}"></li>
+                    </ol>
+		                    
+                    <h6 class="mt-5" th:text="#{text.delete_meeting}"></h6>
+                    <ol>
+                        <li th:text="#{text.login_app}"></li>
+                        <li th:text="#{text.delete_meeting_2}"></li>
+                        <li th:text="#{text.delete_meeting_3}"></li>
+                        <li th:text="#{text.delete_meeting_4}"></li>
+                    </ol>
+                        
+                    <h6 class="mt-5" th:text="#{text.unistall_app}"></h6>
+                    <ol>
+                        <li>
+                            <span th:text="#{text.access_start} + ' '"></span>
+				                    <a href="https://marketplace.zoom.us/user/installed" target="_blank" rel="noopener noreferrer">https://marketplace.zoom.us/user/installed</a>
+                            <span th:text="#{text.access_end}"></span>
+                        </li>
+                        <li th:text="#{text.unistall_app_2}"></li>
+                    </ol>
+                    
+					      </div>
+				    </div>
+				    </div>
+				    
+				<div class="accordion-item">
+					  <h2 class="accordion-header" id="flush-heading2">
+					      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse2" aria-expanded="false" aria-controls="flush-collapse2" th:text="#{text.help.in_preparation}"></button>
+				    </h2>
+				    <div id="flush-collapse2" class="accordion-collapse collapse" aria-labelledby="flush-heading2" data-bs-parent="#accordionFlushExample">
+				        <div class="accordion-body">
+				        </div>
+				    </div>
+				  
+			  </div>	  
+	  </div>
+
+    <!-- Popper and Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js" integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/" crossorigin="anonymous"></script>
+    
+</body>
+</html>
