@@ -27,7 +27,6 @@ import com.example.continuing.dto.MessageDto;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Temporaries;
 import com.example.continuing.entity.Users;
-import com.example.continuing.form.ContactData;
 import com.example.continuing.form.EmailData;
 import com.example.continuing.form.ProfileData;
 import com.example.continuing.form.SearchData;
@@ -235,37 +234,6 @@ public class UserController {
 		session.setAttribute("path", "/User/setting");
 		mv.setViewName("setting");
 		mv.addObject("searchData", new SearchData());
-		return mv;
-	}
-	
-	@GetMapping("/contactForm")
-	public ModelAndView showContactForm(ModelAndView mv) {
-		session.setAttribute("path", "/contactForm");
-		mv.setViewName("contactForm");
-		mv.addObject("searchData", new SearchData());
-		mv.addObject("contactData", new ContactData());
-		return mv;
-	}
-	
-	@PostMapping("/contact")
-	public ModelAndView contact(@ModelAttribute @Validated ContactData contactData,
-			BindingResult result, ModelAndView mv, Locale locale,
-			RedirectAttributes redirectAttributes) {
-		
-		if(!result.hasErrors()) {
-			userService.sendContactEmail(contactData);
-			String msg = messageSource.getMessage("msg.s.contact", null, locale);
-			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
-			mv.setViewName("redirect:/contactForm");
-		} else {
-			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
-			
-			session.setAttribute("path", "/contactForm");
-			mv.setViewName("contactForm");
-			mv.addObject("searchData", new SearchData());
-			mv.addObject("msg", new MessageDto("E", msg));
-		}		
-		
 		return mv;
 	}
 	
