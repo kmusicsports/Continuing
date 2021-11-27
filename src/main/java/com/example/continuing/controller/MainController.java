@@ -165,8 +165,21 @@ public class MainController {
 	}
 	
 	@GetMapping("/privacy")
-	public String showPrivacyPolicy() {
-		return "privacy/privacyPolicy_ja";
+	public String showPrivacyPolicy(Locale locale) {
+		String language = locale.getLanguage();
+		
+		if(language == null){
+			return "privacy/privacyPolicy";			
+		}
+		
+		switch(language) {
+			case "ja":
+				return "privacy/privacyPolicy_ja";
+			case "en":
+				return "privacy/privacyPolicy_en";
+			default:
+				return "privacy/privacyPolicy";
+		}
 	}
 	
 	@GetMapping("/zoomverify/verifyzoom.html")
