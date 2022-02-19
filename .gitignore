@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 
 *.properties
+ZoomDetails.java
 
 ### STS ###
 .apt_generated
