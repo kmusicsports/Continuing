@@ -67,7 +67,20 @@
   - Notion(テーブル定義等のドキュメント)
 
 ## インフラ(AWS)構成図
-![インフラ(AWS)構成図](aws.png)
+![インフラ(AWS)構成図](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/019b7341-35b9-4d22-a379-5471dbcda834/%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%28AWS%29%E6%A7%8B%E6%88%90%E5%9B%B3.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220224%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220224T033650Z&X-Amz-Expires=86400&X-Amz-Signature=77156948a94081e54707fa3fb1cd58b1f16b9f36bf94c9d98cd565802b67ebc1&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22%25E3%2582%25A4%25E3%2583%25B3%25E3%2583%2595%25E3%2583%25A9%28AWS%29%25E6%25A7%258B%25E6%2588%2590%25E5%259B%25B3.png%22&x-id=GetObject)
+
+## ER図
+![ER図](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/599208a8-ce4a-4055-ae06-684571175099/er.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220224%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220224T033749Z&X-Amz-Expires=86400&X-Amz-Signature=c197e2fa4ad133782754608018547d5c051e0c059cf86a6d2580de9373ee9f3a&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22er.png%22&x-id=GetObject)
+| テーブル名 | 説明 |
+| --- | --- |
+| users | ユーザーアカウント情報 |
+| follows | ユーザー同士のフォロー関係情報 |
+| meetings | ユーザーに作成されたミーティング情報 |
+| joins | ユーザーのミーティング参加予約情報 |
+| records | ユーザーが継続した習慣の記録情報 |
+| deliveries | ユーザーのメール配信設定情報 |
+| temporaries | 仮登録されたユーザーの一時保管場所 |
+
 
 ## ライセンス
 このソフトウェアは、
