@@ -5,6 +5,9 @@
 
 ※現在、Zoom App Marketplace へのアプリ公開申請がまだ通っていないため、公開停止中です。
 
+## アプリ使用時の画面
+![アプリ使用時の画面](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/cf321d3b-e6da-4199-afe5-524e8a4acc73/%E3%82%A2%E3%83%97%E3%83%AA%E4%BD%BF%E7%94%A8%E6%99%82%E3%81%AE%E7%94%BB%E9%9D%A2.drawio.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220225%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220225T014411Z&X-Amz-Expires=86400&X-Amz-Signature=bf068ef462ad0be81c19b2c423786946dfb06a0f5c195af06c22a804d15d2ed6&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22%25E3%2582%25A2%25E3%2583%2597%25E3%2583%25AA%25E4%25BD%25BF%25E7%2594%25A8%25E6%2599%2582%25E3%2581%25AE%25E7%2594%25BB%25E9%259D%25A2.drawio.png%22&x-id=GetObject)
+
 ## 仕様/機能一覧
 - **ユーザーアカウント機能**
     - ログイン、ログアウト
