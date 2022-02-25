@@ -28,7 +28,6 @@ import com.example.continuing.repository.DeliveriesRepository;
 import com.example.continuing.repository.FollowsRepository;
 import com.example.continuing.repository.UsersRepository;
 
-//Mockitoの初期化、終了処理(コメント部分)を自動的に行なってくれる
 @ExtendWith(MockitoExtension.class)
 class FollowServiceTest {
 	
