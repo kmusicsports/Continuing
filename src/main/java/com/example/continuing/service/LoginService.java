@@ -35,27 +35,30 @@ public class LoginService {
 	@Value("${app.url}")
 	private String APP_URL;
 	
-	// ログインチェック
+	// ログイン用のチェック
 	public boolean isValid(LoginData loginData, BindingResult result) {
-		boolean isValid = true;
+//		boolean isValid = true;
 		
 		Optional<Users> someUser = usersRepository.findByEmail(loginData.getEmail());
     	if(!someUser.isPresent()) {
     		// 登録されていない
 			System.out.println("email is wrong");
-			isValid = false;
+//			isValid = false;
+			return false;
     	}
     	
     	// パスワードが正しいか？ 
     	if (!passwordEncoder.matches(loginData.getPassword(), someUser.get().getPassword())) {
     		System.out.println("password is wrong");
-			isValid = false;
+//			isValid = false;
+    		return false;
     	}
     	
-    	return isValid;
+//    	return isValid;
+    	return true;
 	}
 	
-	// 登録画面用のチェック
+	// 新規登録用のチェック
 	public boolean isValid(RegisterData registerData, BindingResult result, Locale locale) {
 		boolean isValid = true; 
 		
@@ -71,11 +74,10 @@ public class LoginService {
 			isValid = false;
 		}
 		
-		Optional<Users> someUser;
 		String name = registerData.getName(); 
-		someUser = usersRepository.findByName(name);
+		Optional<Users> someUser = usersRepository.findByName(name);
 		if(someUser.isPresent()) {
-			// 既に同じ名前が登録されている ->　別の名前で登録してください
+			// 既に同じ名前が登録されている
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"name",
@@ -85,9 +87,9 @@ public class LoginService {
 			isValid = false;
 		}
 		
-		// 名前が全角スペースだけで構成されていたらエラー
 		if (!Utils.isBlank(name)) {
 			if (Utils.isAllDoubleSpace(name)) {
+				// 名前が全角スペースだけで構成されている
 				FieldError fieldError = new FieldError(
 						result.getObjectName(),
 						"name",
@@ -95,20 +97,22 @@ public class LoginService {
 				result.addError(fieldError);
 				isValid = false;
 			}
+			
+			if(name.toLowerCase().contains("continuing")) {
+				// 名前にアプリ名が入っている
+				FieldError fieldError = new FieldError(
+						result.getObjectName(),
+						"name",
+						messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
+				result.addError(fieldError);
+				isValid = false;
+			}
 		}
 		
-		if(name.toLowerCase().contains("continuing")) {
-			FieldError fieldError = new FieldError(
-					result.getObjectName(),
-					"name",
-					messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
-			result.addError(fieldError);
-			isValid = false;
-		}
-		
-		someUser = usersRepository.findByEmail(registerData.getEmail());		
+		String email = registerData.getEmail();
+		someUser = usersRepository.findByEmail(email);		
 		if(someUser.isPresent()) {
-			// 既にemailアドレスが登録されている ->　別のemailアドレスで登録してください
+			// 既にemailアドレスが登録されている
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"email",
@@ -118,7 +122,6 @@ public class LoginService {
 			isValid = false;
 		}
 		
-		String email = registerData.getEmail();
 		String address = email.substring(email.lastIndexOf("@") + 1); 
 		if(address.equals("icloud.com") || address.equals("mac.com") || address.equals("me.com")) {
 			// Apple系のメールアドレス
