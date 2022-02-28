@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import java.util.Locale;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -71,5 +72,34 @@ class UserServiceTest {
 		assertThat(captoredLocale).isEqualTo(locale);
 	}
 	
-	
+	@Test
+	@DisplayName("[プロフィール編集用isValid()メソッドのテスト]パスワード不一致エラーのみ")
+	void testIsInvalidUnmatchNewPasswordProfileData() {
+		String testName = "testName";
+		
+		Users testOldData = new Users();
+		testOldData.setName(testName);
+		
+		ProfileData testProfileData = new ProfileData();
+		testProfileData.setName(testName);
+		testProfileData.setNewPassword("testPassword");
+		testProfileData.setNewPasswordAgain("testPasswordAgain");
+		
+		BindingResult result = new DataBinder(testProfileData).getBindingResult();
+		Locale locale = new Locale("ja");
+		
+		boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
+		String getPassword = testProfileData.getNewPassword();
+		String getPasswordAgain = testProfileData.getNewPasswordAgain();
+		
+		assertFalse(isValid);
+		assertNull(getPassword);
+		assertNull(getPasswordAgain);
+		
+		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
+		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+		Locale captoredLocale = localeCaptor.getValue();
+		assertThat(captoredLocale).isEqualTo(locale);
+	}
+
 }
