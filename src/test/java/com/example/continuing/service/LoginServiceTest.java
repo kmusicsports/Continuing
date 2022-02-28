@@ -52,7 +52,7 @@ class LoginServiceTest {
 
 	@Test
 	@DisplayName("[ログイン用isValid()メソッドのテスト]someUser.isPresent()==false")
-	void testEmailIsInvalidLoginDataBindingResult() {
+	void testEmailIsInvalidLoginData() {
 		LoginData testLoginData = new LoginData();
 		testLoginData.setEmail("test@email");
 		
@@ -65,7 +65,7 @@ class LoginServiceTest {
 	
 	@Test
 	@DisplayName("[ログイン用isValid()メソッドのテスト]someUser.isPresent()==true && passwordEncoder.matches()==false")
-	void testPasswordIsInvalidLoginDataBindingResult() {
+	void testPasswordIsInvalidLoginData() {
 		String testEmail = "test@email";
 		String testPassword = "testpassword";
 		String invalidPassword = "invalidpassword";
@@ -87,7 +87,7 @@ class LoginServiceTest {
 	
 	@Test
 	@DisplayName("[ログイン用isValid()メソッドのテスト]someUser.isPresent()==true && passwordEncoder.matches()==true")
-	void testIsValidLoginDataBindingResult() {
+	void testIsValidLoginData() {
 		String testEmail = "test@email";
 		String testPassword = "testpassword";
 		
@@ -109,7 +109,7 @@ class LoginServiceTest {
 
 	@Test
 	@DisplayName("[新規登録用isValid()メソッドのテスト]パスワード不一致エラーのみ")
-	void testIsInvalidUnmathPasswordRegisterDataBindingResultLocale() {
+	void testIsInvalidUnmathPasswordRegisterData() {
 		RegisterData testRegisterData = new RegisterData();
 		testRegisterData.setName("testName");
 		testRegisterData.setEmail("test@email");
@@ -136,7 +136,7 @@ class LoginServiceTest {
 	
 	@Test
 	@DisplayName("[新規登録用isValid()メソッドのテスト]既に同じ名前が登録されているエラーのみ")
-	void testIsInvalidAlreadyUsedNameRegisterDataBindingResultLocale() {
+	void testIsInvalidAlreadyUsedNameRegisterData() {
 		String testName = "testName";
 		
 		RegisterData testRegisterData = new RegisterData();
@@ -168,7 +168,7 @@ class LoginServiceTest {
 
 	@Test
 	@DisplayName("[新規登録用isValid()メソッドのテスト]名前が全角スペースだけで構成されているエラーのみ")
-	void testIsInvalidDoubleSpaceNameRegisterDataBindingResultLocale() {
+	void testIsInvalidDoubleSpaceNameRegisterData() {
 		RegisterData testRegisterData = new RegisterData();
 		testRegisterData.setName("　　　　　"); // 全角スペースのみ
 		testRegisterData.setEmail("test@email");
@@ -191,7 +191,7 @@ class LoginServiceTest {
 	
 	@Test
 	@DisplayName("[新規登録用isValid()メソッドのテスト]名前にアプリ名が入っているエラーのみ")
-	void testIsInvalidIncludeAppNameRegisterDataBindingResultLocale() {
+	void testIsInvalidIncludeAppNameRegisterData() {
 		RegisterData testRegisterData = new RegisterData();
 		testRegisterData.setName("Continuing");
 		testRegisterData.setEmail("test@email");
@@ -214,7 +214,7 @@ class LoginServiceTest {
 	
 	@Test
 	@DisplayName("[新規登録用isValid()メソッドのテスト]既にメールアドレスが登録されているエラーのみ")
-	void testIsInvalidAlreadyUsedEmailRegisterDataBindingResultLocale() {
+	void testIsInvalidAlreadyUsedEmailRegisterData() {
 		String testEmail = "test@email";
 		
 		RegisterData testRegisterData = new RegisterData();
@@ -250,7 +250,7 @@ class LoginServiceTest {
 	"'testEmail@me.com'",
 	})
 	@DisplayName("[新規登録用isValid()メソッドのテスト]Apple系のメールアドレスエラーのみ")
-	void testIsInvalidAppleBasedEmailRegisterDataBindingResultLocale(String testEmail) {
+	void testIsInvalidAppleBasedEmailRegisterData(String testEmail) {
 		RegisterData testRegisterData = new RegisterData();
 		testRegisterData.setName("testName");
 		testRegisterData.setEmail(testEmail);
@@ -275,7 +275,7 @@ class LoginServiceTest {
 	
 	@Test
 	@DisplayName("[新規登録用isValid()メソッドのテスト]エラーなし、名前がnull")
-	void testIsValidNullNameRegisterDataBindingResultLocale() {
+	void testIsValidNullNameRegisterData() {
 		RegisterData testRegisterData = new RegisterData();
 		testRegisterData.setName(null);
 		testRegisterData.setEmail("test@email");
