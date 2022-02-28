@@ -42,14 +42,16 @@ public class UserService {
 	@Value("${app.url}")
 	private String APP_URL;
 	
-	// プロフィール編集画面用のチェック
+	// プロフィール編集用のチェック
 	public boolean isValid(ProfileData profileData, Users oldData, 
 			BindingResult result, Locale locale) {
 		
 		boolean isValid = true;
 		
-		if(!profileData.getNewPassword().equals("")) {
-			if(profileData.getNewPassword().length() < 8 || profileData.getNewPassword().length() > 32) {
+		String newPassword = profileData.getNewPassword();
+		String newPasswordAgain = profileData.getNewPasswordAgain();
+		if(!newPassword.equals("")) {
+			if(newPassword.length() < 8 || newPassword.length() > 32) {
 				// パスワードの長さ
 				FieldError fieldError = new FieldError(
 						result.getObjectName(),
@@ -62,7 +64,7 @@ public class UserService {
 			}			
 		}
 		
-		if(!profileData.getNewPassword().equals(profileData.getNewPasswordAgain())) {
+		if(!newPassword.equals(newPasswordAgain)) {
 			// パスワード不一致
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
@@ -114,6 +116,7 @@ public class UserService {
 		return isValid;
 	}
 	
+	// メールアドレス変更用のチェック
 	public boolean isValid (EmailData emailData, BindingResult result, Locale locale) {	
 		Optional<Users> emailUser = usersRepository.findByEmail(emailData.getEmail());		
 		if(emailUser.isPresent()) {
