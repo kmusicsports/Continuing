@@ -241,6 +241,18 @@ class UserServiceTest {
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
 		}
+		
+		@Test
+		@DisplayName("エラーなし")
+		void noError() {
+			testEmailData.setEmail(TEST_EMAIL);
+			
+			boolean isValid = userService.isValid(testEmailData, result, locale);
+			
+			assertTrue(isValid);
+			
+			verify(messageSource, never()).getMessage(any(), any(), any());
+		}
 	}
 	
 }
