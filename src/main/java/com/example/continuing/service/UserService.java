@@ -77,39 +77,41 @@ public class UserService {
 		}
 		
 		String newName = profileData.getName(); 
-		if (!newName.equals(oldData.getName())) {
-			// 名前が変更されている
-			Optional<Users> nameUser = usersRepository.findByName(newName);
-			if(nameUser.isPresent()) {
-				// 既に同じ名前が登録されている ->　別の名前で登録してください
-				FieldError fieldError = new FieldError(
-						result.getObjectName(),
-						"name",
-						messageSource.getMessage("AlreadyUsed.name", null, locale));
-				result.addError(fieldError);
-				profileData.setName(null);
-				isValid =  false;
-			}
-			
-			// 名前が全角スペースだけで構成されていたらエラー
-			if (!Utils.isBlank(newName)) {
+		if (!Utils.isBlank(newName)) {
+			if (!newName.equals(oldData.getName())) {
+				// 名前が変更されている
+				Optional<Users> nameUser = usersRepository.findByName(newName);
+				if(nameUser.isPresent()) {
+					// 既に同じ名前が登録されている ->　別の名前で登録してください
+					FieldError fieldError = new FieldError(
+							result.getObjectName(),
+							"name",
+							messageSource.getMessage("AlreadyUsed.name", null, locale));
+					result.addError(fieldError);
+					profileData.setName(null);
+					isValid =  false;
+				}
+				
 				if (Utils.isAllDoubleSpace(newName)) {
+					// 名前が全角スペースだけで構成されていたらエラー
 					FieldError fieldError = new FieldError(
 							result.getObjectName(),
 							"name",
 							messageSource.getMessage("DoubleSpace.name", null, locale));
 					result.addError(fieldError);
+					profileData.setName(null);
 					isValid =  false;
 				}
-			}
-			
-			if(newName.toLowerCase().contains("continuing")) {
-				FieldError fieldError = new FieldError(
-						result.getObjectName(),
-						"name",
-						messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
-				result.addError(fieldError);
-				isValid =  false;
+				
+				if(newName.toLowerCase().contains("continuing")) {
+					FieldError fieldError = new FieldError(
+							result.getObjectName(),
+							"name",
+							messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
+					result.addError(fieldError);
+					profileData.setName(null);
+					isValid =  false;
+				}
 			}
 		}
 		
