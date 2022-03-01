@@ -136,4 +136,31 @@ class UserServiceTest {
 		assertThat(captoredLocale).isEqualTo(locale);
 	}
 	
+	@Test
+	@DisplayName("[プロフィール編集用isValid()メソッドのテスト]名前が全角スペースで構成されているエラーのみ")
+	void testIsInvalidDoubleSpaceNameProfileData() {
+		String testName = "　　";
+		
+		ProfileData testProfileData = new ProfileData();
+		testProfileData.setName(testName);
+		testProfileData.setNewPassword("");
+		testProfileData.setNewPasswordAgain("");
+		
+		Users testOldData = new Users();
+		testOldData.setName("oldName");
+		BindingResult result = new DataBinder(testProfileData).getBindingResult();
+		Locale locale = new Locale("ja");
+		
+		boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
+		String getName = testProfileData.getName();
+		
+		assertFalse(isValid);
+		assertNull(getName);
+		
+		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
+		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+		Locale captoredLocale = localeCaptor.getValue();
+		assertThat(captoredLocale).isEqualTo(locale);
+	}
+	
 }
