@@ -87,7 +87,7 @@ public class MainController {
 		
 		Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, prevPageable);
 		List<Users> userList = userService.getSearchReuslt(searchData);
-		List<Users> userRanking = usersRepository.findTop3ByOrderByContinuousDaysDesc();
+		List<Users> userRanking = usersRepository.findTop3();
 		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userRanking);
 		
 		Integer userId = (Integer)session.getAttribute("user_id");
@@ -112,7 +112,7 @@ public class MainController {
 			@ModelAttribute @Validated SearchData searchData,
 			BindingResult result, Locale locale,
 			@PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable) {
-		List<Users> userRanking = usersRepository.findTop3ByOrderByContinuousDaysDesc();
+		List<Users> userRanking = usersRepository.findTop3();
 		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userRanking);
 		
 		Integer userId = (Integer)session.getAttribute("user_id");

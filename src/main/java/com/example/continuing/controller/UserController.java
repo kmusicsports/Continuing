@@ -214,7 +214,7 @@ public class UserController {
 
 	@GetMapping("/User/list/ranking")
 	public ModelAndView showUserRanking(ModelAndView mv) {
-		List<Users> userList = usersRepository.findAllByOrderByContinuousDaysDesc();
+		List<Users> userList = usersRepository.findAll();
 		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userList);
 		
 		Integer myId = (Integer)session.getAttribute("user_id");

@@ -1,6 +1,8 @@
 package com.example.continuing.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -158,6 +160,17 @@ public class UserService {
 	}
  	
 	public Map<Integer, Integer> makeRankingMap(List<Users> userList) {
+		
+		Collections.sort(
+            userList, 
+            new Comparator<Users>() {
+                @Override
+                public int compare(Users user1, Users user2) {
+                    return user2.getContinuousDays() - user1.getContinuousDays();
+                }
+            }
+        );
+		
 		Map<Integer, Integer> rankingMap = new TreeMap<>();
 		int i = 1;
 		for(Users user : userList) {
