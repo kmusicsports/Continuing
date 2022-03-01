@@ -3,7 +3,9 @@ package com.example.continuing.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +29,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 
 import com.example.continuing.entity.Users;
+import com.example.continuing.form.EmailData;
 import com.example.continuing.form.ProfileData;
 import com.example.continuing.repository.UsersRepository;
 
@@ -45,15 +48,16 @@ class UserServiceTest {
 	@InjectMocks
 	private UserService userService;
 	
+	private final Locale locale = new Locale("ja");
+	private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
+	
 	@Nested
 	@DisplayName("[プロフィール編集用isValid()メソッドのテスト]")
 	public class testIsValidProfileData {
 		
 		private ProfileData testProfileData;
 		private Users testOldData;
-		private final Locale locale = new Locale("ja");
 		private final BindingResult result = new DataBinder(testProfileData).getBindingResult();
-		private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
 		private static final String TEST_OLD_NAME = "oldName";
 		
 		@BeforeEach
@@ -110,7 +114,6 @@ class UserServiceTest {
 		@Test
 		@DisplayName("既に同じ名前が登録されているエラーのみ")
 		void alreadyUsedNameError() {
-			
 			String testName = "testName";
 			
 			testProfileData.setName(testName);
@@ -136,7 +139,7 @@ class UserServiceTest {
 		@Test
 		@DisplayName("名前が全角スペースで構成されているエラーのみ")
 		void doubleSpaceNameError() {
-			String testName = "　　";
+			String testName = "　　"; // 全角スペースのみ
 			
 			testProfileData.setName(testName);
 			testProfileData.setNewPassword("");
@@ -172,7 +175,54 @@ class UserServiceTest {
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
 		}
+	
+		@Test
+		@DisplayName("エラーなし、名前がnull")
+		void noErrorAndNullName() {
+			
+			testProfileData.setName(null);
+			testProfileData.setNewPassword("");
+			testProfileData.setNewPasswordAgain("");
+			
+			boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
+			
+			assertTrue(isValid);
+			
+			verify(messageSource, never()).getMessage(any(), any(), any());
+		}
 	}
 	
+	@Nested
+	@DisplayName("[メールアドレス変更用isValid()メソッドのテスト]")
+	public class testIsValidEmailData {
+		
+		private EmailData testEmailData;
+		private final BindingResult result = new DataBinder(testEmailData).getBindingResult();
+		private static final String TEST_EMAIL = "test@email";
+	
+		@BeforeEach
+		void init() {
+			testEmailData = new EmailData();
+		}
+ 		
+		@Test
+		@DisplayName("既にメールアドレスが登録されているエラーのみ")
+		void alreadyUsedEmailError() {
+			testEmailData.setEmail(TEST_EMAIL);
+			
+			Users testEmailUser = new Users();
+			testEmailUser.setEmail(TEST_EMAIL);
+			
+			when(usersRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testEmailUser));
+			
+			boolean isValid = userService.isValid(testEmailData, result, locale);
+			
+			assertFalse(isValid);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+	}
 	
 }
