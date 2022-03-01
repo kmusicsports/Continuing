@@ -152,6 +152,26 @@ class UserServiceTest {
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
 		}
+		
+		@Test
+		@DisplayName("名前にアプリ名が含まれているエラーのみ")
+		void includedContinuingNameError() {
+			String testName = "AppNameIsContinuing";
+			
+			testProfileData.setName(testName);
+			testProfileData.setNewPassword("");
+			testProfileData.setNewPasswordAgain("");
+			
+			boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
+			String getName = testProfileData.getName();
+			
+			assertFalse(isValid);
+			assertNull(getName);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
 	}
 	
 	
