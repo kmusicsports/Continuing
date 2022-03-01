@@ -6,8 +6,10 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Locale;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -102,4 +104,36 @@ class UserServiceTest {
 		assertThat(captoredLocale).isEqualTo(locale);
 	}
 
+	@Test
+	@DisplayName("[プロフィール編集用isValid()メソッドのテスト]既に同じ名前が登録されているエラーのみ")
+	void testIsInvalidAlreadyUsedNameProfileData() {
+		String testName = "testName";
+		
+		ProfileData testProfileData = new ProfileData();
+		testProfileData.setName(testName);
+		testProfileData.setNewPassword("");
+		testProfileData.setNewPasswordAgain("");
+		
+		Users testNameUser = new Users();
+		testNameUser.setName(testName);
+		
+		when(usersRepository.findByName(testName)).thenReturn(Optional.of(testNameUser));
+		
+		Users testOldData = new Users();
+		testOldData.setName("oldName");
+		BindingResult result = new DataBinder(testProfileData).getBindingResult();
+		Locale locale = new Locale("ja");
+		
+		boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
+		String getName = testProfileData.getName();
+		
+		assertFalse(isValid);
+		assertNull(getName);
+		
+		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
+		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+		Locale captoredLocale = localeCaptor.getValue();
+		assertThat(captoredLocale).isEqualTo(locale);
+	}
+	
 }
