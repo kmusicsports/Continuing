@@ -7,7 +7,9 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,59 +28,64 @@ class TemporaryServiceTest {
 	@InjectMocks
 	private TemporaryService temporaryService;
 	
-	@Test
-	@DisplayName("[isValidメソッドのテスト]temporariesList.size() != 0 && token is valid")
-	void testIsValid() {
-		String testEmail = "test.email";
-		String testToken = "testtoken";
+	@Nested
+	@DisplayName("[isValidメソッドのテスト]")
+	public class testIsValid {
 		
-		Temporaries testTemporary = new Temporaries();
-		testTemporary.setEmail(testEmail);
-		testTemporary.setToken(testToken);
+		private static final String TEST_EMAIL = "test@email";
+		private static final String TEST_TOKEN = "testtoken";
+		private List<Temporaries> testList;
 		
-		List<Temporaries> testList = new ArrayList<>();
-		testList.add(testTemporary);
+		@BeforeEach
+		void init() {
+			testList = new ArrayList<>();
+		}
 		
-		when(temporariesRepository.findByEmailOrderByCreatedAtDesc(testEmail)).thenReturn(testList);
+		@Test
+		@DisplayName("エラーなし")
+		void noError() {
+			
+			Temporaries testTemporary = new Temporaries();
+			testTemporary.setEmail(TEST_EMAIL);
+			testTemporary.setToken(TEST_TOKEN);
+			
+			testList.add(testTemporary);
+			
+			when(temporariesRepository.findByEmailOrderByCreatedAtDesc(TEST_EMAIL)).thenReturn(testList);
+			
+			boolean isValid = temporaryService.isValid(TEST_EMAIL, TEST_TOKEN);
+			
+			assertTrue(isValid);
+		}
 		
-		boolean isValid = temporaryService.isValid(testEmail, testToken);
+		@Test
+		@DisplayName("tokenが無効エラーのみ")
+		void tokenIsInvalidError() {
+			String invalidToken = "invalidtoken";
+			
+			Temporaries testTemporary = new Temporaries();
+			testTemporary.setEmail(TEST_EMAIL);
+			testTemporary.setToken(TEST_TOKEN);
+			
+			testList.add(testTemporary);
+			
+			when(temporariesRepository.findByEmailOrderByCreatedAtDesc(TEST_EMAIL)).thenReturn(testList);
+			
+			boolean isValid = temporaryService.isValid(TEST_EMAIL, invalidToken);
+			
+			assertFalse(isValid);
+		}
 		
-		assertTrue(isValid);
+		@Test
+		@DisplayName("仮登録なしエラーのみ")
+		void temporariesNotExistError() {
+			
+			when(temporariesRepository.findByEmailOrderByCreatedAtDesc(TEST_EMAIL)).thenReturn(testList);
+			
+			boolean isValid = temporaryService.isValid(TEST_EMAIL, TEST_TOKEN);
+			
+			assertFalse(isValid);
+		}
 	}
 
-	@Test
-	@DisplayName("[isValidメソッドのテスト]temporariesList.size() != 0 && token is invalid")
-	void testTokenIsInvalid() {
-		String testEmail = "test.email";
-		String testToken = "testtoken";
-		String invalidToken = "invalidtoken";
-		
-		Temporaries testTemporary = new Temporaries();
-		testTemporary.setEmail(testEmail);
-		testTemporary.setToken(testToken);
-		
-		List<Temporaries> testList = new ArrayList<>();
-		testList.add(testTemporary);
-		
-		when(temporariesRepository.findByEmailOrderByCreatedAtDesc(testEmail)).thenReturn(testList);
-		
-		boolean isValid = temporaryService.isValid(testEmail, invalidToken);
-		
-		assertFalse(isValid);
-	}
-	
-	@Test
-	@DisplayName("[isValidメソッドのテスト]temporariesList.size() == 0")
-	void testTemporariesNotExist() {
-		String testEmail = "test.email";
-		String testToken = "testtoken";
-		
-		List<Temporaries> testList = new ArrayList<>();
-		
-		when(temporariesRepository.findByEmailOrderByCreatedAtDesc(testEmail)).thenReturn(testList);
-		
-		boolean isValid = temporaryService.isValid(testEmail, testToken);
-		
-		assertFalse(isValid);
-	}
 }
