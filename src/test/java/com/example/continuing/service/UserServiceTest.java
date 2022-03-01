@@ -223,6 +223,24 @@ class UserServiceTest {
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
 		}
+		
+		@ParameterizedTest
+		@CsvSource({"'testEmail@icloud.com'",
+			"'testEmail@mac.com'",
+			"'testEmail@me.com'",
+		})
+		@DisplayName("Apple系のメールアドレスエラーのみ")
+		void appleBasedEmailError(String testEmail) {
+			testEmailData.setEmail(testEmail);
+			
+			boolean isValid = userService.isValid(testEmailData, result, locale);
+			
+			assertFalse(isValid);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
 	}
 	
 }
