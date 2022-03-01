@@ -2,6 +2,7 @@ package com.example.continuing.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,7 +14,9 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,6 +34,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 
 import com.example.continuing.entity.Users;
+import com.example.continuing.form.ContactData;
 import com.example.continuing.form.EmailData;
 import com.example.continuing.form.ProfileData;
 import com.example.continuing.form.SearchData;
@@ -294,5 +298,66 @@ class UserServiceTest {
 		assertThat(result).isEqualTo(expected);
 		verify(usersRepository, times(1)).findByNameContainingIgnoreCase(testSearchKeyword);
 		verify(usersRepository, times(1)).findByProfileMessageContainingIgnoreCase(testSearchKeyword);
+	}
+	
+	@Test
+	@DisplayName("[makeRankingMapメソッドのテスト]")
+	void testMakeRankingMap() {
+		int testFirstDays = 30;
+		int testSecondDays = 15;
+		int testThirdDays = 0;
+		
+		Users testUser1 = new Users();
+		Users testUser2 = new Users();
+		Users testUser3 = new Users();
+		Users testUser4 = new Users();
+		testUser1.setContinuousDays(testSecondDays);
+		testUser2.setContinuousDays(testFirstDays);
+		testUser3.setContinuousDays(testThirdDays);
+		testUser4.setContinuousDays(testSecondDays);
+		
+		List<Users> testUserList = new ArrayList<Users>();
+		testUserList.add(testUser1);
+		testUserList.add(testUser2);
+		testUserList.add(testUser3);
+		testUserList.add(testUser4);
+		
+		Map<Integer, Integer> expected = new TreeMap<>();
+		expected.put(testFirstDays, 1);
+		expected.put(testSecondDays, 2);
+		expected.put(testThirdDays, 3);
+		
+		Map<Integer, Integer> result = userService.makeRankingMap(testUserList);
+		
+		assertThat(result).isEqualTo(expected);
+	}
+	
+	@Test
+	@DisplayName("[sendContactEmailメソッドのテスト]")
+	void testSendContactEmail() {
+		ContactData testContactData = new ContactData();
+		
+		userService.sendContactEmail(testContactData);
+		
+		verify(mailService, times(1)).sendMail(any(), any(), any());
+	}
+	
+	@Test
+	@DisplayName("[sendAuthenticationEmailメソッドのテスト]")
+	void testSendAuthenticationEmail() {
+		String testEmail = "test@email";
+		
+		String token = userService.sendAuthenticationEmail(testEmail, locale);
+		
+		assertNotNull(token);
+		
+		ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
+		verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
+		String captoredEmail = emailCaptor.getValue();
+		assertThat(captoredEmail).isEqualTo(testEmail);
+		
+		verify(messageSource, times(2)).getMessage(any(), any(), localeCaptor.capture());
+		Locale captoredLocale = localeCaptor.getValue();
+		assertThat(captoredLocale).isEqualTo(locale);
 	}
 }
