@@ -11,7 +11,9 @@ import static org.mockito.Mockito.when;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -42,125 +44,115 @@ class UserServiceTest {
 	
 	@InjectMocks
 	private UserService userService;
-
-	@ParameterizedTest
-	@CsvSource({"'newPass'", "'AnInvalidPasswordThatTheCharacterLengthExceeded'"})
-	@DisplayName("[プロフィール編集用isValid()メソッドのテスト]パスワードの長さエラーのみ")
-	void testIsInvalidLengthNewPasswordProfileData(String testNewPassword) {
-		String testName = "testName";
+	
+	@Nested
+	@DisplayName("[プロフィール編集用isValid()メソッドのテスト]")
+	public class testIsValidProfileData {
 		
-		Users testOldData = new Users();
-		testOldData.setName(testName);
+		private ProfileData testProfileData;
+		private Users testOldData;
+		private final Locale locale = new Locale("ja");
+		private final BindingResult result = new DataBinder(testProfileData).getBindingResult();
+		private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
+		private static final String TEST_OLD_NAME = "oldName";
 		
-		ProfileData testProfileData = new ProfileData();
-		testProfileData.setName(testName);
-		testProfileData.setNewPassword(testNewPassword);
-		testProfileData.setNewPasswordAgain(testNewPassword);
+		@BeforeEach
+		void init() {
+			testProfileData = new ProfileData();
+			
+			testOldData = new Users();
+			testOldData.setName(TEST_OLD_NAME);
+		}
 		
-		BindingResult result = new DataBinder(testProfileData).getBindingResult();
-		Locale locale = new Locale("ja");
+		@ParameterizedTest
+		@CsvSource({"'newPass'", "'AnInvalidPasswordThatTheCharacterLengthExceeded'"})
+		@DisplayName("パスワードの長さエラーのみ")
+		void newPasswordLengthError(String testNewPassword) {
+			
+			testProfileData.setName(TEST_OLD_NAME);
+			testProfileData.setNewPassword(testNewPassword);
+			testProfileData.setNewPasswordAgain(testNewPassword);	
+			
+			boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
+			String getPassword = testProfileData.getNewPassword();
+			String getPasswordAgain = testProfileData.getNewPasswordAgain();
+			
+			assertFalse(isValid);
+			assertNull(getPassword);
+			assertNull(getPasswordAgain);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
 		
-		boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
-		String getPassword = testProfileData.getNewPassword();
-		String getPasswordAgain = testProfileData.getNewPasswordAgain();
+		@Test
+		@DisplayName("パスワード不一致エラーのみ")
+		void unmatchNewPasswordError() {
+			
+			testProfileData.setName(TEST_OLD_NAME);
+			testProfileData.setNewPassword("testPassword");
+			testProfileData.setNewPasswordAgain("testPasswordAgain");
+			
+			boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
+			String getPassword = testProfileData.getNewPassword();
+			String getPasswordAgain = testProfileData.getNewPasswordAgain();
+			
+			assertFalse(isValid);
+			assertNull(getPassword);
+			assertNull(getPasswordAgain);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}		
 		
-		assertFalse(isValid);
-		assertNull(getPassword);
-		assertNull(getPasswordAgain);
+		@Test
+		@DisplayName("既に同じ名前が登録されているエラーのみ")
+		void alreadyUsedNameError() {
+			
+			String testName = "testName";
+			
+			testProfileData.setName(testName);
+			testProfileData.setNewPassword("");
+			testProfileData.setNewPasswordAgain("");
+			
+			Users testNameUser = new Users();
+			testNameUser.setName(testName);
+			
+			when(usersRepository.findByName(testName)).thenReturn(Optional.of(testNameUser));
+			
+			boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
+			String getName = testProfileData.getName();
+			
+			assertFalse(isValid);
+			assertNull(getName);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
 		
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
+		@Test
+		@DisplayName("名前が全角スペースで構成されているエラーのみ")
+		void doubleSpaceNameError() {
+			String testName = "　　";
+			
+			testProfileData.setName(testName);
+			testProfileData.setNewPassword("");
+			testProfileData.setNewPasswordAgain("");
+			
+			boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
+			String getName = testProfileData.getName();
+			
+			assertFalse(isValid);
+			assertNull(getName);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
 	}
 	
-	@Test
-	@DisplayName("[プロフィール編集用isValid()メソッドのテスト]パスワード不一致エラーのみ")
-	void testIsInvalidUnmatchNewPasswordProfileData() {
-		String testName = "testName";
-		
-		Users testOldData = new Users();
-		testOldData.setName(testName);
-		
-		ProfileData testProfileData = new ProfileData();
-		testProfileData.setName(testName);
-		testProfileData.setNewPassword("testPassword");
-		testProfileData.setNewPasswordAgain("testPasswordAgain");
-		
-		BindingResult result = new DataBinder(testProfileData).getBindingResult();
-		Locale locale = new Locale("ja");
-		
-		boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
-		String getPassword = testProfileData.getNewPassword();
-		String getPasswordAgain = testProfileData.getNewPasswordAgain();
-		
-		assertFalse(isValid);
-		assertNull(getPassword);
-		assertNull(getPasswordAgain);
-		
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
-	}
-
-	@Test
-	@DisplayName("[プロフィール編集用isValid()メソッドのテスト]既に同じ名前が登録されているエラーのみ")
-	void testIsInvalidAlreadyUsedNameProfileData() {
-		String testName = "testName";
-		
-		ProfileData testProfileData = new ProfileData();
-		testProfileData.setName(testName);
-		testProfileData.setNewPassword("");
-		testProfileData.setNewPasswordAgain("");
-		
-		Users testNameUser = new Users();
-		testNameUser.setName(testName);
-		
-		when(usersRepository.findByName(testName)).thenReturn(Optional.of(testNameUser));
-		
-		Users testOldData = new Users();
-		testOldData.setName("oldName");
-		BindingResult result = new DataBinder(testProfileData).getBindingResult();
-		Locale locale = new Locale("ja");
-		
-		boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
-		String getName = testProfileData.getName();
-		
-		assertFalse(isValid);
-		assertNull(getName);
-		
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
-	}
-	
-	@Test
-	@DisplayName("[プロフィール編集用isValid()メソッドのテスト]名前が全角スペースで構成されているエラーのみ")
-	void testIsInvalidDoubleSpaceNameProfileData() {
-		String testName = "　　";
-		
-		ProfileData testProfileData = new ProfileData();
-		testProfileData.setName(testName);
-		testProfileData.setNewPassword("");
-		testProfileData.setNewPasswordAgain("");
-		
-		Users testOldData = new Users();
-		testOldData.setName("oldName");
-		BindingResult result = new DataBinder(testProfileData).getBindingResult();
-		Locale locale = new Locale("ja");
-		
-		boolean isValid = userService.isValid(testProfileData, testOldData, result, locale);
-		String getName = testProfileData.getName();
-		
-		assertFalse(isValid);
-		assertNull(getName);
-		
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
-	}
 	
 }
