@@ -1,6 +1,8 @@
 package com.example.continuing.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
@@ -42,14 +44,16 @@ public class UserService {
 	@Value("${app.url}")
 	private String APP_URL;
 	
-	// プロフィール編集画面用のチェック
+	// プロフィール編集用のチェック
 	public boolean isValid(ProfileData profileData, Users oldData, 
 			BindingResult result, Locale locale) {
 		
 		boolean isValid = true;
 		
-		if(!profileData.getNewPassword().equals("")) {
-			if(profileData.getNewPassword().length() < 8 || profileData.getNewPassword().length() > 32) {
+		String newPassword = profileData.getNewPassword();
+		String newPasswordAgain = profileData.getNewPasswordAgain();
+		if(!newPassword.equals("")) {
+			if(newPassword.length() < 8 || newPassword.length() > 32) {
 				// パスワードの長さ
 				FieldError fieldError = new FieldError(
 						result.getObjectName(),
@@ -62,7 +66,7 @@ public class UserService {
 			}			
 		}
 		
-		if(!profileData.getNewPassword().equals(profileData.getNewPasswordAgain())) {
+		if(!newPassword.equals(newPasswordAgain)) {
 			// パスワード不一致
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
@@ -75,45 +79,48 @@ public class UserService {
 		}
 		
 		String newName = profileData.getName(); 
-		if (!newName.equals(oldData.getName())) {
-			// 名前が変更されている
-			Optional<Users> nameUser = usersRepository.findByName(newName);
-			if(nameUser.isPresent()) {
-				// 既に同じ名前が登録されている ->　別の名前で登録してください
-				FieldError fieldError = new FieldError(
-						result.getObjectName(),
-						"name",
-						messageSource.getMessage("AlreadyUsed.name", null, locale));
-				result.addError(fieldError);
-				profileData.setName(null);
-				isValid =  false;
-			}
-			
-			// 名前が全角スペースだけで構成されていたらエラー
-			if (!Utils.isBlank(newName)) {
+		if (!Utils.isBlank(newName)) {
+			if (!newName.equals(oldData.getName())) {
+				// 名前が変更されている
+				Optional<Users> nameUser = usersRepository.findByName(newName);
+				if(nameUser.isPresent()) {
+					// 既に同じ名前が登録されている ->　別の名前で登録してください
+					FieldError fieldError = new FieldError(
+							result.getObjectName(),
+							"name",
+							messageSource.getMessage("AlreadyUsed.name", null, locale));
+					result.addError(fieldError);
+					profileData.setName(null);
+					isValid =  false;
+				}
+				
 				if (Utils.isAllDoubleSpace(newName)) {
+					// 名前が全角スペースだけで構成されていたらエラー
 					FieldError fieldError = new FieldError(
 							result.getObjectName(),
 							"name",
 							messageSource.getMessage("DoubleSpace.name", null, locale));
 					result.addError(fieldError);
+					profileData.setName(null);
 					isValid =  false;
 				}
-			}
-			
-			if(newName.toLowerCase().contains("continuing")) {
-				FieldError fieldError = new FieldError(
-						result.getObjectName(),
-						"name",
-						messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
-				result.addError(fieldError);
-				isValid =  false;
+				
+				if(newName.toLowerCase().contains("continuing")) {
+					FieldError fieldError = new FieldError(
+							result.getObjectName(),
+							"name",
+							messageSource.getMessage("Cannnot.included_continuing.name", null, locale));
+					result.addError(fieldError);
+					profileData.setName(null);
+					isValid =  false;
+				}
 			}
 		}
 		
 		return isValid;
 	}
 	
+	// メールアドレス変更用のチェック
 	public boolean isValid (EmailData emailData, BindingResult result, Locale locale) {	
 		Optional<Users> emailUser = usersRepository.findByEmail(emailData.getEmail());		
 		if(emailUser.isPresent()) {
@@ -142,8 +149,10 @@ public class UserService {
 	}
 	
 	public List<Users> getSearchReuslt(SearchData searchData) {
-		List<Users> userListName = usersRepository.findByNameContainingIgnoreCase(searchData.getKeyword());
-		List<Users> userList = usersRepository.findByProfileMessageContainingIgnoreCase(searchData.getKeyword());
+		String searchKeyword = searchData.getKeyword();
+		
+		List<Users> userListName = usersRepository.findByNameContainingIgnoreCase(searchKeyword);
+		List<Users> userList = usersRepository.findByProfileMessageContainingIgnoreCase(searchKeyword);
 		userList.addAll(userListName);
 		userList = new ArrayList<Users>(new LinkedHashSet<>(userList));
 		
@@ -151,6 +160,17 @@ public class UserService {
 	}
  	
 	public Map<Integer, Integer> makeRankingMap(List<Users> userList) {
+		
+		Collections.sort(
+            userList, 
+            new Comparator<Users>() {
+                @Override
+                public int compare(Users user1, Users user2) {
+                    return user2.getContinuousDays() - user1.getContinuousDays();
+                }
+            }
+        );
+		
 		Map<Integer, Integer> rankingMap = new TreeMap<>();
 		int i = 1;
 		for(Users user : userList) {

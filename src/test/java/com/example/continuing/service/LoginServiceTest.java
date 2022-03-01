@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,7 +14,9 @@ import static org.mockito.Mockito.when;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,293 +53,272 @@ class LoginServiceTest {
 	@InjectMocks
 	private LoginService loginService;
 
-	@Test
-	@DisplayName("[ログイン用isValid()メソッドのテスト]someUser.isPresent()==false")
-	void testEmailIsInvalidLoginDataBindingResult() {
-		LoginData testLoginData = new LoginData();
-		testLoginData.setEmail("test@email");
-		
-		when(usersRepository.findByEmail(testLoginData.getEmail())).thenReturn(Optional.empty());
-
-		boolean isValid = loginService.isValid(testLoginData, null);
-		
-		assertFalse(isValid);
-	}
+	private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
 	
-	@Test
-	@DisplayName("[ログイン用isValid()メソッドのテスト]someUser.isPresent()==true && passwordEncoder.matches()==false")
-	void testPasswordIsInvalidLoginDataBindingResult() {
-		String testEmail = "test@email";
-		String testPassword = "testpassword";
-		String invalidPassword = "invalidpassword";
-		
-		LoginData testLoginData = new LoginData();
-		testLoginData.setEmail(testEmail);
-		testLoginData.setPassword(invalidPassword);
-		
-		Users testUser = new Users();
-		testUser.setEmail(testEmail);
-		testUser.setPassword(testPassword);
-		
-		when(usersRepository.findByEmail(testLoginData.getEmail())).thenReturn(Optional.of(testUser));
-
-		boolean isValid = loginService.isValid(testLoginData, null);
-		
-		assertFalse(isValid);
-	}
+	private static final String TEST_EMAIL = "test@email";
+	private static final String TEST_PASS = "testpassword";
 	
-	@Test
-	@DisplayName("[ログイン用isValid()メソッドのテスト]someUser.isPresent()==true && passwordEncoder.matches()==true")
-	void testIsValidLoginDataBindingResult() {
-		String testEmail = "test@email";
-		String testPassword = "testpassword";
+	@Nested
+	@DisplayName("[ログイン用isValid()メソッドのテスト]")
+	public class testIsValidLoginData {
 		
-		LoginData testLoginData = new LoginData();
-		testLoginData.setEmail(testEmail);
-		testLoginData.setPassword(testPassword);
-		
-		Users testUser = new Users();
-		testUser.setEmail(testEmail);
-		testUser.setPassword(passwordEncoder.encode(testPassword));
-		
-		when(usersRepository.findByEmail(testLoginData.getEmail())).thenReturn(Optional.of(testUser));
-		when(passwordEncoder.matches(testPassword, passwordEncoder.encode(testPassword))).thenReturn(true);
+		private LoginData testLoginData;
+		private Users testUser;
 
-		boolean isValid = loginService.isValid(testLoginData, null);
+		@BeforeEach
+		void init() {
+			testLoginData = new LoginData();
+			testLoginData.setEmail(TEST_EMAIL);
+			
+			testUser = new Users();
+			testUser.setEmail(TEST_EMAIL);
+		}
 		
-		assertTrue(isValid);
-	}
+		@Test
+		@DisplayName("メールアドレスが間違っているエラーのみ")
+		void emailError() {
+			
+			boolean isValid = loginService.isValid(testLoginData, null);
+			
+			assertFalse(isValid);
+		}
+		
+		@Test
+		@DisplayName("パスワードが間違っているエラーのみ")
+		void passwordError() {
+			
+			String invalidPassword = "invalidpassword";
 
-	@Test
-	@DisplayName("[新規登録用isValid()メソッドのテスト]パスワード不一致エラーのみ")
-	void testIsInvalidUnmathPasswordRegisterDataBindingResultLocale() {
-		RegisterData testRegisterData = new RegisterData();
-		testRegisterData.setName("testName");
-		testRegisterData.setEmail("test@email");
-		testRegisterData.setPassword("testPassword");
-		testRegisterData.setPasswordAgain("testPasswordAgain");
-		testRegisterData.setChecked(true);
+			testLoginData.setPassword(invalidPassword);
+			
+			testUser.setPassword(TEST_PASS);
+			
+			when(usersRepository.findByEmail(testLoginData.getEmail())).thenReturn(Optional.of(testUser));
+			
+			boolean isValid = loginService.isValid(testLoginData, null);
+			
+			assertFalse(isValid);
+		}
 		
-		BindingResult result = new DataBinder(testRegisterData).getBindingResult();
-		Locale locale = new Locale("ja");
-		
-		boolean isValid = loginService.isValid(testRegisterData, result, locale);
-		String getPassword = testRegisterData.getPassword();
-		String getPasswordAgain = testRegisterData.getPasswordAgain();
-		
-		assertFalse(isValid);
-		assertNull(getPassword);
-		assertNull(getPasswordAgain);
-		
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
-	}
-	
-	@Test
-	@DisplayName("[新規登録用isValid()メソッドのテスト]既に同じ名前が登録されているエラーのみ")
-	void testIsInvalidAlreadyUsedNameRegisterDataBindingResultLocale() {
-		String testName = "testName";
-		
-		RegisterData testRegisterData = new RegisterData();
-		testRegisterData.setName(testName);
-		testRegisterData.setEmail("test@email");
-		testRegisterData.setPassword("testPassword");
-		testRegisterData.setPasswordAgain("testPassword");
-		testRegisterData.setChecked(true);
-		
-		Users testNameUser = new Users();
-		testNameUser.setName(testName);
-		
-		when(usersRepository.findByName(testName)).thenReturn(Optional.of(testNameUser));
-		
-		BindingResult result = new DataBinder(testRegisterData).getBindingResult();
-		Locale locale = new Locale("ja");
-		
-		boolean isValid = loginService.isValid(testRegisterData, result, locale);
-		String getName = testRegisterData.getName();
-		
-		assertFalse(isValid);
-		assertNull(getName);
-		
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
+		@Test
+		@DisplayName("エラーなし")
+		void noError() {
+			
+			testLoginData.setPassword(TEST_PASS);
+			
+			testUser.setPassword(passwordEncoder.encode(TEST_PASS));
+			
+			when(usersRepository.findByEmail(testLoginData.getEmail())).thenReturn(Optional.of(testUser));
+			when(passwordEncoder.matches(TEST_PASS, passwordEncoder.encode(TEST_PASS))).thenReturn(true);
+			
+			boolean isValid = loginService.isValid(testLoginData, null);
+			
+			assertTrue(isValid);
+		}
 	}
 
-	@Test
-	@DisplayName("[新規登録用isValid()メソッドのテスト]名前が全角スペースだけで構成されているエラーのみ")
-	void testIsInvalidDoubleSpaceNameRegisterDataBindingResultLocale() {
-		RegisterData testRegisterData = new RegisterData();
-		testRegisterData.setName("　　　　　"); // 全角スペースのみ
-		testRegisterData.setEmail("test@email");
-		testRegisterData.setPassword("testPassword");
-		testRegisterData.setPasswordAgain("testPassword");
-		testRegisterData.setChecked(true);
+	@Nested
+	@DisplayName("[新規登録用isValid()メソッドのテスト]")
+	public class testIsValidRegisterData {
 		
-		BindingResult result = new DataBinder(testRegisterData).getBindingResult();
-		Locale locale = new Locale("ja");
+		private RegisterData testRegisterData;
+		private final Locale locale = new Locale("ja");
+		private final BindingResult result = new DataBinder(testRegisterData).getBindingResult();
 		
-		boolean isValid = loginService.isValid(testRegisterData, result, locale);
+		@BeforeEach
+		void init() {
+			testRegisterData = new RegisterData();
+			testRegisterData.setPassword(TEST_PASS);
+			testRegisterData.setChecked(true);
+		}
 		
-		assertFalse(isValid);
+		@Test
+		@DisplayName("パスワード不一致エラーのみ")
+		void unmatchPasswordError() {
+			
+			testRegisterData.setName("testName");
+			testRegisterData.setEmail(TEST_EMAIL);
+			testRegisterData.setPasswordAgain("testUnmatchPassword");
+			
+			boolean isValid = loginService.isValid(testRegisterData, result, locale);
+			String getPassword = testRegisterData.getPassword();
+			String getPasswordAgain = testRegisterData.getPasswordAgain();
+			
+			assertFalse(isValid);
+			assertNull(getPassword);
+			assertNull(getPasswordAgain);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+		
+		@Test
+		@DisplayName("既に同じ名前が登録されているエラーのみ")
+		void alreadyUsedNameError() {
+			String testName = "testName";
+			
+			testRegisterData.setName(testName);
+			testRegisterData.setEmail(TEST_EMAIL);
+			testRegisterData.setPasswordAgain(TEST_PASS);
+			
+			Users testNameUser = new Users();
+			testNameUser.setName(testName);
+			
+			when(usersRepository.findByName(testName)).thenReturn(Optional.of(testNameUser));
+			
+			boolean isValid = loginService.isValid(testRegisterData, result, locale);
+			String getName = testRegisterData.getName();
+			
+			assertFalse(isValid);
+			assertNull(getName);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
 
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
+		@Test
+		@DisplayName("名前が全角スペースだけで構成されているエラーのみ")
+		void doubleSpaceNameError() {
+			
+			testRegisterData.setName("　　　　　"); // 全角スペースのみ
+			testRegisterData.setEmail(TEST_EMAIL);
+			testRegisterData.setPasswordAgain(TEST_PASS);
+			
+			boolean isValid = loginService.isValid(testRegisterData, result, locale);
+			
+			assertFalse(isValid);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+		
+		@Test
+		@DisplayName("名前にアプリ名が入っているエラーのみ")
+		void appNameError() {
+			
+			testRegisterData.setName("Continuing");
+			testRegisterData.setEmail(TEST_EMAIL);
+			testRegisterData.setPasswordAgain(TEST_PASS);
+			
+			boolean isValid = loginService.isValid(testRegisterData, result, locale);
+			
+			assertFalse(isValid);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+				
+		@Test
+		@DisplayName("既にメールアドレスが登録されているエラーのみ")
+		void alreadyUsedEmailError() {
+			testRegisterData.setName("testName");
+			testRegisterData.setEmail(TEST_EMAIL);
+			testRegisterData.setPasswordAgain(TEST_PASS);
+			
+			Users testEmailUser = new Users();
+			testEmailUser.setEmail(TEST_EMAIL);
+			
+			when(usersRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testEmailUser));
+			
+			boolean isValid = loginService.isValid(testRegisterData, result, locale);
+			String getEmail = testRegisterData.getEmail();
+			
+			assertFalse(isValid);
+			assertNull(getEmail);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+		
+		@ParameterizedTest
+		@CsvSource({"'testEmail@icloud.com'",
+			"'testEmail@mac.com'",
+			"'testEmail@me.com'",
+		})
+		@DisplayName("Apple系のメールアドレスエラーのみ")
+		void appleBasedEmailError(String testEmail) {
+			
+			testRegisterData.setName("testName");
+			testRegisterData.setEmail(testEmail);
+			testRegisterData.setPasswordAgain(TEST_PASS);
+			
+			boolean isValid = loginService.isValid(testRegisterData, result, locale);
+			String getEmail = testRegisterData.getEmail();
+			
+			assertFalse(isValid);
+			assertNull(getEmail);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+		
+		@Test
+		@DisplayName("エラーなし、名前がnull")
+		void noErrorAndNullName() {
+			
+			testRegisterData.setName(null);
+			testRegisterData.setEmail(TEST_EMAIL);
+			testRegisterData.setPasswordAgain(TEST_PASS);
+			
+			boolean isValid = loginService.isValid(testRegisterData, result, locale);
+			
+			assertTrue(isValid);
+			
+			verify(messageSource, never()).getMessage(any(), any(), any());
+		}
 	}
 	
-	@Test
-	@DisplayName("[新規登録用isValid()メソッドのテスト]名前にアプリ名が入っているエラーのみ")
-	void testIsInvalidIncludeAppNameRegisterDataBindingResultLocale() {
-		RegisterData testRegisterData = new RegisterData();
-		testRegisterData.setName("Continuing");
-		testRegisterData.setEmail("test@email");
-		testRegisterData.setPassword("testPassword");
-		testRegisterData.setPasswordAgain("testPassword");
-		testRegisterData.setChecked(true);
+	@Nested
+	@DisplayName("[sendMail()メソッドのテスト]")
+	public class testSendMail {
 		
-		BindingResult result = new DataBinder(testRegisterData).getBindingResult();
-		Locale locale = new Locale("ja");
+		private final Locale locale = new Locale("ja");
+		private final ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
 		
-		boolean isValid = loginService.isValid(testRegisterData, result, locale);
+		@ParameterizedTest
+		@CsvSource({"'welcome', 6",
+			", 2",
+		})
+		@DisplayName("tokenなし")
+		void tokenNull(String type, int count) {
+			String token = loginService.sendMail(TEST_EMAIL, type, locale);
+			
+			assertNull(token);
+			
+			verify(messageSource, times(count)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+			
+			verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
+			String captoredEmail = emailCaptor.getValue();
+			assertThat(captoredEmail).isEqualTo(TEST_EMAIL);
+		}
 		
-		assertFalse(isValid);
-		
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
+		@ParameterizedTest
+		@CsvSource({"'reset-password', 2",
+			"'registration', 3",
+		})
+		@DisplayName("tokenあり")
+		void tokenNotNull(String type, int count) {
+			String token = loginService.sendMail(TEST_EMAIL, type, locale);
+			
+			assertNotNull(token);
+			
+			verify(messageSource, times(count)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+			
+			verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
+			String captoredEmail = emailCaptor.getValue();
+			assertThat(captoredEmail).isEqualTo(TEST_EMAIL);
+		}
 	}
 	
-	@Test
-	@DisplayName("[新規登録用isValid()メソッドのテスト]既にメールアドレスが登録されているエラーのみ")
-	void testIsInvalidAlreadyUsedEmailRegisterDataBindingResultLocale() {
-		String testEmail = "test@email";
-		
-		RegisterData testRegisterData = new RegisterData();
-		testRegisterData.setName("testName");
-		testRegisterData.setEmail(testEmail);
-		testRegisterData.setPassword("testPassword");
-		testRegisterData.setPasswordAgain("testPassword");
-		testRegisterData.setChecked(true);
-		
-		Users testEmailUser = new Users();
-		testEmailUser.setEmail(testEmail);
-		when(usersRepository.findByEmail(testEmail)).thenReturn(Optional.of(testEmailUser));
-		
-		
-		BindingResult result = new DataBinder(testRegisterData).getBindingResult();
-		Locale locale = new Locale("ja");
-		
-		boolean isValid = loginService.isValid(testRegisterData, result, locale);
-		String getEmail = testRegisterData.getEmail();
-		
-		assertFalse(isValid);
-		assertNull(getEmail);
-		
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
-	}
-	
-	@ParameterizedTest
-	@CsvSource({"'testEmail@icloud.com'",
-	"'testEmail@mac.com'",
-	"'testEmail@me.com'",
-	})
-	@DisplayName("[新規登録用isValid()メソッドのテスト]Apple系のメールアドレスエラーのみ")
-	void testIsInvalidAppleBasedEmailRegisterDataBindingResultLocale(String testEmail) {
-		RegisterData testRegisterData = new RegisterData();
-		testRegisterData.setName("testName");
-		testRegisterData.setEmail(testEmail);
-		testRegisterData.setPassword("testPassword");
-		testRegisterData.setPasswordAgain("testPassword");
-		testRegisterData.setChecked(true);
-		
-		BindingResult result = new DataBinder(testRegisterData).getBindingResult();
-		Locale locale = new Locale("ja");
-		
-		boolean isValid = loginService.isValid(testRegisterData, result, locale);
-		String getEmail = testRegisterData.getEmail();
-		
-		assertFalse(isValid);
-		assertNull(getEmail);
-		
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
-	}
-	
-	@Test
-	@DisplayName("[新規登録用isValid()メソッドのテスト]エラーなし、名前がnull")
-	void testIsValidNullNameRegisterDataBindingResultLocale() {
-		RegisterData testRegisterData = new RegisterData();
-		testRegisterData.setName(null);
-		testRegisterData.setEmail("test@email");
-		testRegisterData.setPassword("testPassword");
-		testRegisterData.setPasswordAgain("testPassword");
-		testRegisterData.setChecked(true);
-		
-		BindingResult result = new DataBinder(testRegisterData).getBindingResult();
-		Locale locale = new Locale("ja");
-		
-		boolean isValid = loginService.isValid(testRegisterData, result, locale);
-		
-		assertTrue(isValid);
-	}
-	
-	@ParameterizedTest
-	@CsvSource({"'welcome', 6",
-	", 2",
-	})
-	@DisplayName("[sendMail()メソッドのテスト]tokenなし")
-	void testSendMailTokenNull(String type, int count) {
-		String testEmail = "test@email";
-		Locale locale = new Locale("ja");
-		
-		String token = loginService.sendMail(testEmail, type, locale);
-		
-		assertNull(token);
-
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(count)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
-		
-		ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
-		String captoredEmail = emailCaptor.getValue();
-		assertThat(captoredEmail).isEqualTo(testEmail);
-	}
-	
-	@ParameterizedTest
-	@CsvSource({"'reset-password', 2",
-	"'registration', 3",
-	})
-	@DisplayName("[sendMail()メソッドのテスト]tokenあり")
-	void testSendMailTokenNotNull(String type, int count) {
-		String testEmail = "test@email";
-		Locale locale = new Locale("ja");
-		
-		String token = loginService.sendMail(testEmail, type, locale);
-		
-		assertNotNull(token);
-
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(count)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
-		
-		ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
-		String captoredEmail = emailCaptor.getValue();
-		assertThat(captoredEmail).isEqualTo(testEmail);
-	}
 
 }
