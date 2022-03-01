@@ -10,6 +10,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -31,6 +33,7 @@ import org.springframework.validation.DataBinder;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.EmailData;
 import com.example.continuing.form.ProfileData;
+import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.UsersRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -255,4 +258,41 @@ class UserServiceTest {
 		}
 	}
 	
+	@Test
+	@DisplayName("[getSearchResultメソッドのテスト]")
+	void testGetSearchResult() {
+		String testSearchKeyword = "testSearchKeyword";
+		
+		SearchData testSearchData = new SearchData();
+		testSearchData.setKeyword(testSearchKeyword);
+		
+		Users testUser1 = new Users();
+		Users testUser2 = new Users();
+		Users testUser3 = new Users();
+		testUser1.setId(1);
+		testUser2.setId(2);
+		testUser3.setId(3);
+		
+		List<Users> userListName = new ArrayList<Users>();
+		userListName.add(testUser3);
+		userListName.add(testUser1);
+		
+		List<Users> userListProfileMessage =  new ArrayList<Users>();
+		userListProfileMessage.add(testUser1);
+		userListProfileMessage.add(testUser2);
+		
+		when(usersRepository.findByNameContainingIgnoreCase(testSearchKeyword)).thenReturn(userListName);
+		when(usersRepository.findByProfileMessageContainingIgnoreCase(testSearchKeyword)).thenReturn(userListProfileMessage);
+		
+		List<Users> expected = new ArrayList<Users>();
+		expected.add(testUser1);
+		expected.add(testUser2);
+		expected.add(testUser3);
+		
+		List<Users> result = userService.getSearchReuslt(testSearchData);
+		
+		assertThat(result).isEqualTo(expected);
+		verify(usersRepository, times(1)).findByNameContainingIgnoreCase(testSearchKeyword);
+		verify(usersRepository, times(1)).findByProfileMessageContainingIgnoreCase(testSearchKeyword);
+	}
 }

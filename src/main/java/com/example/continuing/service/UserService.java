@@ -147,8 +147,10 @@ public class UserService {
 	}
 	
 	public List<Users> getSearchReuslt(SearchData searchData) {
-		List<Users> userListName = usersRepository.findByNameContainingIgnoreCase(searchData.getKeyword());
-		List<Users> userList = usersRepository.findByProfileMessageContainingIgnoreCase(searchData.getKeyword());
+		String searchKeyword = searchData.getKeyword();
+		
+		List<Users> userListName = usersRepository.findByNameContainingIgnoreCase(searchKeyword);
+		List<Users> userList = usersRepository.findByProfileMessageContainingIgnoreCase(searchKeyword);
 		userList.addAll(userListName);
 		userList = new ArrayList<Users>(new LinkedHashSet<>(userList));
 		
