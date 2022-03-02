@@ -80,7 +80,6 @@ class MeetingServiceTest {
 		@BeforeEach
 		void init() {
 			testMeetingData = new MeetingData();
-			
 		}
 	
 		@Test
@@ -120,6 +119,31 @@ class MeetingServiceTest {
 			testMeetingData.setPasswordAgain(TEST_PASS);
 			
 			boolean isValid = meetingService.isValid(testMeetingData, false, result, locale);
+			String getStartTime = testMeetingData.getStartTime();
+			String getEndTime = testMeetingData.getEndTime();
+			
+			assertFalse(isValid);
+			assertNull(getStartTime);
+			assertNull(getEndTime);
+			
+			verify(messageSource, times(2)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+		
+		@ParameterizedTest
+		@CsvSource({"'00:10'", "'36:00'"})
+		@DisplayName("1対1でのミーティングにおいて、ミーティング時間が15分以上1800分(30時間)以下でないエラーのみ")
+		void oneOnOnemeetingTimeError(String testEndTime) {
+			
+			testMeetingData.setNumberPeople(1);
+			testMeetingData.setDate(TODAY);
+			testMeetingData.setStartTime(TEST_START_TIME);
+			testMeetingData.setEndTime(testEndTime);
+			testMeetingData.setPassword(TEST_PASS);
+			testMeetingData.setPasswordAgain(TEST_PASS);
+			
+			boolean isValid = meetingService.isValid(testMeetingData, true, result, locale);
 			String getStartTime = testMeetingData.getStartTime();
 			String getEndTime = testMeetingData.getEndTime();
 			
