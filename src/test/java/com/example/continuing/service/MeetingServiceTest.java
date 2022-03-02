@@ -16,6 +16,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -101,6 +103,31 @@ class MeetingServiceTest {
 			assertNull(getPasswordAgain);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+		
+		@ParameterizedTest
+		@CsvSource({"'00:10'", "'01:00'"})
+		@DisplayName("複数人でのミーティングにおいて、ミーティング時間が15分以上40分以下でないエラーのみ")
+		void multiplePeoplemeetingTimeError(String testEndTime) {
+			
+			testMeetingData.setNumberPeople(2);
+			testMeetingData.setDate("1000/10/10");
+			testMeetingData.setStartTime(TEST_START_TIME);
+			testMeetingData.setEndTime(testEndTime);
+			testMeetingData.setPassword(TEST_PASS);
+			testMeetingData.setPasswordAgain(TEST_PASS);
+			
+			boolean isValid = meetingService.isValid(testMeetingData, false, result, locale);
+			String getStartTime = testMeetingData.getStartTime();
+			String getEndTime = testMeetingData.getEndTime();
+			
+			assertFalse(isValid);
+			assertNull(getStartTime);
+			assertNull(getEndTime);
+			
+			verify(messageSource, times(2)).getMessage(any(), any(), localeCaptor.capture());
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
 		}
