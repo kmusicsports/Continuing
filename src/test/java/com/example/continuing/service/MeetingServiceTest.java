@@ -2,16 +2,21 @@ package com.example.continuing.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+
+import javax.servlet.http.HttpSession;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +34,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 
 import com.example.continuing.comparator.MeetingsComparator;
+import com.example.continuing.entity.Joins;
+import com.example.continuing.entity.Meetings;
+import com.example.continuing.entity.Users;
 import com.example.continuing.form.MeetingData;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.DeliveriesRepository;
@@ -44,6 +52,9 @@ class MeetingServiceTest {
 	
 	@Mock
 	private RecordsRepository recordsRepository;
+
+	@Mock
+	private HttpSession session;
 	
 	@Mock
 	private MeetingsRepository meetingsRepository;
@@ -69,7 +80,8 @@ class MeetingServiceTest {
 	private final Locale locale = new Locale("ja");
 	private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
 	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-	private final String TODAY = sdf.format(new Date());
+	private final String strToday = sdf.format(new java.util.Date());
+	private final String invalidDate = (new java.util.Date()).toString();
 	private static final String TEST_START_TIME = "00:00";
 	
 	@Nested
@@ -82,7 +94,7 @@ class MeetingServiceTest {
 	
 		@BeforeEach
 		void init() {
-			testMeetingData = new MeetingData();
+			testMeetingData = new MeetingData();		
 		}
 	
 		@Test
@@ -90,7 +102,7 @@ class MeetingServiceTest {
 		void unmatchPasswordError() {
 			
 			testMeetingData.setNumberPeople(1);
-			testMeetingData.setDate(TODAY);
+			testMeetingData.setDate(strToday);
 			testMeetingData.setStartTime(TEST_START_TIME);
 			testMeetingData.setEndTime("01:00");
 			testMeetingData.setPassword(TEST_PASS);
@@ -108,7 +120,7 @@ class MeetingServiceTest {
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
 		}
-		
+	
 		@ParameterizedTest
 		@CsvSource({"'00:10'", "'01:00'"})
 		@DisplayName("複数人でのミーティングにおいて、ミーティング時間が15分以上40分以下でないエラーのみ")
@@ -140,7 +152,7 @@ class MeetingServiceTest {
 		void oneOnOnemeetingTimeError(String testEndTime) {
 			
 			testMeetingData.setNumberPeople(1);
-			testMeetingData.setDate(TODAY);
+			testMeetingData.setDate(strToday);
 			testMeetingData.setStartTime(TEST_START_TIME);
 			testMeetingData.setEndTime(testEndTime);
 			testMeetingData.setPassword(TEST_PASS);
@@ -186,7 +198,7 @@ class MeetingServiceTest {
 		void invalidFormatDateError() {
 			
 			testMeetingData.setNumberPeople(2);
-			testMeetingData.setDate((new Date()).toString());
+			testMeetingData.setDate(invalidDate);
 			testMeetingData.setStartTime(TEST_START_TIME);
 			testMeetingData.setEndTime("00:20");
 			testMeetingData.setPassword(TEST_PASS);
@@ -220,7 +232,7 @@ class MeetingServiceTest {
 		@DisplayName("日付がDate型に変換できないエラーのみ")
 		void invalidFormatDateError() {
 			
-			testSearchData.setDate((new Date()).toString());
+			testSearchData.setDate(invalidDate);
 			testSearchData.setStartTime(TEST_START_TIME);
 			testSearchData.setEndTime("00:20");
 			
@@ -234,13 +246,13 @@ class MeetingServiceTest {
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
 		}
-		
+	
 		@Test
 		@DisplayName("開始時刻の形式エラーのみ")
 		void invalidFormatStartTimeError() {
 			
-			testSearchData.setDate(TODAY);
-			testSearchData.setStartTime((new Date()).toString());
+			testSearchData.setDate(strToday);
+			testSearchData.setStartTime(invalidDate);
 			testSearchData.setEndTime("00:20");
 			
 			boolean isValid = meetingService.isValid(testSearchData, result, locale);
@@ -258,9 +270,9 @@ class MeetingServiceTest {
 		@DisplayName("終了時刻の形式エラーのみ")
 		void invalidFormatEndTimeError() {
 			
-			testSearchData.setDate(TODAY);
+			testSearchData.setDate(strToday);
 			testSearchData.setStartTime(TEST_START_TIME);
-			testSearchData.setEndTime((new Date()).toString());
+			testSearchData.setEndTime(invalidDate);
 			
 			boolean isValid = meetingService.isValid(testSearchData, result, locale);
 			String getEndTime = testSearchData.getEndTime();
@@ -287,5 +299,45 @@ class MeetingServiceTest {
 			
 			verify(messageSource, never()).getMessage(any(), any(), any());
 		}
+	}
+	
+	@Nested
+	@DisplayName("[ミーティングフォーム用isValid()メソッドのテスト]")
+	public class testJoinCheck {
+		
+		private Meetings testMeeting;
+		private int testUserId = 1;
+		private final java.sql.Date sqlDate = new java.sql.Date(System.currentTimeMillis());
+		private List<Joins> joinList;
+	
+		@BeforeEach
+		void init() {
+			testMeeting = new Meetings();
+			joinList = new ArrayList<>();
+			
+			when(messageSource.getMessage(any(), any(), any())).thenReturn("testWarningMessage");
+		}
+		
+		@Test
+		@DisplayName("ミーティング開催者が参加者のいないミーティングを開始しようとした場合のエラーのみ")
+		void noJoinListError() {
+			
+			Users meetingHost = new Users();
+			meetingHost.setId(testUserId);
+			
+			testMeeting.setHost(meetingHost);
+			testMeeting.setDate(sqlDate);
+			testMeeting.setJoinList(joinList);
+			
+			String warningMessage = meetingService.joinCheck(testMeeting, testUserId, locale);
+						
+			assertNotNull(warningMessage);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+		
+		
 	}
 }
