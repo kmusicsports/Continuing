@@ -28,6 +28,7 @@ import org.springframework.validation.DataBinder;
 
 import com.example.continuing.comparator.MeetingsComparator;
 import com.example.continuing.form.MeetingData;
+import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.DeliveriesRepository;
 import com.example.continuing.repository.MeetingsRepository;
 import com.example.continuing.repository.RecordsRepository;
@@ -65,6 +66,9 @@ class MeetingServiceTest {
 
 	private final Locale locale = new Locale("ja");
 	private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
+	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+	private final String TODAY = sdf.format(new Date());
+	private static final String TEST_START_TIME = "00:00";
 	
 	@Nested
 	@DisplayName("[ミーティングフォーム用isValid()メソッドのテスト]")
@@ -72,10 +76,7 @@ class MeetingServiceTest {
 		
 		private MeetingData testMeetingData;
 		private final BindingResult result = new DataBinder(testMeetingData).getBindingResult();
-		private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-		private final String TODAY = sdf.format(new Date());
 		private static final String TEST_PASS = "testpassword";
-		private static final String TEST_START_TIME = "00:00";
 	
 		@BeforeEach
 		void init() {
@@ -201,4 +202,35 @@ class MeetingServiceTest {
 		}
 	}
 	
+	@Nested
+	@DisplayName("[検索条件用isValid()メソッドのテスト]")
+	public class testIsValidSearchData {
+		
+		private SearchData testSearchData;
+		private final BindingResult result = new DataBinder(testSearchData).getBindingResult();
+	
+		@BeforeEach
+		void init() {
+			testSearchData = new SearchData();		
+		}
+		
+		@Test
+		@DisplayName("日付がDate型に変換できないエラーのみ")
+		void invalidFormatDateError() {
+			
+			testSearchData.setDate((new Date()).toString());
+			testSearchData.setStartTime(TEST_START_TIME);
+			testSearchData.setEndTime("00:20");
+			
+			boolean isValid = meetingService.isValid(testSearchData, result, locale);
+			String getDate = testSearchData.getDate();
+			
+			assertFalse(isValid);
+			assertNull(getDate);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+	}
 }
