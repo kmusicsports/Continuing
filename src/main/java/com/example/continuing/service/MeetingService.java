@@ -40,7 +40,7 @@ public class MeetingService {
 	
 	private final UsersRepository usersRepository;
 	private final RecordsRepository recordsRepository;
-	private HttpSession session;
+//	private final HttpSession session;
 	private final MeetingsRepository meetingsRepository;
 	private final JoinService joinService;
 	private final MeetingsComparator meetingsComparator;
@@ -175,7 +175,7 @@ public class MeetingService {
 	}
 	
 	// ミーティングへの参加かどうかのチェック
-	public String joinCheck(Meetings meeting, Integer userId, Locale locale) {
+	public String joinCheck(Meetings meeting, Integer userId, Locale locale, HttpSession session) {
 		final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
 		
 		LocalDate localDate = LocalDate.parse(meeting.getDate().toString());

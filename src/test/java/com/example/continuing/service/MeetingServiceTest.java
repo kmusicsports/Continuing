@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import javax.servlet.http.HttpSession;
 
@@ -30,6 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 
@@ -52,9 +54,6 @@ class MeetingServiceTest {
 	
 	@Mock
 	private RecordsRepository recordsRepository;
-
-	@Mock
-	private HttpSession session;
 	
 	@Mock
 	private MeetingsRepository meetingsRepository;
@@ -307,17 +306,18 @@ class MeetingServiceTest {
 		
 		private Meetings testMeeting;
 		private int testUserId = 1;
+		private int meetingHostId = 2;
 		private final java.sql.Date sqlToday = new java.sql.Date(System.currentTimeMillis());
 		private List<Joins> joinList;
 		private Users meetingHost;
+		private final MockHttpServletRequest req = new MockHttpServletRequest();
+		private final HttpSession testSession = req.getSession();
 	
 		@BeforeEach
 		void init() {
 			meetingHost = new Users();
 			testMeeting = new Meetings();
 			joinList = new ArrayList<>();
-			
-			when(messageSource.getMessage(any(), any(), any())).thenReturn("testWarningMessage");
 		}
 		
 		@Test
@@ -330,7 +330,9 @@ class MeetingServiceTest {
 			testMeeting.setDate(sqlToday);
 			testMeeting.setJoinList(joinList);
 			
-			String warningMessage = meetingService.joinCheck(testMeeting, testUserId, locale);
+			when(messageSource.getMessage(any(), any(), any())).thenReturn("testWarningMessage");
+			
+			String warningMessage = meetingService.joinCheck(testMeeting, testUserId, locale, testSession);
 						
 			assertNotNull(warningMessage);
 			
@@ -342,9 +344,9 @@ class MeetingServiceTest {
 		@Test
 		@DisplayName("ミーティングの日付が今日ではないエラーのみ")
 		void notTodayError() {
-			final java.sql.Date sqlNotToday = new java.sql.Date(System.currentTimeMillis() + 86400000);
+			final java.sql.Date sqlNotToday = new java.sql.Date(System.currentTimeMillis() + 86400000); // 1日加える
 
-			meetingHost.setId(2);
+			meetingHost.setId(meetingHostId);
 			
 			Joins testJoin = new Joins();
 			testJoin.setMeeting(testMeeting);
@@ -355,7 +357,9 @@ class MeetingServiceTest {
 			testMeeting.setDate(sqlNotToday);
 			testMeeting.setJoinList(joinList);
 			
-			String warningMessage = meetingService.joinCheck(testMeeting, 2, locale);
+			when(messageSource.getMessage(any(), any(), any())).thenReturn("testWarningMessage");
+			
+			String warningMessage = meetingService.joinCheck(testMeeting, meetingHostId, locale, testSession);
 						
 			assertNotNull(warningMessage);
 			
@@ -365,25 +369,55 @@ class MeetingServiceTest {
 		}
 		
 		@ParameterizedTest
-		@CsvSource({"-1800000", "1800000"})
+		@CsvSource({"-1800000", "1800000"}) // 30分
 		@DisplayName("ミーティング開始時刻から遠い時刻でミーティングを開始しようとしている場合のエラーのみ")
 		void invalidTimeError(int plusMillis) {
 			final java.sql.Time sqlInvalidTime = new java.sql.Time(System.currentTimeMillis() + plusMillis);
 			
-			meetingHost.setId(2);
+			meetingHost.setId(meetingHostId);
 			
 			testMeeting.setHost(meetingHost);
 			testMeeting.setDate(sqlToday);
 			testMeeting.setJoinList(joinList);
 			testMeeting.setStartTime(sqlInvalidTime);
 			
-			String warningMessage = meetingService.joinCheck(testMeeting, testUserId, locale);
+			when(messageSource.getMessage(any(), any(), any())).thenReturn("testWarningMessage");
+			
+			String warningMessage = meetingService.joinCheck(testMeeting, testUserId, locale, testSession);
 						
 			assertNotNull(warningMessage);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
+		}
+		
+		@Test
+		@DisplayName("エラーなし、同ミーティングへの参加が2回目以降")
+		void noErrorAndNotFirstJoinInMeeting() {
+			final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
+			final java.sql.Time sqlNow = new java.sql.Time(System.currentTimeMillis());
+
+			testSession.setAttribute(stf.format(sqlNow), "not null");
+			
+			meetingHost.setId(meetingHostId);
+			
+			testMeeting.setHost(meetingHost);
+			testMeeting.setDate(sqlToday);
+			testMeeting.setJoinList(joinList);
+			testMeeting.setStartTime(sqlNow);
+			
+			Users testUser = new Users();
+			testUser.setId(testUserId);
+			
+			when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+			when(recordsRepository.findByUserAndTopic(testUser, testMeeting.getTopic())).thenReturn(Optional.empty());
+			
+			String warningMessage = meetingService.joinCheck(testMeeting, testUserId, locale, testSession);
+						
+			assertNull(warningMessage);
+			
+			verify(messageSource, never()).getMessage(any(), any(), any());
 		}
 	}
 }

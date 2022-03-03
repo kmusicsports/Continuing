@@ -140,7 +140,7 @@ public class MainMeetingController {
 		Optional<Meetings> someMeeting = meetingsRepository.findById(meetingId);
 		if(someMeeting.isPresent()) {
 			Meetings meeting = someMeeting.get();
-			String warningMessage = meetingService.joinCheck(meeting, myId, locale);
+			String warningMessage = meetingService.joinCheck(meeting, myId, locale, session);
 			if(warningMessage == null) {
 				if(meeting.getHost().getId() == myId) {
 					return "redirect:" +  meeting.getStartUrl();
