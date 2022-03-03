@@ -155,6 +155,28 @@ class MeetingServiceTest {
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
 		}
+		
+		@Test
+		@DisplayName("ミーティングの日付が作成日以前エラーのみ")
+		void meetingDateBeforeTodayError() {
+			
+			testMeetingData.setNumberPeople(2);
+			testMeetingData.setDate("1000/10/10");
+			testMeetingData.setStartTime(TEST_START_TIME);
+			testMeetingData.setEndTime("00:20");
+			testMeetingData.setPassword(TEST_PASS);
+			testMeetingData.setPasswordAgain(TEST_PASS);
+			
+			boolean isValid = meetingService.isValid(testMeetingData, true, result, locale);
+			String getDate = testMeetingData.getDate();
+			
+			assertFalse(isValid);
+			assertNull(getDate);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
 	}
 	
 }
