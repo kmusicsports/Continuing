@@ -3,7 +3,9 @@ package com.example.continuing.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -269,6 +271,21 @@ class MeetingServiceTest {
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
+		}
+		
+		@Test
+		@DisplayName("エラーなし、日時条件なし")
+		void noErrorAndNoDateTime() {
+			
+			testSearchData.setDate("");
+			testSearchData.setStartTime("");
+			testSearchData.setEndTime("");
+			
+			boolean isValid = meetingService.isValid(testSearchData, result, locale);
+			
+			assertTrue(isValid);
+			
+			verify(messageSource, never()).getMessage(any(), any(), any());
 		}
 	}
 }
