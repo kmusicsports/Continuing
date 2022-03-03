@@ -307,7 +307,7 @@ class MeetingServiceTest {
 		
 		private Meetings testMeeting;
 		private int testUserId = 1;
-		private final java.sql.Date sqlDate = new java.sql.Date(System.currentTimeMillis());
+		private final java.sql.Date sqlToday = new java.sql.Date(System.currentTimeMillis());
 		private List<Joins> joinList;
 	
 		@BeforeEach
@@ -326,7 +326,7 @@ class MeetingServiceTest {
 			meetingHost.setId(testUserId);
 			
 			testMeeting.setHost(meetingHost);
-			testMeeting.setDate(sqlDate);
+			testMeeting.setDate(sqlToday);
 			testMeeting.setJoinList(joinList);
 			
 			String warningMessage = meetingService.joinCheck(testMeeting, testUserId, locale);
@@ -338,6 +338,30 @@ class MeetingServiceTest {
 			assertThat(captoredLocale).isEqualTo(locale);
 		}
 		
-		
+		@Test
+		@DisplayName("ミーティングの日付が今日ではないエラーのみ")
+		void notTodayError() {
+			final java.sql.Date sqlNotToday = new java.sql.Date(System.currentTimeMillis() + 86400000);
+			
+			Users meetingHost = new Users();
+			meetingHost.setId(testUserId);
+			
+			Joins testJoin = new Joins();
+			testJoin.setMeeting(testMeeting);
+			testJoin.setUserId(2);
+			joinList.add(testJoin);
+			
+			testMeeting.setHost(meetingHost);
+			testMeeting.setDate(sqlNotToday);
+			testMeeting.setJoinList(joinList);
+			
+			String warningMessage = meetingService.joinCheck(testMeeting, testUserId, locale);
+						
+			assertNotNull(warningMessage);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
 	}
 }
