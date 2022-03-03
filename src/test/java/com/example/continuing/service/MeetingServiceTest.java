@@ -177,6 +177,28 @@ class MeetingServiceTest {
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
 		}
+		
+		@Test
+		@DisplayName("ミーティングの日付がDate型に変換できないエラーのみ")
+		void invalidFormatDateError() {
+			
+			testMeetingData.setNumberPeople(2);
+			testMeetingData.setDate((new Date()).toString());
+			testMeetingData.setStartTime(TEST_START_TIME);
+			testMeetingData.setEndTime("00:20");
+			testMeetingData.setPassword(TEST_PASS);
+			testMeetingData.setPasswordAgain(TEST_PASS);
+			
+			boolean isValid = meetingService.isValid(testMeetingData, false, result, locale);
+			String getDate = testMeetingData.getDate();
+			
+			assertFalse(isValid);
+			assertNull(getDate);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
 	}
 	
 }
