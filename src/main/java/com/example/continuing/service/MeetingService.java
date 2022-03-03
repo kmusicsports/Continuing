@@ -132,7 +132,7 @@ public class MeetingService {
 	
 	// 検索条件のチェック
 	public boolean isValid(SearchData searchData, BindingResult result, Locale locale) {
-		Boolean answer = true;
+		boolean answer = true;
 		
 		String date = searchData.getDate().replace("/", "-");
 		if (!date.equals("")) {
@@ -144,6 +144,8 @@ public class MeetingService {
 						"date",
 						messageSource.getMessage("InvalidFormat.date", null, locale));
 				result.addError(fieldError);
+				searchData.setDate(null);
+				e.printStackTrace();
 				answer =  false;
 			}			
 		}
