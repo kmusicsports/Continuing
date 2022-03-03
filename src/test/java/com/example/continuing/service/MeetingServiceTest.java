@@ -309,9 +309,11 @@ class MeetingServiceTest {
 		private int testUserId = 1;
 		private final java.sql.Date sqlToday = new java.sql.Date(System.currentTimeMillis());
 		private List<Joins> joinList;
+		private Users meetingHost;
 	
 		@BeforeEach
 		void init() {
+			meetingHost = new Users();
 			testMeeting = new Meetings();
 			joinList = new ArrayList<>();
 			
@@ -322,7 +324,6 @@ class MeetingServiceTest {
 		@DisplayName("ミーティング開催者が参加者のいないミーティングを開始しようとした場合のエラーのみ")
 		void noJoinListError() {
 			
-			Users meetingHost = new Users();
 			meetingHost.setId(testUserId);
 			
 			testMeeting.setHost(meetingHost);
@@ -342,18 +343,39 @@ class MeetingServiceTest {
 		@DisplayName("ミーティングの日付が今日ではないエラーのみ")
 		void notTodayError() {
 			final java.sql.Date sqlNotToday = new java.sql.Date(System.currentTimeMillis() + 86400000);
-			
-			Users meetingHost = new Users();
-			meetingHost.setId(testUserId);
+
+			meetingHost.setId(2);
 			
 			Joins testJoin = new Joins();
 			testJoin.setMeeting(testMeeting);
-			testJoin.setUserId(2);
+			testJoin.setUserId(testUserId);
 			joinList.add(testJoin);
 			
 			testMeeting.setHost(meetingHost);
 			testMeeting.setDate(sqlNotToday);
 			testMeeting.setJoinList(joinList);
+			
+			String warningMessage = meetingService.joinCheck(testMeeting, 2, locale);
+						
+			assertNotNull(warningMessage);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+		
+		@ParameterizedTest
+		@CsvSource({"-1800000", "1800000"})
+		@DisplayName("ミーティング開始時刻から遠い時刻でミーティングを開始しようとしている場合のエラーのみ")
+		void invalidTimeError(int plusMillis) {
+			final java.sql.Time sqlInvalidTime = new java.sql.Time(System.currentTimeMillis() + plusMillis);
+			
+			meetingHost.setId(2);
+			
+			testMeeting.setHost(meetingHost);
+			testMeeting.setDate(sqlToday);
+			testMeeting.setJoinList(joinList);
+			testMeeting.setStartTime(sqlInvalidTime);
 			
 			String warningMessage = meetingService.joinCheck(testMeeting, testUserId, locale);
 						
