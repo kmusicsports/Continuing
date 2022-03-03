@@ -40,7 +40,6 @@ public class MeetingService {
 	
 	private final UsersRepository usersRepository;
 	private final RecordsRepository recordsRepository;
-	private final HttpSession session;
 	private final MeetingsRepository meetingsRepository;
 	private final JoinService joinService;
 	private final MeetingsComparator meetingsComparator;
@@ -54,7 +53,7 @@ public class MeetingService {
 	// ミーティングフォーム用のチェック
 	public boolean isValid(MeetingData meetingData, boolean isCreate, 
 			BindingResult result, Locale locale) {
-		Boolean answer = true;
+		boolean answer = true;
 		
 		if(!meetingData.getPassword().equals(meetingData.getPasswordAgain())) {
 			// パスワード不一致
@@ -63,13 +62,14 @@ public class MeetingService {
 					"passwordAgain",
 					messageSource.getMessage("Unmatch.password", null, locale));
 			result.addError(fieldError);
-			meetingData.setPassword("");
-			meetingData.setPasswordAgain("");
+			meetingData.setPassword(null);
+			meetingData.setPasswordAgain(null);
 			answer = false;
 		}
 		
 		int duration = Utils.string2Int(meetingData.getEndTime()) - Utils.string2Int(meetingData.getStartTime());
-		if(meetingData.getNumberPeople() == 2 && (duration < 15 || duration > 40)) {			
+		if(meetingData.getNumberPeople() == 2 && (duration < 15 || duration > 40)) {
+			// 複数人でのミーティングにおいて、ミーティング時間が15分以上40分以下でない
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"startTime",
@@ -80,10 +80,11 @@ public class MeetingService {
 					"endTime",
 					messageSource.getMessage("Time.Length.2.endTime", null, locale));
 			result.addError(fieldError);
-			meetingData.setStartTime("");
-			meetingData.setEndTime("");
+			meetingData.setStartTime(null);
+			meetingData.setEndTime(null);
 			answer = false;
 		} else if(meetingData.getNumberPeople() == 1 && (duration < 15 || duration > 1800)) {
+			// 1対1でのミーティングにおいて、ミーティング時間が15分以上1800分(30時間)以下でない
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"startTime",
@@ -94,8 +95,8 @@ public class MeetingService {
 					"endTime",
 					messageSource.getMessage("Time.Length.1.endTime", null, locale));
 			result.addError(fieldError);
-			meetingData.setStartTime("");
-			meetingData.setEndTime("");
+			meetingData.setStartTime(null);
+			meetingData.setEndTime(null);
 			answer = false;
 		}
 		
@@ -105,21 +106,23 @@ public class MeetingService {
         	LocalDate today = LocalDate.now();
         	localeDate = LocalDate.parse(date);
             if (isCreate && localeDate.isBefore(today)) {
+            	// ミーティングの日付が作成日以前
             	FieldError fieldError = new FieldError(
     					result.getObjectName(),
     					"date",
     					messageSource.getMessage("Previous.date", null, locale));
     			result.addError(fieldError);
-            	meetingData.setDate("");
+            	meetingData.setDate(null);
                 answer =  false;
             }
         } catch (DateTimeException e) {
+        	// ミーティングの日付がDate型に変換できない
         	FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"date",
 					messageSource.getMessage("InvalidFormat.date", null, locale));
 			result.addError(fieldError);
-        	meetingData.setDate("");
+        	meetingData.setDate(null);
         	e.printStackTrace();
             answer =  false;
         }
@@ -169,7 +172,7 @@ public class MeetingService {
 	}
 	
 	// ミーティングへの参加かどうかのチェック
-	public String joinCheck(Meetings meeting, Integer userId, Locale locale) {
+	public String joinCheck(Meetings meeting, Integer userId, Locale locale, HttpSession session) {
 		final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
 		
 		LocalDate localDate = LocalDate.parse(meeting.getDate().toString());
