@@ -39,6 +39,7 @@ import org.springframework.validation.DataBinder;
 import com.example.continuing.comparator.MeetingsComparator;
 import com.example.continuing.entity.Joins;
 import com.example.continuing.entity.Meetings;
+import com.example.continuing.entity.Records;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.MeetingData;
 import com.example.continuing.form.SearchData;
@@ -449,6 +450,35 @@ class MeetingServiceTest {
 			verify(messageSource, never()).getMessage(any(), any(), any());
 			verify(recordsRepository, times(1)).saveAndFlush(any());
 			verify(usersRepository, never()).saveAndFlush(any());
+		}
+		
+		@Test
+		@DisplayName("エラーなし、ミーティング参加が今日初")
+		void noErrorAndTodayFirstJoin() {			
+			meetingHost.setId(meetingHostId);
+			
+			testMeeting.setHost(meetingHost);
+			testMeeting.setDate(sqlToday);
+			testMeeting.setJoinList(joinList);
+			testMeeting.setStartTime(sqlNow);
+			testMeeting.setTopic(1);
+			
+			Users testUser = new Users();
+			testUser.setId(testUserId);
+			testUser.setContinuousDays(0);
+			
+			Records testRecord = new Records(testUser, testMeeting.getTopic());
+			
+			when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+			when(recordsRepository.findByUserAndTopic(testUser, testMeeting.getTopic())).thenReturn(Optional.of(testRecord));
+			
+			String warningMessage = meetingService.joinCheck(testMeeting, testUserId, locale, testSession);
+						
+			assertNull(warningMessage);
+			
+			verify(messageSource, never()).getMessage(any(), any(), any());
+			verify(recordsRepository, times(1)).saveAndFlush(any());
+			verify(usersRepository, times(1)).saveAndFlush(any());
 		}
 	}
 }
