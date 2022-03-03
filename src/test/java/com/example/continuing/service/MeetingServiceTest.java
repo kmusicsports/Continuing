@@ -232,5 +232,43 @@ class MeetingServiceTest {
 			Locale captoredLocale = localeCaptor.getValue();
 			assertThat(captoredLocale).isEqualTo(locale);
 		}
+		
+		@Test
+		@DisplayName("開始時刻の形式エラーのみ")
+		void invalidFormatStartTimeError() {
+			
+			testSearchData.setDate(TODAY);
+			testSearchData.setStartTime((new Date()).toString());
+			testSearchData.setEndTime("00:20");
+			
+			boolean isValid = meetingService.isValid(testSearchData, result, locale);
+			String getStartTime = testSearchData.getStartTime();
+			
+			assertFalse(isValid);
+			assertNull(getStartTime);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
+		
+		@Test
+		@DisplayName("終了時刻の形式エラーのみ")
+		void invalidFormatEndTimeError() {
+			
+			testSearchData.setDate(TODAY);
+			testSearchData.setStartTime(TEST_START_TIME);
+			testSearchData.setEndTime((new Date()).toString());
+			
+			boolean isValid = meetingService.isValid(testSearchData, result, locale);
+			String getEndTime = testSearchData.getEndTime();
+			
+			assertFalse(isValid);
+			assertNull(getEndTime);
+			
+			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+		}
 	}
 }
