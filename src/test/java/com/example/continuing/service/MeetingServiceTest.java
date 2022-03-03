@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -78,7 +79,7 @@ class MeetingServiceTest {
 
 	private final Locale locale = new Locale("ja");
 	private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+	private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	private final String strToday = sdf.format(new java.util.Date());
 	private final String invalidDate = (new java.util.Date()).toString();
 	private static final String TEST_START_TIME = "00:00";
@@ -308,22 +309,23 @@ class MeetingServiceTest {
 		private int testUserId = 1;
 		private int meetingHostId = 2;
 		private final java.sql.Date sqlToday = new java.sql.Date(System.currentTimeMillis());
+		private final java.sql.Time sqlNow = new java.sql.Time(System.currentTimeMillis());
 		private List<Joins> joinList;
 		private Users meetingHost;
-		private final MockHttpServletRequest req = new MockHttpServletRequest();
-		private final HttpSession testSession = req.getSession();
+		private final MockHttpServletRequest testRequest = new MockHttpServletRequest();
+		private HttpSession testSession;
 	
 		@BeforeEach
 		void init() {
 			meetingHost = new Users();
 			testMeeting = new Meetings();
 			joinList = new ArrayList<>();
+			testSession = testRequest.getSession();
 		}
 		
 		@Test
 		@DisplayName("ミーティング開催者が参加者のいないミーティングを開始しようとした場合のエラーのみ")
 		void noJoinListError() {
-			
 			meetingHost.setId(testUserId);
 			
 			testMeeting.setHost(meetingHost);
@@ -396,16 +398,15 @@ class MeetingServiceTest {
 		@DisplayName("エラーなし、同ミーティングへの参加が2回目以降")
 		void noErrorAndNotFirstJoinInMeeting() {
 			final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
-			final java.sql.Time sqlNow = new java.sql.Time(System.currentTimeMillis());
 
-			testSession.setAttribute(stf.format(sqlNow), "not null");
-			
-			meetingHost.setId(meetingHostId);
+			meetingHost.setId(meetingHostId);			
 			
 			testMeeting.setHost(meetingHost);
 			testMeeting.setDate(sqlToday);
 			testMeeting.setJoinList(joinList);
 			testMeeting.setStartTime(sqlNow);
+			
+			testSession.setAttribute(stf.format(sqlNow), "not null");
 			
 			Users testUser = new Users();
 			testUser.setId(testUserId);
@@ -418,6 +419,36 @@ class MeetingServiceTest {
 			assertNull(warningMessage);
 			
 			verify(messageSource, never()).getMessage(any(), any(), any());
+			verify(recordsRepository, never()).saveAndFlush(any());
+			verify(usersRepository, never()).saveAndFlush(any());
+		}
+		
+		@Test
+		@DisplayName("エラーなし、ミーティング参加が今日初じゃない")
+		void noErrorAndNotTodayFirstJoin() {			
+			meetingHost.setId(meetingHostId);
+			
+			testMeeting.setHost(meetingHost);
+			testMeeting.setDate(sqlToday);
+			testMeeting.setJoinList(joinList);
+			testMeeting.setStartTime(sqlNow);
+			
+			LocalDate localDate = LocalDate.parse(strToday);			
+			testSession.setAttribute(localDate.toString(), "not null");
+			
+			Users testUser = new Users();
+			testUser.setId(testUserId);
+			
+			when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+			when(recordsRepository.findByUserAndTopic(testUser, testMeeting.getTopic())).thenReturn(Optional.empty());
+			
+			String warningMessage = meetingService.joinCheck(testMeeting, testUserId, locale, testSession);
+						
+			assertNull(warningMessage);
+			
+			verify(messageSource, never()).getMessage(any(), any(), any());
+			verify(recordsRepository, times(1)).saveAndFlush(any());
+			verify(usersRepository, never()).saveAndFlush(any());
 		}
 	}
 }
