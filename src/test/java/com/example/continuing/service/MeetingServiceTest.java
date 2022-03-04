@@ -36,7 +36,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 
-import com.example.continuing.comparator.MeetingsComparator;
 import com.example.continuing.entity.Deliveries;
 import com.example.continuing.entity.Joins;
 import com.example.continuing.entity.Meetings;
@@ -63,9 +62,6 @@ class MeetingServiceTest {
 	
 	@Mock
 	private JoinService joinService;
-	
-	@Mock
-	private MeetingsComparator meetingsComparator;
 	
 	@Mock
 	private MailService mailService;
@@ -592,5 +588,45 @@ class MeetingServiceTest {
 			
 			verify(mailService, never()).sendMail(any(), any(), any());
 		}
+	}
+	
+	@Test
+	@DisplayName("[getUserMeetingListメソッドのテスト]")
+	void testGetUserMeetingList() {
+		final java.sql.Date sqlYesterday = new java.sql.Date(System.currentTimeMillis() - 86400000);
+		final java.sql.Date sqlToday = new java.sql.Date(System.currentTimeMillis());
+		final java.sql.Date sqlTomorrow = new java.sql.Date(System.currentTimeMillis() + 86400000);
+		
+		Users testUser = new Users();
+		testUser.setId(1);
+		
+		Meetings testMeeting1 = new Meetings();
+		Meetings testMeeting2 = new Meetings();
+		Meetings testMeeting3 = new Meetings();
+		testMeeting1.setId(1);
+		testMeeting2.setId(2);
+		testMeeting3.setId(3);
+		testMeeting1.setDate(sqlYesterday);
+		testMeeting2.setDate(sqlToday);
+		testMeeting3.setDate(sqlTomorrow);
+		
+		List<Meetings> hostMeetingList = new ArrayList<>();
+		hostMeetingList.add(testMeeting3);
+		
+		List<Meetings> joinMeetingList = new ArrayList<>();
+		joinMeetingList.add(testMeeting2);
+		joinMeetingList.add(testMeeting1);
+		
+		
+		when(meetingsRepository.findByHostAndDateGreaterThanEqual(any(), any())).thenReturn(hostMeetingList);
+		when(joinService.getJoinMeetingList(testUser.getId())).thenReturn(joinMeetingList);
+		
+		List<Meetings> result = meetingService.getUserMeetingList(testUser);
+		
+		List<Meetings> expected = new ArrayList<>();
+		expected.add(testMeeting2);
+		expected.add(testMeeting3);
+		
+		assertThat(result).isEqualTo(expected);
 	}
 }
