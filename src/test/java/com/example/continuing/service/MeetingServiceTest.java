@@ -515,11 +515,12 @@ class MeetingServiceTest {
 		}
 
 		@ParameterizedTest
-		@CsvSource({"'create', 3",
+		@CsvSource({", 2",
+			"'create', 3",
 			"'delete', 3",
 		})
-		@DisplayName("配信が許可されているuserへのメール")
-		void toUserCanSend(String type, int count) {
+		@DisplayName("userへのメール")
+		void sendToUser(String type, int count) {
 			testDeliveries = new Deliveries(testUser.getId());
 			
 			when(deliveriesRepository.findByUserId(testUser.getId())).thenReturn(Optional.of(testDeliveries));
@@ -537,6 +538,59 @@ class MeetingServiceTest {
 			verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
 			String captoredEmail = emailCaptor.getValue();
 			assertThat(captoredEmail).isEqualTo(testUser.getEmail());
+		}
+		
+		@ParameterizedTest
+		@CsvSource({"'join', 3",
+			"'leave', 2",
+		})
+		@DisplayName("ミーティング開催者へのメール")
+		void sendToMeetingHost(String type, int count) {
+			testDeliveries = new Deliveries(meetingHost.getId());
+			
+			when(deliveriesRepository.findByUserId(meetingHost.getId())).thenReturn(Optional.of(testDeliveries));
+			
+			meetingService.sendMail(testMeeting, testUser, type, locale);
+		
+			verify(deliveriesRepository, times(1)).findByUserId(userIdCaptor.capture());
+			int captoredUserId = userIdCaptor.getValue();
+			assertThat(captoredUserId).isEqualTo(meetingHost.getId());
+			
+			verify(messageSource, times(5 + count)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+			
+			verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
+			String captoredEmail = emailCaptor.getValue();
+			assertThat(captoredEmail).isEqualTo(meetingHost.getEmail());
+		}
+		
+		@ParameterizedTest
+		@CsvSource({"'create'",
+			"'delete'",
+			"'join'",
+			"'leave'",
+		})
+		@DisplayName("配信の許可がされておらず、メールを送らない")
+		void notSend(String type) {
+			
+			testDeliveries = new Deliveries();
+			testDeliveries.setMeetingCreated(0);
+			testDeliveries.setMeetingDeleted(0);
+			testDeliveries.setMeetingJoined(0);
+			testDeliveries.setMeetingLeft(0);
+			
+			when(deliveriesRepository.findByUserId(any())).thenReturn(Optional.of(testDeliveries));
+			
+			meetingService.sendMail(testMeeting, testUser, type, locale);
+		
+			verify(deliveriesRepository, times(1)).findByUserId(any());
+			
+			verify(messageSource, times(5)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+			
+			verify(mailService, never()).sendMail(any(), any(), any());
 		}
 	}
 }
