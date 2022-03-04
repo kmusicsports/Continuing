@@ -42,7 +42,6 @@ public class MeetingService {
 	private final RecordsRepository recordsRepository;
 	private final MeetingsRepository meetingsRepository;
 	private final JoinService joinService;
-	private final MeetingsComparator meetingsComparator;
 	private final MailService mailService;
 	private final MessageSource messageSource;
 	private final DeliveriesRepository deliveriesRepository;
@@ -223,12 +222,13 @@ public class MeetingService {
 	
 	public void sendMail(Meetings meeting, Users user, String type, Locale locale) {
 		Deliveries deliveries = null;
+		Users meetingHost = meeting.getHost();
 		String username = user.getName();
 		String subject = null;
 		String messageText = "<html><head></head><body>";
 		String meetingInfo = "<br>"
 				+ messageSource.getMessage("mail.msg.meeting_host", null, locale)
-				+ " : " + meeting.getHost().getName() + "<br>" 
+				+ " : " + meetingHost.getName() + "<br>" 
 				+ messageSource.getMessage("mail.msg.meeting_topic", null, locale) 
 				+ " : " 
 				+ messageSource.getMessage("option.topic." + meeting.getTopic(), null, locale) 
@@ -247,9 +247,9 @@ public class MeetingService {
 			case "create":
 				deliveries = deliveriesRepository.findByUserId(user.getId()).get();
 				if(deliveries.getMeetingCreated() == 1) {
-					subject = meeting.getHost().getName() + " " 
+					subject = meetingHost.getName() + " " 
 							+ messageSource.getMessage("mail.subject.meeting_created", null, locale);
-					messageText += meeting.getHost().getName() + " " 
+					messageText += meetingHost.getName() + " " 
 							+ messageSource.getMessage("mail.msg.meeting_created", null, locale) 
 							+ "<br>"
 							+ meetingInfo
@@ -277,7 +277,7 @@ public class MeetingService {
 				}
 				break;
 			case "join":
-				deliveries = deliveriesRepository.findByUserId(meeting.getHost().getId()).get();
+				deliveries = deliveriesRepository.findByUserId(meetingHost.getId()).get();
 				if(deliveries.getMeetingJoined() == 1) {
 					subject = messageSource.getMessage("mail.subject.meeting_joined", null, locale);
 					messageText += messageSource.getMessage("mail.msg.meeting_joined_start", null, locale) 
@@ -288,11 +288,11 @@ public class MeetingService {
 //					+ "参加を拒否する場合は<a href='https://" + APP_URL + "/'>こちら</a>";
 							+ "</body></html>";
 					
-					mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);					
+					mailService.sendMail(meetingHost.getEmail(), subject, messageText);					
 				}
 				break;
 			case "leave":
-				deliveries = deliveriesRepository.findByUserId(meeting.getHost().getId()).get();
+				deliveries = deliveriesRepository.findByUserId(meetingHost.getId()).get();
 				if(deliveries.getMeetingLeft() == 1) {
 					subject = username + " " 
 							+ messageSource.getMessage("mail.subject.meeting_left", null, locale);
@@ -302,14 +302,15 @@ public class MeetingService {
 							+ meetingInfo
 							+ "</body></html>";
 					
-					mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);					
+					mailService.sendMail(meetingHost.getEmail(), subject, messageText);					
 				}
 				break;
 			default:
+				deliveries = deliveriesRepository.findByUserId(user.getId()).get();
 				subject = messageSource.getMessage("mail.subject.error", null, locale);
 				messageText += messageSource.getMessage("mail.msg.operation_error", null, locale)
 						+ "</body></html>";
-				mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);		
+				mailService.sendMail(user.getEmail(), subject, messageText);		
 		}
 	}
 	
@@ -327,7 +328,7 @@ public class MeetingService {
 				userMeetingList.add(meeting);
 			}
 		}
-		Collections.sort(userMeetingList, meetingsComparator);
+		Collections.sort(userMeetingList, new MeetingsComparator());
 		
 		return userMeetingList;
 		
@@ -348,7 +349,7 @@ public class MeetingService {
 				todayMeetingList.add(meeting);
 			}
 		}
-		Collections.sort(todayMeetingList, meetingsComparator);
+		Collections.sort(todayMeetingList, new MeetingsComparator());
 		
 		return todayMeetingList;
 		
