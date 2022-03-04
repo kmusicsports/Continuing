@@ -40,10 +40,8 @@ public class MeetingService {
 	
 	private final UsersRepository usersRepository;
 	private final RecordsRepository recordsRepository;
-	private final HttpSession session;
 	private final MeetingsRepository meetingsRepository;
 	private final JoinService joinService;
-	private final MeetingsComparator meetingsComparator;
 	private final MailService mailService;
 	private final MessageSource messageSource;
 	private final DeliveriesRepository deliveriesRepository;
@@ -54,7 +52,7 @@ public class MeetingService {
 	// ミーティングフォーム用のチェック
 	public boolean isValid(MeetingData meetingData, boolean isCreate, 
 			BindingResult result, Locale locale) {
-		Boolean answer = true;
+		boolean answer = true;
 		
 		if(!meetingData.getPassword().equals(meetingData.getPasswordAgain())) {
 			// パスワード不一致
@@ -63,13 +61,14 @@ public class MeetingService {
 					"passwordAgain",
 					messageSource.getMessage("Unmatch.password", null, locale));
 			result.addError(fieldError);
-			meetingData.setPassword("");
-			meetingData.setPasswordAgain("");
+			meetingData.setPassword(null);
+			meetingData.setPasswordAgain(null);
 			answer = false;
 		}
 		
 		int duration = Utils.string2Int(meetingData.getEndTime()) - Utils.string2Int(meetingData.getStartTime());
-		if(meetingData.getNumberPeople() == 2 && (duration < 15 || duration > 40)) {			
+		if(meetingData.getNumberPeople() == 2 && (duration < 15 || duration > 40)) {
+			// 複数人でのミーティングにおいて、ミーティング時間が15分以上40分以下でない
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"startTime",
@@ -80,10 +79,11 @@ public class MeetingService {
 					"endTime",
 					messageSource.getMessage("Time.Length.2.endTime", null, locale));
 			result.addError(fieldError);
-			meetingData.setStartTime("");
-			meetingData.setEndTime("");
+			meetingData.setStartTime(null);
+			meetingData.setEndTime(null);
 			answer = false;
 		} else if(meetingData.getNumberPeople() == 1 && (duration < 15 || duration > 1800)) {
+			// 1対1でのミーティングにおいて、ミーティング時間が15分以上1800分(30時間)以下でない
 			FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"startTime",
@@ -94,8 +94,8 @@ public class MeetingService {
 					"endTime",
 					messageSource.getMessage("Time.Length.1.endTime", null, locale));
 			result.addError(fieldError);
-			meetingData.setStartTime("");
-			meetingData.setEndTime("");
+			meetingData.setStartTime(null);
+			meetingData.setEndTime(null);
 			answer = false;
 		}
 		
@@ -105,21 +105,23 @@ public class MeetingService {
         	LocalDate today = LocalDate.now();
         	localeDate = LocalDate.parse(date);
             if (isCreate && localeDate.isBefore(today)) {
+            	// ミーティングの日付が作成日以前
             	FieldError fieldError = new FieldError(
     					result.getObjectName(),
     					"date",
     					messageSource.getMessage("Previous.date", null, locale));
     			result.addError(fieldError);
-            	meetingData.setDate("");
+            	meetingData.setDate(null);
                 answer =  false;
             }
         } catch (DateTimeException e) {
+        	// ミーティングの日付がDate型に変換できない
         	FieldError fieldError = new FieldError(
 					result.getObjectName(),
 					"date",
 					messageSource.getMessage("InvalidFormat.date", null, locale));
 			result.addError(fieldError);
-        	meetingData.setDate("");
+        	meetingData.setDate(null);
         	e.printStackTrace();
             answer =  false;
         }
@@ -129,7 +131,7 @@ public class MeetingService {
 	
 	// 検索条件のチェック
 	public boolean isValid(SearchData searchData, BindingResult result, Locale locale) {
-		Boolean answer = true;
+		boolean answer = true;
 		
 		String date = searchData.getDate().replace("/", "-");
 		if (!date.equals("")) {
@@ -141,6 +143,8 @@ public class MeetingService {
 						"date",
 						messageSource.getMessage("InvalidFormat.date", null, locale));
 				result.addError(fieldError);
+				searchData.setDate(null);
+				e.printStackTrace();
 				answer =  false;
 			}			
 		}
@@ -169,7 +173,7 @@ public class MeetingService {
 	}
 	
 	// ミーティングへの参加かどうかのチェック
-	public String joinCheck(Meetings meeting, Integer userId, Locale locale) {
+	public String joinCheck(Meetings meeting, Integer userId, Locale locale, HttpSession session) {
 		final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
 		
 		LocalDate localDate = LocalDate.parse(meeting.getDate().toString());
@@ -218,12 +222,13 @@ public class MeetingService {
 	
 	public void sendMail(Meetings meeting, Users user, String type, Locale locale) {
 		Deliveries deliveries = null;
+		Users meetingHost = meeting.getHost();
 		String username = user.getName();
 		String subject = null;
 		String messageText = "<html><head></head><body>";
 		String meetingInfo = "<br>"
 				+ messageSource.getMessage("mail.msg.meeting_host", null, locale)
-				+ " : " + meeting.getHost().getName() + "<br>" 
+				+ " : " + meetingHost.getName() + "<br>" 
 				+ messageSource.getMessage("mail.msg.meeting_topic", null, locale) 
 				+ " : " 
 				+ messageSource.getMessage("option.topic." + meeting.getTopic(), null, locale) 
@@ -242,9 +247,9 @@ public class MeetingService {
 			case "create":
 				deliveries = deliveriesRepository.findByUserId(user.getId()).get();
 				if(deliveries.getMeetingCreated() == 1) {
-					subject = meeting.getHost().getName() + " " 
+					subject = meetingHost.getName() + " " 
 							+ messageSource.getMessage("mail.subject.meeting_created", null, locale);
-					messageText += meeting.getHost().getName() + " " 
+					messageText += meetingHost.getName() + " " 
 							+ messageSource.getMessage("mail.msg.meeting_created", null, locale) 
 							+ "<br>"
 							+ meetingInfo
@@ -272,7 +277,7 @@ public class MeetingService {
 				}
 				break;
 			case "join":
-				deliveries = deliveriesRepository.findByUserId(meeting.getHost().getId()).get();
+				deliveries = deliveriesRepository.findByUserId(meetingHost.getId()).get();
 				if(deliveries.getMeetingJoined() == 1) {
 					subject = messageSource.getMessage("mail.subject.meeting_joined", null, locale);
 					messageText += messageSource.getMessage("mail.msg.meeting_joined_start", null, locale) 
@@ -283,11 +288,11 @@ public class MeetingService {
 //					+ "参加を拒否する場合は<a href='https://" + APP_URL + "/'>こちら</a>";
 							+ "</body></html>";
 					
-					mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);					
+					mailService.sendMail(meetingHost.getEmail(), subject, messageText);					
 				}
 				break;
 			case "leave":
-				deliveries = deliveriesRepository.findByUserId(meeting.getHost().getId()).get();
+				deliveries = deliveriesRepository.findByUserId(meetingHost.getId()).get();
 				if(deliveries.getMeetingLeft() == 1) {
 					subject = username + " " 
 							+ messageSource.getMessage("mail.subject.meeting_left", null, locale);
@@ -297,14 +302,15 @@ public class MeetingService {
 							+ meetingInfo
 							+ "</body></html>";
 					
-					mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);					
+					mailService.sendMail(meetingHost.getEmail(), subject, messageText);					
 				}
 				break;
 			default:
+				deliveries = deliveriesRepository.findByUserId(user.getId()).get();
 				subject = messageSource.getMessage("mail.subject.error", null, locale);
 				messageText += messageSource.getMessage("mail.msg.operation_error", null, locale)
 						+ "</body></html>";
-				mailService.sendMail(meeting.getHost().getEmail(), subject, messageText);		
+				mailService.sendMail(user.getEmail(), subject, messageText);		
 		}
 	}
 	
@@ -322,7 +328,7 @@ public class MeetingService {
 				userMeetingList.add(meeting);
 			}
 		}
-		Collections.sort(userMeetingList, meetingsComparator);
+		Collections.sort(userMeetingList, new MeetingsComparator());
 		
 		return userMeetingList;
 		
@@ -343,7 +349,7 @@ public class MeetingService {
 				todayMeetingList.add(meeting);
 			}
 		}
-		Collections.sort(todayMeetingList, meetingsComparator);
+		Collections.sort(todayMeetingList, new MeetingsComparator());
 		
 		return todayMeetingList;
 		
