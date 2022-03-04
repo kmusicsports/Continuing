@@ -37,6 +37,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 
 import com.example.continuing.comparator.MeetingsComparator;
+import com.example.continuing.entity.Deliveries;
 import com.example.continuing.entity.Joins;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Records;
@@ -373,7 +374,7 @@ class MeetingServiceTest {
 		
 		@ParameterizedTest
 		@CsvSource({"-1800000", "1800000"}) // 30分
-		@DisplayName("ミーティング開始時刻から遠い時刻でミーティングを開始しようとしている場合のエラーのみ")
+		@DisplayName("ミーティング開始時刻から遠い(または遅い)時刻でミーティングを開始しようとしている場合のエラーのみ")
 		void invalidTimeError(int plusMillis) {
 			final java.sql.Time sqlInvalidTime = new java.sql.Time(System.currentTimeMillis() + plusMillis);
 			
@@ -479,6 +480,63 @@ class MeetingServiceTest {
 			verify(messageSource, never()).getMessage(any(), any(), any());
 			verify(recordsRepository, times(1)).saveAndFlush(any());
 			verify(usersRepository, times(1)).saveAndFlush(any());
+		}
+	}
+	
+	@Nested
+	@DisplayName("[ミーティング用sendMail()メソッドのテスト]")
+	public class testSendMail {
+		
+		private Users meetingHost;
+		private Users testUser;
+		private Meetings testMeeting;
+		private Deliveries testDeliveries; 
+		private final java.sql.Date sqlToday = new java.sql.Date(System.currentTimeMillis());
+		private final java.sql.Time sqlNow = new java.sql.Time(System.currentTimeMillis());
+		private final ArgumentCaptor<Integer> userIdCaptor = ArgumentCaptor.forClass(Integer.class);
+		private final ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
+	
+		@BeforeEach
+		void init() {
+			meetingHost = new Users();
+			meetingHost.setId(1);
+			meetingHost.setName("");
+			meetingHost.setEmail("test@meetinghost.email");
+			
+			testUser = new Users();
+			testUser.setId(2);
+			testUser.setEmail("test@user.email");
+			
+			testMeeting = new Meetings();
+			testMeeting.setHost(meetingHost);
+			testMeeting.setDate(sqlToday);
+			testMeeting.setStartTime(sqlNow);
+			testMeeting.setEndTime(sqlNow);
+		}
+
+		@ParameterizedTest
+		@CsvSource({"'create', 3",
+			"'delete', 3",
+		})
+		@DisplayName("配信が許可されているuserへのメール")
+		void toUserCanSend(String type, int count) {
+			testDeliveries = new Deliveries(testUser.getId());
+			
+			when(deliveriesRepository.findByUserId(testUser.getId())).thenReturn(Optional.of(testDeliveries));
+			
+			meetingService.sendMail(testMeeting, testUser, type, locale);
+		
+			verify(deliveriesRepository, times(1)).findByUserId(userIdCaptor.capture());
+			int captoredUserId = userIdCaptor.getValue();
+			assertThat(captoredUserId).isEqualTo(testUser.getId());
+			
+			verify(messageSource, times(5 + count)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+			
+			verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
+			String captoredEmail = emailCaptor.getValue();
+			assertThat(captoredEmail).isEqualTo(testUser.getEmail());
 		}
 	}
 }

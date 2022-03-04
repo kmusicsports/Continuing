@@ -40,7 +40,6 @@ public class MeetingService {
 	
 	private final UsersRepository usersRepository;
 	private final RecordsRepository recordsRepository;
-//	private final HttpSession session;
 	private final MeetingsRepository meetingsRepository;
 	private final JoinService joinService;
 	private final MeetingsComparator meetingsComparator;
