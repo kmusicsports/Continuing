@@ -617,7 +617,6 @@ class MeetingServiceTest {
 		joinMeetingList.add(testMeeting2);
 		joinMeetingList.add(testMeeting1);
 		
-		
 		when(meetingsRepository.findByHostAndDateGreaterThanEqual(any(), any())).thenReturn(hostMeetingList);
 		when(joinService.getJoinMeetingList(testUser.getId())).thenReturn(joinMeetingList);
 		
@@ -626,6 +625,49 @@ class MeetingServiceTest {
 		List<Meetings> expected = new ArrayList<>();
 		expected.add(testMeeting2);
 		expected.add(testMeeting3);
+		
+		assertThat(result).isEqualTo(expected);
+	}
+	
+	@Test
+	@DisplayName("[getTodayMeetingListメソッドのテスト]")
+	void testGetTodayMeetingList() {
+		final java.sql.Date sqlYesterday = new java.sql.Date(System.currentTimeMillis() - 86400000);
+		final java.sql.Date sqlToday = new java.sql.Date(System.currentTimeMillis());
+		final java.sql.Date sqlTomorrow = new java.sql.Date(System.currentTimeMillis() + 86400000);
+		
+		Users testUser = new Users();
+		testUser.setId(1);
+		
+		Meetings testMeeting1 = new Meetings();
+		Meetings testMeeting2 = new Meetings();
+		Meetings testMeeting3 = new Meetings();
+		Meetings testMeeting4 = new Meetings();
+		testMeeting1.setId(1);
+		testMeeting2.setId(2);
+		testMeeting3.setId(3);
+		testMeeting4.setId(4);
+		testMeeting1.setDate(sqlYesterday);
+		testMeeting2.setDate(sqlToday);
+		testMeeting3.setDate(sqlTomorrow);
+		testMeeting4.setDate(sqlToday);
+		
+		List<Meetings> todayHostMeetingList = new ArrayList<>();
+		todayHostMeetingList.add(testMeeting4);
+		
+		List<Meetings> joinMeetingList = new ArrayList<>();
+		joinMeetingList.add(testMeeting2);
+		joinMeetingList.add(testMeeting3);
+		joinMeetingList.add(testMeeting1);
+		
+		when(meetingsRepository.findByHostAndDate(any(), any())).thenReturn(todayHostMeetingList);
+		when(joinService.getJoinMeetingList(testUser.getId())).thenReturn(joinMeetingList);
+		
+		List<Meetings> result = meetingService.getTodayMeetingList(testUser);
+		
+		List<Meetings> expected = new ArrayList<>();
+		expected.add(testMeeting2);
+		expected.add(testMeeting4);
 		
 		assertThat(result).isEqualTo(expected);
 	}
