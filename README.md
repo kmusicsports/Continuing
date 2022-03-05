@@ -6,7 +6,7 @@
 ※現在、Zoom App Marketplace へのアプリ公開申請がまだ通っていないため、公開停止中です。
 
 ## アプリ使用時の画面
-![アプリ使用時の画面](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/cf321d3b-e6da-4199-afe5-524e8a4acc73/%E3%82%A2%E3%83%97%E3%83%AA%E4%BD%BF%E7%94%A8%E6%99%82%E3%81%AE%E7%94%BB%E9%9D%A2.drawio.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220225%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220225T014411Z&X-Amz-Expires=86400&X-Amz-Signature=bf068ef462ad0be81c19b2c423786946dfb06a0f5c195af06c22a804d15d2ed6&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22%25E3%2582%25A2%25E3%2583%2597%25E3%2583%25AA%25E4%25BD%25BF%25E7%2594%25A8%25E6%2599%2582%25E3%2581%25AE%25E7%2594%25BB%25E9%259D%25A2.drawio.png%22&x-id=GetObject)
+![アプリ使用時の画面](https://user-images.githubusercontent.com/62631497/156865794-ee88e5d9-31e8-429f-8361-5890cea14fa4.png)
 
 ## 仕様/機能一覧
 - **ユーザーアカウント機能**
@@ -70,10 +70,10 @@
   - Notion(テーブル定義等のドキュメント)
 
 ## インフラ(AWS)構成図
-![インフラ(AWS)構成図](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/019b7341-35b9-4d22-a379-5471dbcda834/%E3%82%A4%E3%83%B3%E3%83%95%E3%83%A9%28AWS%29%E6%A7%8B%E6%88%90%E5%9B%B3.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220224%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220224T033650Z&X-Amz-Expires=86400&X-Amz-Signature=77156948a94081e54707fa3fb1cd58b1f16b9f36bf94c9d98cd565802b67ebc1&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22%25E3%2582%25A4%25E3%2583%25B3%25E3%2583%2595%25E3%2583%25A9%28AWS%29%25E6%25A7%258B%25E6%2588%2590%25E5%259B%25B3.png%22&x-id=GetObject)
+![インフラ(AWS)構成図](https://user-images.githubusercontent.com/62631497/156865680-c4055543-1b8b-4ad6-ba38-81e81c73fbe8.png)
 
 ## ER図
-![ER図](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/599208a8-ce4a-4055-ae06-684571175099/er.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20220224%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20220224T033749Z&X-Amz-Expires=86400&X-Amz-Signature=c197e2fa4ad133782754608018547d5c051e0c059cf86a6d2580de9373ee9f3a&X-Amz-SignedHeaders=host&response-content-disposition=filename%20%3D%22er.png%22&x-id=GetObject)
+![ER図](https://user-images.githubusercontent.com/62631497/156865717-db89473e-6bd2-4da9-bc2a-1ceaaab910c5.png)
 | テーブル名 | 説明 |
 | --- | --- |
 | users | ユーザーアカウント情報 |
