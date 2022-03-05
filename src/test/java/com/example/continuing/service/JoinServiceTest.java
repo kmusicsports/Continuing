@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,97 +38,116 @@ class JoinServiceTest {
 	@InjectMocks
 	private JoinService JoinService;
 	
-	@Test
-	@DisplayName("[getJoinMeetingListメソッドのテスト]joinList.isEmpty()==true")
-	void testGetEmptyJoinMeetingList() {
-		int testUserId = 1;
+	@Nested
+	@DisplayName("[getJoinMeetingListメソッドのテスト]")
+	public class testGetJoinMeetingList {
 		
-		List<Joins> emptyJoinsList = new ArrayList<>();
-		when(joinsRepository.findByUserId(testUserId)).thenReturn(emptyJoinsList);	
+		private int testUserId = 1;
+		private List<Joins> joinList;
+		private List<Meetings> expected;
 		
-		List<Meetings> result = JoinService.getJoinMeetingList(testUserId);
-		List<Meetings> expected = new ArrayList<>();
+		@BeforeEach
+		void init() {
+			joinList = new ArrayList<>();
+			expected = new ArrayList<>();
+		}
 		
-		assertThat(result).isEqualTo(expected);
-		verify(joinsRepository, times(1)).findByUserId(any());
-	}
+		@Test
+		@DisplayName("joinList.isEmpty()==true")
+		void getEmptyJoinMeetingList() {
+			when(joinsRepository.findByUserId(testUserId)).thenReturn(joinList);	
+			
+			List<Meetings> result = JoinService.getJoinMeetingList(testUserId);
+			
+			assertThat(result).isEqualTo(expected);
+		}
+		
+		@Test
+		@DisplayName("joinList.isEmpty()==false")
+		void getNotEmptyJoinMeetingList() {
+			
+			Meetings testMeeting10 = new Meetings();
+			Meetings testMeeting11 = new Meetings();
+			testMeeting10.setId(10);
+			testMeeting10.setId(11);
+			Joins join10 = new Joins(testUserId, testMeeting10);
+			Joins join11 = new Joins(testUserId, testMeeting11);
+			
+			joinList.add(join10);
+			joinList.add(join11);
+			
+			when(joinsRepository.findByUserId(testUserId)).thenReturn(joinList);
+			
+			List<Meetings> result = JoinService.getJoinMeetingList(testUserId);
 
-	@Test
-	@DisplayName("[getJoinMeetingListメソッドのテスト]joinList.isEmpty()==false")
-	void testGetNotEmptyJoinMeetingList() {
-		int testUserId = 1;
-		Meetings testMeeting10 = new Meetings();
-		Meetings testMeeting11 = new Meetings();
-		testMeeting10.setId(10);
-		testMeeting10.setId(11);
-		Joins join10 = new Joins(testUserId, testMeeting10);
-		Joins join11 = new Joins(testUserId, testMeeting11);
-	
-		List<Joins> twoJoinsList = new ArrayList<>();
-		twoJoinsList.add(join10);
-		twoJoinsList.add(join11);
-		
-		when(joinsRepository.findByUserId(testUserId)).thenReturn(twoJoinsList);
-		
-		List<Meetings> result = JoinService.getJoinMeetingList(testUserId);
-		
-		List<Meetings> expected = new ArrayList<>();
-		expected.add(testMeeting10);
-		expected.add(testMeeting11);
-		
-		assertThat(result).isEqualTo(expected);
+			expected.add(testMeeting10);
+			expected.add(testMeeting11);
+			
+			assertThat(result).isEqualTo(expected);
+		}
 	}
 	
-	@Test
-	@DisplayName("[getJoinUserListメソッドのテスト]joinList.isEmpty()==true")
-	void testGetEmptyJoinUserList() {
-		int testMeetingId = 1;
-		Meetings testMeeting = new Meetings();
-		testMeeting.setId(testMeetingId);
+	@Nested
+	@DisplayName("[getJoinUserListメソッドのテスト]")
+	public class testGetJoinUserList {
 		
-		List<Joins> emptyJoinsList = new ArrayList<>();
-		when(joinsRepository.findByMeeting(testMeeting)).thenReturn(emptyJoinsList);	
+		private int testMeetingId = 10;
+		private Meetings testMeeting;
+		private List<Joins> joinList;
+		private List<Users> expected;
 		
-		List<Users> result = JoinService.getJoinUserList(testMeeting);
-		List<Users> expected = new ArrayList<>();
+		@BeforeEach
+		void init() {
+			testMeeting = new Meetings();
+			joinList = new ArrayList<>();
+			expected = new ArrayList<>();
+		}
+		@Test
+		@DisplayName("joinList.isEmpty()==true")
+		void getEmptyJoinUserList() {
+			testMeeting.setId(testMeetingId);
+			
+			when(joinsRepository.findByMeeting(testMeeting)).thenReturn(joinList);	
+			
+			List<Users> result = JoinService.getJoinUserList(testMeeting);
+			
+			assertThat(result).isEqualTo(expected);
+			verify(joinsRepository, times(1)).findByMeeting(any());
+			verify(usersRepository, never()).findById(any());
+		}
 		
-		assertThat(result).isEqualTo(expected);
-		verify(joinsRepository, times(1)).findByMeeting(any());
-		verify(usersRepository, never()).findById(any());
-	}
-
-	@Test
-	@DisplayName("[getJoinUserListメソッドのテスト]joinList.isEmpty()==false")
-	void testGetNotEmptyJoinUserList() {
-		int testUserId1 = 1;
-		int testUserId2 = 2;
-		Users testUser1 = new Users();
-		Users testUser2 = new Users();
-		testUser1.setId(testUserId1);
-		testUser2.setId(testUserId2);
-		
-		Meetings testMeeting = new Meetings();
-		testMeeting.setId(10);
-		Joins join1 = new Joins(testUserId1, testMeeting);
-		Joins join2 = new Joins(testUserId2, testMeeting);
-	
-		List<Joins> twoJoinsList = new ArrayList<>();
-		twoJoinsList.add(join1);
-		twoJoinsList.add(join2);
-		
-		when(joinsRepository.findByMeeting(testMeeting)).thenReturn(twoJoinsList);
-		when(usersRepository.findById(testUserId1)).thenReturn(Optional.of(testUser1));
-		when(usersRepository.findById(testUserId2)).thenReturn(Optional.of(testUser2));
-		
-		List<Users> result = JoinService.getJoinUserList(testMeeting);
-		List<Users> expected = new ArrayList<>();
-		expected.add(testUser1);
-		expected.add(testUser2);
-		
-		assertThat(result).isEqualTo(expected);
-		verify(usersRepository, times(2)).findById(any());
-		verify(usersRepository, times(1)).findById(testUserId1);
-		verify(usersRepository, times(1)).findById(testUserId2);
+		@Test
+		@DisplayName("joinList.isEmpty()==false")
+		void getNotEmptyJoinUserList() {
+			testMeeting.setId(testMeetingId);
+			
+			int testUserId1 = 1;
+			int testUserId2 = 2;
+			Users testUser1 = new Users();
+			Users testUser2 = new Users();
+			testUser1.setId(testUserId1);
+			testUser2.setId(testUserId2);
+			
+			Joins join1 = new Joins(testUserId1, testMeeting);
+			Joins join2 = new Joins(testUserId2, testMeeting);
+			
+			joinList.add(join1);
+			joinList.add(join2);
+			
+			when(joinsRepository.findByMeeting(testMeeting)).thenReturn(joinList);
+			when(usersRepository.findById(testUserId1)).thenReturn(Optional.of(testUser1));
+			when(usersRepository.findById(testUserId2)).thenReturn(Optional.of(testUser2));
+			
+			List<Users> result = JoinService.getJoinUserList(testMeeting);
+			
+			expected.add(testUser1);
+			expected.add(testUser2);
+			
+			assertThat(result).isEqualTo(expected);
+			verify(usersRepository, times(2)).findById(any());
+			verify(usersRepository, times(1)).findById(testUserId1);
+			verify(usersRepository, times(1)).findById(testUserId2);
+		}		
 	}
 	
 }
