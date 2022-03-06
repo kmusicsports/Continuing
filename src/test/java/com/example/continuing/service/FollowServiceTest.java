@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -49,152 +51,170 @@ class FollowServiceTest {
 	@InjectMocks
 	private FollowService followService;
 
-	@Test
-	@DisplayName("[getFollowsListメソッドのテスト]followList.isEmpty()==true")
-	void testGetEmptyFollowsList() {
-		int testUserId = 1;
-		List<Follows> emptyFollowsList = new ArrayList<>();
+	@Nested
+	@DisplayName("[getFollowsListメソッドのテスト]")
+	public class testGetFollowsList {
 		
-		when(followsRepository.findByFollowerId(testUserId)).thenReturn(emptyFollowsList);
+		private int testUserId1 = 1;
+		List<Follows> followList;
+		List<Users> expected;
 		
-		List<Users> result = followService.getFollowsList(testUserId);
-		List<Users> expected = new ArrayList<>();
+		@BeforeEach
+		void init() {
+			followList = new ArrayList<>();
+			expected = new ArrayList<>();
+		}
 		
-		assertThat(result).isEqualTo(expected);
-		verify(followsRepository, times(1)).findByFollowerId(any());		
-		verify(usersRepository, never()).findById(any());
+		@Test
+		@DisplayName("followList.isEmpty()==true")
+		void getEmptyFollowsList() {
+			when(followsRepository.findByFollowerId(testUserId1)).thenReturn(followList);
+			
+			List<Users> result = followService.getFollowsList(testUserId1);
+			
+			assertThat(result).isEqualTo(expected);
+			verify(followsRepository, times(1)).findByFollowerId(any());		
+			verify(usersRepository, never()).findById(any());
+		}
+		
+		@Test
+		@DisplayName("followList.isEmpty()==false")
+		void getNotEmptyFollowsList() {
+			
+			int testUserId2 = 2;
+			int testUserId3 = 3;
+			Users testUser2 = new Users();
+			Users testUser3 = new Users();
+			testUser2.setId(testUserId2);
+			testUser3.setId(testUserId3);
+			
+			Follows follow1to2 = new Follows(testUserId1, testUserId2);
+			Follows follow1to3 = new Follows(testUserId1, testUserId3);
+			followList.add(follow1to2);
+			followList.add(follow1to3);
+			
+			when(followsRepository.findByFollowerId(testUserId1)).thenReturn(followList);
+			when(usersRepository.findById(testUserId2)).thenReturn(Optional.of(testUser2));
+			when(usersRepository.findById(testUserId3)).thenReturn(Optional.of(testUser3));
+			
+			List<Users> result = followService.getFollowsList(testUserId1);
+			
+			expected.add(testUser2);
+			expected.add(testUser3);
+			
+			assertThat(result).isEqualTo(expected);
+			verify(usersRepository, times(2)).findById((any()));
+			verify(usersRepository, times(1)).findById(testUserId2);
+			verify(usersRepository, times(1)).findById(testUserId3);
+		}
 	}
 	
-	@Test
-	@DisplayName("[getFollowsListメソッドのテスト]followList.isEmpty()==false")
-	void testGetNotEmptyFollowsList() {
-		int testUserId1 = 1;
-		int testUserId2 = 2;
-		int testUserId3 = 3;
-		Users testUser2 = new Users();
-		testUser2.setId(testUserId2);
-		Users testUser3 = new Users();
-		testUser3.setId(testUserId3);
+	@Nested
+	@DisplayName("[getFollowersListメソッドのテスト]")
+	public class testGetFollowersList {
 		
-		List<Follows> twoFollowsList = new ArrayList<>();
-		Follows follow1to2 = new Follows(testUserId1, testUserId2);
-		Follows follow1to3 = new Follows(testUserId1, testUserId3);
-		twoFollowsList.add(follow1to2);
-		twoFollowsList.add(follow1to3);
+		private int testUserId1 = 1;
+		List<Follows> followList;
+		List<Users> expected;
 		
-		when(followsRepository.findByFollowerId(testUserId1)).thenReturn(twoFollowsList);
-		when(usersRepository.findById(testUserId2)).thenReturn(Optional.of(testUser2));
-		when(usersRepository.findById(testUserId3)).thenReturn(Optional.of(testUser3));
+		@BeforeEach
+		void init() {
+			followList = new ArrayList<>();
+			expected = new ArrayList<>();
+		}
 		
-		List<Users> result = followService.getFollowsList(testUserId1);
-		List<Users> expected = new ArrayList<>();
-		expected.add(testUser2);
-		expected.add(testUser3);
+		@Test
+		@DisplayName("followList.isEmpty()==true")
+		void getEmptyFollowersList() {
+			when(followsRepository.findByFolloweeId(testUserId1)).thenReturn(followList);
+			
+			List<Users> result = followService.getFollowersList(testUserId1);
+			
+			assertThat(result).isEqualTo(expected);
+			verify(followsRepository, times(1)).findByFolloweeId(any());
+			verify(usersRepository, never()).findById(any());
+		}
 		
-		assertThat(result).isEqualTo(expected);
-		verify(usersRepository, times(2)).findById((any()));
-		verify(usersRepository, times(1)).findById(testUserId2);
-		verify(usersRepository, times(1)).findById(testUserId3);
-	}
-	
-	@Test
-	@DisplayName("[getFollowersListメソッドのテスト]followList.isEmpty()==true")
-	void testGetEmptyFollowersList() {
-		int testUserId = 1;
-		List<Follows> emptyFollowsList = new ArrayList<>();
-		
-		when(followsRepository.findByFolloweeId(testUserId)).thenReturn(emptyFollowsList);
-		
-		List<Users> result = followService.getFollowersList(testUserId);
-		List<Users> expected = new ArrayList<>();
-		
-		assertThat(result).isEqualTo(expected);
-		verify(followsRepository, times(1)).findByFolloweeId(any());
-		verify(usersRepository, never()).findById(any());
-	}
-
-	@Test
-	@DisplayName("[getFollowersListメソッドのテスト]followList.isEmpty()==false")
-	void testGetNotEmptyFollowersList() {
-		int testUserId1 = 1;
-		int testUserId2 = 2;
-		int testUserId3 = 3;
-		Users testUser2 = new Users();
-		testUser2.setId(testUserId2);
-		Users testUser3 = new Users();
-		testUser3.setId(testUserId3);
-		
-		List<Follows> twoFollowsList = new ArrayList<>();
-		Follows follow2to1 = new Follows(testUserId2, testUserId1);
-		Follows follow3to1 = new Follows(testUserId3, testUserId1);
-		twoFollowsList.add(follow2to1);
-		twoFollowsList.add(follow3to1);
-		
-		when(followsRepository.findByFolloweeId(testUserId1)).thenReturn(twoFollowsList);
-		when(usersRepository.findById(testUserId2)).thenReturn(Optional.of(testUser2));
-		when(usersRepository.findById(testUserId3)).thenReturn(Optional.of(testUser3));
-		
-		List<Users> result = followService.getFollowersList(testUserId1);
-		List<Users> expected = new ArrayList<>();
-		expected.add(testUser2);
-		expected.add(testUser3);
-		
-		assertThat(result).isEqualTo(expected);
-		verify(usersRepository, times(2)).findById((any()));
-		verify(usersRepository, times(1)).findById(testUserId2);
-		verify(usersRepository, times(1)).findById(testUserId3);
+		@Test
+		@DisplayName("followList.isEmpty()==false")
+		void getNotEmptyFollowersList() {
+			
+			int testUserId2 = 2;
+			int testUserId3 = 3;
+			Users testUser2 = new Users();
+			Users testUser3 = new Users();
+			testUser2.setId(testUserId2);
+			testUser3.setId(testUserId3);
+			
+			Follows follow2to1 = new Follows(testUserId2, testUserId1);
+			Follows follow3to1 = new Follows(testUserId3, testUserId1);
+			followList.add(follow2to1);
+			followList.add(follow3to1);
+			
+			when(followsRepository.findByFolloweeId(testUserId1)).thenReturn(followList);
+			when(usersRepository.findById(testUserId2)).thenReturn(Optional.of(testUser2));
+			when(usersRepository.findById(testUserId3)).thenReturn(Optional.of(testUser3));
+			
+			List<Users> result = followService.getFollowersList(testUserId1);
+			
+			expected.add(testUser2);
+			expected.add(testUser3);
+			
+			assertThat(result).isEqualTo(expected);
+			verify(usersRepository, times(2)).findById((any()));
+			verify(usersRepository, times(1)).findById(testUserId2);
+			verify(usersRepository, times(1)).findById(testUserId3);
+		}
 	}
 
-	@Test
-	@DisplayName("[sendMailメソッドのテスト]deliveries.getFollowed() == 1")
-	void testSendMail() {
-		int testUserId1 = 1;
-		String testUser1Email = "testUser1@email";
-		Users testUser1 = new Users();
-		testUser1.setId(testUserId1);
-		testUser1.setEmail(testUser1Email);
-
-		Deliveries deliveries = new Deliveries(testUserId1);
+	@Nested
+	@DisplayName("[sendMailメソッドのテスト]")
+	public class testSendMail {
 		
-		when(deliveriesRepository.findByUserId(testUser1.getId())).thenReturn(Optional.of(deliveries));
+		private Users testUser1 = new Users();
+		private Users testUser2 = new Users();
+		private Locale locale = new Locale("ja");
+		private Deliveries deliveries;
 		
-		Users testUser2 = new Users();
-		Locale locale = new Locale("ja");
-		followService.sendMail(testUser1, testUser2, locale);
+		@BeforeEach
+		void init() {
+			testUser1.setId(1);
+			testUser1.setEmail("testUser1@email");
+			
+			deliveries = new Deliveries(testUser1.getId());
+		}
 		
-		ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-		verify(messageSource, times(2)).getMessage(any(), any(), localeCaptor.capture());
-		Locale captoredLocale = localeCaptor.getValue();
-		assertThat(captoredLocale).isEqualTo(locale);
+		@Test
+		@DisplayName("メールを送る")
+		void sendMail() {
+			when(deliveriesRepository.findByUserId(testUser1.getId())).thenReturn(Optional.of(deliveries));
+			
+			followService.sendMail(testUser1, testUser2, locale);
+			
+			ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
+			verify(messageSource, times(2)).getMessage(any(), any(), localeCaptor.capture());
+			Locale captoredLocale = localeCaptor.getValue();
+			assertThat(captoredLocale).isEqualTo(locale);
+			
+			ArgumentCaptor<String> followeeEmailCaptor = ArgumentCaptor.forClass(String.class);
+			verify(mailService, times(1)).sendMail(followeeEmailCaptor.capture(), any(), any());		
+			String captoredUserEmail = followeeEmailCaptor.getValue();
+			assertThat(captoredUserEmail).isEqualTo(testUser1.getEmail());
+		}
 		
-		ArgumentCaptor<String> followeeEmailCaptor = ArgumentCaptor.forClass(String.class);
-		verify(mailService, times(1)).sendMail(followeeEmailCaptor.capture(), any(), any());		
-		String captoredUserEmail = followeeEmailCaptor.getValue();
-		assertThat(captoredUserEmail).isEqualTo(testUser1Email);
-		
-	}
-
-	@Test
-	@DisplayName("[sendMailメソッドのテスト]deliveries.getFollowed() != 1")
-	void testNotSendMail() {
-		int testUserId1 = 1;
-		String testUser1Email = "testUser1@email";
-		Users testUser1 = new Users();
-		testUser1.setId(testUserId1);
-		testUser1.setEmail(testUser1Email);
-
-		Deliveries deliveries = new Deliveries(testUserId1);
-		deliveries.setFollowed(0);
-		
-		when(deliveriesRepository.findByUserId(testUser1.getId())).thenReturn(Optional.of(deliveries));
-		
-		Users testUser2 = new Users();
-		Locale locale = new Locale("ja");
-		followService.sendMail(testUser1, testUser2, locale);
-		
-		verify(messageSource, never()).getMessage(any(), any(), any());
-		verify(mailService, never()).sendMail(any(), any(), any());		
-		
+		@Test
+		@DisplayName("配信の許可がされておらず、メールを送らない")
+		void notSendMail() {
+			deliveries.setFollowed(0);
+			
+			when(deliveriesRepository.findByUserId(testUser1.getId())).thenReturn(Optional.of(deliveries));
+			
+			Locale locale = new Locale("ja");
+			followService.sendMail(testUser1, testUser2, locale);
+			
+			verify(messageSource, never()).getMessage(any(), any(), any());
+			verify(mailService, never()).sendMail(any(), any(), any());		
+		}
 	}
 
 }
