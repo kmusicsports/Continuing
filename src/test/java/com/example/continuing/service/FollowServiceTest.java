@@ -53,9 +53,9 @@ class FollowServiceTest {
 
 	@Nested
 	@DisplayName("[getFollowsListメソッドのテスト]")
-	public class testGetFollowsList {
+	public class NestedTestGetFollowsList {
 		
-		private int testUserId1 = 1;
+		private final int testUserId1 = 1;
 		List<Follows> followList;
 		List<Users> expected;
 		
@@ -111,9 +111,9 @@ class FollowServiceTest {
 	
 	@Nested
 	@DisplayName("[getFollowersListメソッドのテスト]")
-	public class testGetFollowersList {
+	public class NestedTestGetFollowersList {
 		
-		private int testUserId1 = 1;
+		private final int testUserId1 = 1;
 		List<Follows> followList;
 		List<Users> expected;
 		
@@ -169,11 +169,11 @@ class FollowServiceTest {
 
 	@Nested
 	@DisplayName("[sendMailメソッドのテスト]")
-	public class testSendMail {
+	public class NestedTestSendMail {
 		
-		private Users testUser1 = new Users();
-		private Users testUser2 = new Users();
-		private Locale locale = new Locale("ja");
+		private final Users testUser1 = new Users();
+		private final Users testUser2 = new Users();
+		private final Locale locale = new Locale("ja");
 		private Deliveries deliveries;
 		
 		@BeforeEach
@@ -193,13 +193,13 @@ class FollowServiceTest {
 			
 			ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
 			verify(messageSource, times(2)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 			
 			ArgumentCaptor<String> followeeEmailCaptor = ArgumentCaptor.forClass(String.class);
 			verify(mailService, times(1)).sendMail(followeeEmailCaptor.capture(), any(), any());		
-			String captoredUserEmail = followeeEmailCaptor.getValue();
-			assertThat(captoredUserEmail).isEqualTo(testUser1.getEmail());
+			String capturedUserEmail = followeeEmailCaptor.getValue();
+			assertThat(capturedUserEmail).isEqualTo(testUser1.getEmail());
 		}
 		
 		@Test

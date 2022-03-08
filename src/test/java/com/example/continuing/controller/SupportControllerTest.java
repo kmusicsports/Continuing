@@ -78,7 +78,7 @@ class SupportControllerTest {
 
     @Nested
     @DisplayName("[contactメソッドのテスト]")
-    public class TestContact {
+    public class NestedTestContact {
 
         private ContactData contactData = new ContactData();
 
