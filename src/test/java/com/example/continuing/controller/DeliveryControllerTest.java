@@ -65,8 +65,7 @@ class DeliveryControllerTest {
 				.andExpect(view().name("deliverySetting"))
 	            .andExpect(request().sessionAttribute("path", path))
 	            .andExpect(model().attribute("searchData", new SearchData()))
-	            .andExpect(model().attribute("deliveryData", new DeliveryData(testDeliveries)))
-	            .andReturn();
+	            .andExpect(model().attribute("deliveryData", new DeliveryData(testDeliveries)));
 		
 		verify(deliveriesRepository, times(1)).findByUserId(testUserId);
 	}

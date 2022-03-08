@@ -84,20 +84,21 @@ class MeetingServiceTest {
 	
 	@Nested
 	@DisplayName("[ミーティングフォーム用isValid()メソッドのテスト]")
-	public class testIsValidMeetingData {
+	public class NestedTestIsValidMeetingData {
 		
 		private MeetingData testMeetingData;
-		private final BindingResult result = new DataBinder(testMeetingData).getBindingResult();
-		private static final String TEST_PASS = "testpassword";
+		private BindingResult result;
+		private static final String TEST_PASS = "testPassword";
 	
 		@BeforeEach
 		void init() {
-			testMeetingData = new MeetingData();		
+			testMeetingData = new MeetingData();
+			result = new DataBinder(testMeetingData).getBindingResult();
 		}
 	
 		@Test
 		@DisplayName("パスワード不一致エラーのみ")
-		void unmatchPasswordError() {
+		void unmatchedPasswordError() {
 			
 			testMeetingData.setNumberPeople(1);
 			testMeetingData.setDate(strToday);
@@ -115,14 +116,14 @@ class MeetingServiceTest {
 			assertNull(getPasswordAgain);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 	
 		@ParameterizedTest
 		@CsvSource({"'00:10'", "'01:00'"})
 		@DisplayName("複数人でのミーティングにおいて、ミーティング時間が15分以上40分以下でないエラーのみ")
-		void multiplePeoplemeetingTimeError(String testEndTime) {
+		void multiplePeopleMeetingTimeError(String testEndTime) {
 			
 			testMeetingData.setNumberPeople(2);
 			testMeetingData.setDate("1000/10/10");
@@ -140,14 +141,14 @@ class MeetingServiceTest {
 			assertNull(getEndTime);
 			
 			verify(messageSource, times(2)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@ParameterizedTest
 		@CsvSource({"'00:10'", "'36:00'"})
 		@DisplayName("1対1でのミーティングにおいて、ミーティング時間が15分以上1800分(30時間)以下でないエラーのみ")
-		void oneOnOnemeetingTimeError(String testEndTime) {
+		void oneOnOneMeetingTimeError(String testEndTime) {
 			
 			testMeetingData.setNumberPeople(1);
 			testMeetingData.setDate(strToday);
@@ -165,8 +166,8 @@ class MeetingServiceTest {
 			assertNull(getEndTime);
 			
 			verify(messageSource, times(2)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@Test
@@ -187,8 +188,8 @@ class MeetingServiceTest {
 			assertNull(getDate);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@Test
@@ -209,21 +210,22 @@ class MeetingServiceTest {
 			assertNull(getDate);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 	}
 	
 	@Nested
 	@DisplayName("[検索条件用isValid()メソッドのテスト]")
-	public class testIsValidSearchData {
+	public class NestedTestIsValidSearchData {
 		
 		private SearchData testSearchData;
-		private final BindingResult result = new DataBinder(testSearchData).getBindingResult();
+		private BindingResult result;
 	
 		@BeforeEach
 		void init() {
-			testSearchData = new SearchData();		
+			testSearchData = new SearchData();
+			result = new DataBinder(testSearchData).getBindingResult();
 		}
 		
 		@Test
@@ -241,8 +243,8 @@ class MeetingServiceTest {
 			assertNull(getDate);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 	
 		@Test
@@ -260,8 +262,8 @@ class MeetingServiceTest {
 			assertNull(getStartTime);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@Test
@@ -279,8 +281,8 @@ class MeetingServiceTest {
 			assertNull(getEndTime);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@Test
@@ -301,11 +303,11 @@ class MeetingServiceTest {
 	
 	@Nested
 	@DisplayName("[ミーティングフォーム用isValid()メソッドのテスト]")
-	public class testJoinCheck {
+	public class NestedTestJoinCheck {
 		
 		private Meetings testMeeting;
-		private int testUserId = 1;
-		private int meetingHostId = 2;
+		private final int testUserId = 1;
+		private final int meetingHostId = 2;
 		private final java.sql.Date sqlToday = new java.sql.Date(System.currentTimeMillis());
 		private final java.sql.Time sqlNow = new java.sql.Time(System.currentTimeMillis());
 		private List<Joins> joinList;
@@ -337,8 +339,8 @@ class MeetingServiceTest {
 			assertNotNull(warningMessage);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@Test
@@ -364,8 +366,8 @@ class MeetingServiceTest {
 			assertNotNull(warningMessage);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@ParameterizedTest
@@ -388,8 +390,8 @@ class MeetingServiceTest {
 			assertNotNull(warningMessage);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@Test
@@ -481,7 +483,7 @@ class MeetingServiceTest {
 	
 	@Nested
 	@DisplayName("[ミーティング用sendMail()メソッドのテスト]")
-	public class testSendMail {
+	public class NestedTestSendMail {
 		
 		private Users meetingHost;
 		private Users testUser;
@@ -524,16 +526,16 @@ class MeetingServiceTest {
 			meetingService.sendMail(testMeeting, testUser, type, locale);
 		
 			verify(deliveriesRepository, times(1)).findByUserId(userIdCaptor.capture());
-			int captoredUserId = userIdCaptor.getValue();
-			assertThat(captoredUserId).isEqualTo(testUser.getId());
+			int capturedUserId = userIdCaptor.getValue();
+			assertThat(capturedUserId).isEqualTo(testUser.getId());
 			
 			verify(messageSource, times(5 + count)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 			
 			verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
-			String captoredEmail = emailCaptor.getValue();
-			assertThat(captoredEmail).isEqualTo(testUser.getEmail());
+			String capturedEmail = emailCaptor.getValue();
+			assertThat(capturedEmail).isEqualTo(testUser.getEmail());
 		}
 		
 		@ParameterizedTest
@@ -549,16 +551,16 @@ class MeetingServiceTest {
 			meetingService.sendMail(testMeeting, testUser, type, locale);
 		
 			verify(deliveriesRepository, times(1)).findByUserId(userIdCaptor.capture());
-			int captoredUserId = userIdCaptor.getValue();
-			assertThat(captoredUserId).isEqualTo(meetingHost.getId());
+			int capturedUserId = userIdCaptor.getValue();
+			assertThat(capturedUserId).isEqualTo(meetingHost.getId());
 			
 			verify(messageSource, times(5 + count)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 			
 			verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
-			String captoredEmail = emailCaptor.getValue();
-			assertThat(captoredEmail).isEqualTo(meetingHost.getEmail());
+			String capturedEmail = emailCaptor.getValue();
+			assertThat(capturedEmail).isEqualTo(meetingHost.getEmail());
 		}
 		
 		@ParameterizedTest
@@ -583,8 +585,8 @@ class MeetingServiceTest {
 			verify(deliveriesRepository, times(1)).findByUserId(any());
 			
 			verify(messageSource, times(5)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 			
 			verify(mailService, never()).sendMail(any(), any(), any());
 		}

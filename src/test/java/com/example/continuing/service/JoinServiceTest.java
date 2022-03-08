@@ -40,9 +40,9 @@ class JoinServiceTest {
 	
 	@Nested
 	@DisplayName("[getJoinMeetingListメソッドのテスト]")
-	public class testGetJoinMeetingList {
+	public class NestedTestGetJoinMeetingList {
 		
-		private int testUserId = 1;
+		private final int testUserId = 1;
 		private List<Joins> joinList;
 		private List<Meetings> expected;
 		
@@ -89,9 +89,9 @@ class JoinServiceTest {
 	
 	@Nested
 	@DisplayName("[getJoinUserListメソッドのテスト]")
-	public class testGetJoinUserList {
+	public class NestedTestGetJoinUserList {
 		
-		private int testMeetingId = 10;
+		private final int testMeetingId = 10;
 		private Meetings testMeeting;
 		private List<Joins> joinList;
 		private List<Users> expected;

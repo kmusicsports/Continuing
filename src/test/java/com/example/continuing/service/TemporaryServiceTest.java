@@ -30,10 +30,10 @@ class TemporaryServiceTest {
 	
 	@Nested
 	@DisplayName("[isValidメソッドのテスト]")
-	public class testIsValid {
+	public class NestedTestIsValid {
 		
 		private static final String TEST_EMAIL = "test@email";
-		private static final String TEST_TOKEN = "testtoken";
+		private static final String TEST_TOKEN = "testToken";
 		private List<Temporaries> testList;
 		
 		@BeforeEach
@@ -61,7 +61,7 @@ class TemporaryServiceTest {
 		@Test
 		@DisplayName("tokenが無効エラーのみ")
 		void tokenIsInvalidError() {
-			String invalidToken = "invalidtoken";
+			String invalidToken = "invalidToken";
 			
 			Temporaries testTemporary = new Temporaries();
 			testTemporary.setEmail(TEST_EMAIL);

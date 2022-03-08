@@ -56,11 +56,11 @@ class LoginServiceTest {
 	private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
 	
 	private static final String TEST_EMAIL = "test@email";
-	private static final String TEST_PASS = "testpassword";
+	private static final String TEST_PASS = "testPassword";
 	
 	@Nested
 	@DisplayName("[ログイン用isValid()メソッドのテスト]")
-	public class testIsValidLoginData {
+	public class NestedTestIsValidLoginData {
 		
 		private LoginData testLoginData;
 		private Users testUser;
@@ -87,7 +87,7 @@ class LoginServiceTest {
 		@DisplayName("パスワードが間違っているエラーのみ")
 		void passwordError() {
 			
-			String invalidPassword = "invalidpassword";
+			String invalidPassword = "invalidPassword";
 
 			testLoginData.setPassword(invalidPassword);
 			
@@ -119,7 +119,7 @@ class LoginServiceTest {
 
 	@Nested
 	@DisplayName("[新規登録用isValid()メソッドのテスト]")
-	public class testIsValidRegisterData {
+	public class NestedTestIsValidRegisterData {
 		
 		private RegisterData testRegisterData;
 		private final Locale locale = new Locale("ja");
@@ -134,11 +134,11 @@ class LoginServiceTest {
 		
 		@Test
 		@DisplayName("パスワード不一致エラーのみ")
-		void unmatchPasswordError() {
+		void unmatchedPasswordError() {
 			
 			testRegisterData.setName("testName");
 			testRegisterData.setEmail(TEST_EMAIL);
-			testRegisterData.setPasswordAgain("testUnmatchPassword");
+			testRegisterData.setPasswordAgain("testUnmatchedPassword");
 			
 			boolean isValid = loginService.isValid(testRegisterData, result, locale);
 			String getPassword = testRegisterData.getPassword();
@@ -149,8 +149,8 @@ class LoginServiceTest {
 			assertNull(getPasswordAgain);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@Test
@@ -174,8 +174,8 @@ class LoginServiceTest {
 			assertNull(getName);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 
 		@Test
@@ -191,8 +191,8 @@ class LoginServiceTest {
 			assertFalse(isValid);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@Test
@@ -208,8 +208,8 @@ class LoginServiceTest {
 			assertFalse(isValid);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 				
 		@Test
@@ -231,8 +231,8 @@ class LoginServiceTest {
 			assertNull(getEmail);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@ParameterizedTest
@@ -254,8 +254,8 @@ class LoginServiceTest {
 			assertNull(getEmail);
 			
 			verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 		}
 		
 		@Test
@@ -276,7 +276,7 @@ class LoginServiceTest {
 	
 	@Nested
 	@DisplayName("[sendMail()メソッドのテスト]")
-	public class testSendMail {
+	public class NestedTestSendMail {
 		
 		private final Locale locale = new Locale("ja");
 		private final ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
@@ -292,12 +292,12 @@ class LoginServiceTest {
 			assertNull(token);
 			
 			verify(messageSource, times(count)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 			
 			verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
-			String captoredEmail = emailCaptor.getValue();
-			assertThat(captoredEmail).isEqualTo(TEST_EMAIL);
+			String capturedEmail = emailCaptor.getValue();
+			assertThat(capturedEmail).isEqualTo(TEST_EMAIL);
 		}
 		
 		@ParameterizedTest
@@ -311,14 +311,12 @@ class LoginServiceTest {
 			assertNotNull(token);
 			
 			verify(messageSource, times(count)).getMessage(any(), any(), localeCaptor.capture());
-			Locale captoredLocale = localeCaptor.getValue();
-			assertThat(captoredLocale).isEqualTo(locale);
+			Locale capturedLocale = localeCaptor.getValue();
+			assertThat(capturedLocale).isEqualTo(locale);
 			
 			verify(mailService, times(1)).sendMail(emailCaptor.capture(), any(), any());
-			String captoredEmail = emailCaptor.getValue();
-			assertThat(captoredEmail).isEqualTo(TEST_EMAIL);
+			String capturedEmail = emailCaptor.getValue();
+			assertThat(capturedEmail).isEqualTo(TEST_EMAIL);
 		}
 	}
-	
-
 }
