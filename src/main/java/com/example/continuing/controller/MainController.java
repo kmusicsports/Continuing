@@ -166,13 +166,8 @@ public class MainController {
 	
 	@GetMapping("/privacy")
 	public String showPrivacyPolicy(Locale locale) {
-		String language = locale.getLanguage();
-		
-		if(language == null){
-			return "privacy/privacyPolicy";			
-		}
-		
-		switch(language) {
+
+		switch(locale.getLanguage()) {
 			case "ja":
 				return "privacy/privacyPolicy_ja";
 			case "en":
