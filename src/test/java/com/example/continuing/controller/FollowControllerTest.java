@@ -2,6 +2,7 @@ package com.example.continuing.controller;
 
 import com.example.continuing.entity.Follows;
 import com.example.continuing.entity.Users;
+import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.FollowsRepository;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
@@ -121,7 +122,7 @@ class FollowControllerTest {
 
         @Test
         @DisplayName("異常系")
-        public void failed() throws Exception {
+        public void fail() throws Exception {
 
             mockMvc.perform(get("/User/follow/" + followeeId).sessionAttrs(sessionAttributes))
                     .andExpect(status().isFound())
@@ -186,7 +187,7 @@ class FollowControllerTest {
 
         @Test
         @DisplayName("異常系")
-        public void failed() throws Exception {
+        public void fail() throws Exception {
             when(usersRepository.findById(followerId)).thenReturn(Optional.of(follower));
 
             mockMvc.perform(get("/User/unfollow/" + followeeId).sessionAttrs(sessionAttributes))
@@ -200,6 +201,78 @@ class FollowControllerTest {
             verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
             Locale capturedLocale = localeCaptor.getValue();
             assertThat(capturedLocale).isEqualTo(new Locale(follower.getLanguage()));
+        }
+    }
+
+    @Nested
+    @DisplayName("[showUserFollowsメソッドのテスト]")
+    public class NestedTestShowUserFollows {
+
+        private final int operationUserId = 1;
+        private final int showUserId = 2;
+        private final String path = "/User/" + showUserId + "/list/follows";
+        private Users users;
+
+        @BeforeEach
+        public void init() {
+            users = new Users();
+        }
+
+        @Test
+        @DisplayName("正常系")
+        public void success() throws Exception {
+            users.setId(showUserId);
+
+            List<Users> followsList = new ArrayList<>();
+            List<Users> followersList = new ArrayList<>();
+            List<Users> myFollowsList = new ArrayList<>();
+            followersList.add(new Users());
+            myFollowsList.add(users);
+
+            when(usersRepository.findById(showUserId)).thenReturn(Optional.of(users));
+            when(followService.getFollowsList(showUserId)).thenReturn(followsList);
+            when(followService.getFollowersList(showUserId)).thenReturn(followersList);
+            when(followService.getFollowsList(operationUserId)).thenReturn(myFollowsList);
+
+            mockMvc.perform(get(path).sessionAttr("user_id", operationUserId))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("follows"))
+                    .andExpect(request().sessionAttribute("path", path))
+                    .andExpect(model().attribute("followsList", followsList))
+                    .andExpect(model().attribute("followersList", followersList))
+                    .andExpect(model().attribute("myFollowsList", myFollowsList))
+                    .andExpect(model().attribute("searchData", new SearchData()));
+
+            verify(usersRepository, times(1)).findById(showUserId);
+            verify(usersRepository, never()).findById(operationUserId);
+            verify(followService, times(1)).getFollowsList(showUserId);
+            verify(followService, times(1)).getFollowersList(showUserId);
+            verify(followService, times(1)).getFollowsList(operationUserId);
+        }
+
+        @Test
+        @DisplayName("異常系")
+        public void fail() throws Exception {
+            
+            users.setId(operationUserId);
+            users.setLanguage("ja");
+
+            when(usersRepository.findById(operationUserId)).thenReturn(Optional.of(users));
+
+            mockMvc.perform(get(path).sessionAttr("user_id", operationUserId))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/home"))
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(usersRepository, times(1)).findById(showUserId);
+            verify(usersRepository, times(1)).findById(operationUserId);
+            verify(followService, never()).getFollowsList(showUserId);
+            verify(followService, never()).getFollowersList(showUserId);
+            verify(followService, never()).getFollowsList(operationUserId);
+
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(new Locale(users.getLanguage()));
         }
     }
 }
