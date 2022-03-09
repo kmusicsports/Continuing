@@ -26,10 +26,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -66,6 +63,9 @@ class FollowControllerTest {
 
     @Captor
     private ArgumentCaptor<Users> followeeCaptor;
+
+    @Captor
+    private ArgumentCaptor<List<Follows>> followsListCaptor;
 
     @Nested
     @DisplayName("[followメソッドのテスト]")
@@ -129,7 +129,73 @@ class FollowControllerTest {
                     .andExpect(flash().attributeExists("msg"));
 
             verify(followsRepository, never()).saveAndFlush(any());
-            verify(followsRepository, never()).saveAndFlush(any());
+            verify(followService, never()).sendMail(any(), any(), any());
+
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(new Locale(follower.getLanguage()));
+        }
+    }
+
+    @Nested
+    @DisplayName("[unfollowメソッドのテスト]")
+    public class NestedTestUnfollow {
+
+        private final int followerId = 1;
+        private final int followeeId = 2;
+        private Users follower;
+        private Users followee;
+        private Map<String, Object> sessionAttributes;
+        private static final String CURRENT_URL = "/";
+
+        @BeforeEach
+        public void init() {
+            follower = new Users();
+            followee = new Users();
+            follower.setId(followerId);
+            followee.setId(followeeId);
+            follower.setLanguage("en");
+            followee.setLanguage("ja");
+
+            sessionAttributes = new HashMap<>();
+            sessionAttributes.put("user_id", followerId);
+            sessionAttributes.put("path", CURRENT_URL);
+        }
+
+        @Test
+        @DisplayName("正常系")
+        public void success() throws Exception {
+            List<Follows> testFollowsList = new ArrayList<>();
+            testFollowsList.add(new Follows(followerId, followeeId));
+
+            when(usersRepository.findById(followeeId)).thenReturn(Optional.of(followee));
+            when(followsRepository.findByFollowerIdAndFolloweeId(followerId, followeeId)).thenReturn(testFollowsList);
+
+            mockMvc.perform(get("/User/unfollow/" + followeeId).sessionAttrs(sessionAttributes))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl(CURRENT_URL));
+
+            verify(followsRepository, times(1)).findByFollowerIdAndFolloweeId(followerId, followeeId);
+
+            verify(followsRepository, times(1)).deleteAll(followsListCaptor.capture());
+            List<Follows> capturedFollowsList = followsListCaptor.getValue();
+            assertThat(capturedFollowsList).isEqualTo(testFollowsList);
+
+            verify(messageSource, never()).getMessage(any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("異常系")
+        public void failed() throws Exception {
+            when(usersRepository.findById(followerId)).thenReturn(Optional.of(follower));
+
+            mockMvc.perform(get("/User/unfollow/" + followeeId).sessionAttrs(sessionAttributes))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/home"))
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(followsRepository, never()).findByFollowerIdAndFolloweeId(any(), any());
+            verify(followsRepository, never()).deleteAll(any());
 
             verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
             Locale capturedLocale = localeCaptor.getValue();
