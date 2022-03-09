@@ -3,8 +3,6 @@ package com.example.continuing.controller;
 import com.example.continuing.form.ContactData;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.service.UserService;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -22,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Locale;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -80,7 +77,7 @@ class SupportControllerTest {
     @DisplayName("[contactメソッドのテスト]")
     public class NestedTestContact {
 
-        private ContactData contactData = new ContactData();
+        private final ContactData contactData = new ContactData();
 
         @Test
         @DisplayName("バリデーションエラーなし")
