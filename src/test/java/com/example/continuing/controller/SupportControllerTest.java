@@ -7,8 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,8 +15,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Locale;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -44,9 +40,6 @@ class SupportControllerTest {
 
     @Autowired
     private SupportController supportController;
-
-    @Captor
-    private ArgumentCaptor<Locale> localeCaptor;
 
     @Test
     @DisplayName("[showHelpメソッドのテスト]")
