@@ -1,5 +1,6 @@
 package com.example.continuing.controller;
 
+import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.UsersRepository;
 import com.example.continuing.service.FollowService;
 import com.example.continuing.service.JoinService;
@@ -54,6 +55,30 @@ class MainControllerTest {
 
     @Autowired
     private MainController mainController;
+
+    @Nested
+    @DisplayName("[showHome(Model model)メソッドのテスト]")
+    public class NestedTestShowHomeModel {
+
+        @Test
+        @DisplayName("userId == null")
+        public void userIdIsNull() throws Exception {
+
+            mockMvc.perform(get("/"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("welcome"))
+                    .andExpect(model().attribute("searchData", new SearchData()));
+        }
+
+        @Test
+        @DisplayName("userId != null")
+        public void userIdIsNotNull() throws Exception {
+
+            mockMvc.perform(get("/").sessionAttr("user_id", 1))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/home"));
+        }
+    }
 
 
 
