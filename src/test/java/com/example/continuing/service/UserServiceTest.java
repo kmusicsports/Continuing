@@ -294,7 +294,7 @@ class UserServiceTest {
 		expected.add(testUser2);
 		expected.add(testUser3);
 		
-		List<Users> result = userService.getSearchReuslt(testSearchData);
+		List<Users> result = userService.getSearchResult(testSearchData);
 		
 		assertThat(result).isEqualTo(expected);
 		verify(usersRepository, times(1)).findByNameContainingIgnoreCase(testSearchKeyword);

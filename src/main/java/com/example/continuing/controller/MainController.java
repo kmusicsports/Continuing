@@ -86,7 +86,7 @@ public class MainController {
         }
 		
 		Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, prevPageable);
-		List<Users> userList = userService.getSearchReuslt(searchData);
+		List<Users> userList = userService.getSearchResult(searchData);
 		List<Users> userRanking = usersRepository.findTop3By();
 		Map<Integer, Integer> rankingMap = userService.makeRankingMap(userRanking);
 		
@@ -129,7 +129,7 @@ public class MainController {
 		boolean isValid = meetingService.isValid(searchData, result, locale);
 		if (!result.hasErrors() && isValid) {			
 			Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, pageable);
-			List<Users> userList = userService.getSearchReuslt(searchData);
+			List<Users> userList = userService.getSearchResult(searchData);
 			
 			// 入力された検索条件をsessionへ保存
 			session.setAttribute("searchData", searchData);

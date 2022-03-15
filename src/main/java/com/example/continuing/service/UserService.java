@@ -148,13 +148,13 @@ public class UserService {
 		return true;
 	}
 	
-	public List<Users> getSearchReuslt(SearchData searchData) {
+	public List<Users> getSearchResult(SearchData searchData) {
 		String searchKeyword = searchData.getKeyword();
 		
 		List<Users> userListName = usersRepository.findByNameContainingIgnoreCase(searchKeyword);
 		List<Users> userList = usersRepository.findByProfileMessageContainingIgnoreCase(searchKeyword);
 		userList.addAll(userListName);
-		userList = new ArrayList<Users>(new LinkedHashSet<>(userList));
+		userList = new ArrayList<>(new LinkedHashSet<>(userList));
 		
 		return userList;
 	}
@@ -163,7 +163,7 @@ public class UserService {
 		
 		Collections.sort(
             userList, 
-            new Comparator<Users>() {
+            new Comparator<>() {
                 @Override
                 public int compare(Users user1, Users user2) {
                     return user2.getContinuousDays() - user1.getContinuousDays();
