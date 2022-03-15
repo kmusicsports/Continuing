@@ -53,7 +53,7 @@
 		                            
 		                            <div class="col-5">
 		                                <h5 class="ms-1 mt-4" th:text="#{label.topic}"></h5>
-		                                <div th:each="i : ${#numbers.sequence(1,__#{definition.number.topic}__)}">
+		                                <div th:each="i : ${#numbers.sequence(1, 13)}">
 				                                <input type="checkbox" name="topicList" th:value="${i}" th:text="' ' + #{option.topic.__${i}__}" th:field="*{topicList}">
 		                                </div>
                                 </div>
