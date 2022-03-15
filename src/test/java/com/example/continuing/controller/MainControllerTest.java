@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,8 +31,10 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
@@ -196,6 +199,90 @@ class MainControllerTest {
         }
     }
 
+    @Nested
+    @DisplayName("[searchメソッドのテスト]")
+    public class testSearch {
+
+        private List<Users> userList;
+        private List<Users> userRanking;
+        private Map<Integer, Integer> rankingMap;
+        private final int testUserId = 1;
+        private final int continuousDays = 2;
+        private List<Users> myFollowsList;
+        private List<Meetings> myJoinMeetingList;
+        private SearchData searchData;
+        private Users testUser1;
+        private Users testUser2;
+        private Users testUser3;
+        private Meetings testMeeting;
+        private final Locale locale = new Locale("ja");
+        private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
+
+        @BeforeEach
+        public void init() {
+            userList = new ArrayList<>();
+            userRanking = new ArrayList<>();
+            rankingMap = new TreeMap<>();
+            myFollowsList = new ArrayList<>();
+            myJoinMeetingList = new ArrayList<>();
+            searchData = new SearchData();
+            testUser1 = new Users();
+            testUser2 = new Users();
+            testUser3 = new Users();
+            testMeeting = new Meetings();
+
+            testUser1.setId(1);
+            testUser2.setId(2);
+            testUser3.setId(3);
+            testUser2.setContinuousDays(continuousDays);
+            testMeeting.setId(1);
+            userList.add(testUser1);
+            userRanking.add(testUser2);
+            rankingMap.put(continuousDays, 1);
+//            myFollowsList.add(testUser3);
+//            myJoinMeetingList.add(testMeeting);
+
+            when(usersRepository.findTop3By()).thenReturn(userRanking);
+            when(userService.makeRankingMap(userRanking)).thenReturn(rankingMap);
+        }
+
+        @Test
+        @DisplayName("userId == null && isValid == false")
+        public void isInvalid() throws Exception {
+
+            when(followService.getFollowsList(testUserId)).thenReturn(null);
+            when(joinService.getJoinMeetingList(testUserId)).thenReturn(null);
+            when(meetingService.isValid(any(), any(), any())).thenReturn(false);
+
+            mockMvc.perform(post("/search")
+                            .flashAttr("searchData", searchData)
+                            .locale(locale)
+                    )
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("home"))
+                    .andExpect(request().sessionAttribute("path", "/home"))
+                    .andExpect(model().attributeDoesNotExist("meetingPage"))
+                    .andExpect(model().attributeDoesNotExist("meetingList"))
+                    .andExpect(model().attributeDoesNotExist("userList"))
+                    .andExpect(model().attributeExists("msgMeeting"))
+                    .andExpect(model().attribute("myFollowsList", myFollowsList))
+                    .andExpect(model().attribute("myJoinMeetingList", myJoinMeetingList))
+                    .andExpect(model().attribute("searchData", searchData))
+                    .andExpect(model().attribute("userRanking", userRanking))
+                    .andExpect(model().attribute("rankingMap", rankingMap));
+
+            verify(userService, never()).getSearchResult(searchData);
+            verify(usersRepository, times(1)).findTop3By();
+            verify(userService, times(1)).makeRankingMap(userRanking);
+            verify(followService, times(1)).getFollowsList(null);
+            verify(joinService, times(1)).getJoinMeetingList(null);
+
+            verify(messageSource, atLeastOnce()).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
+        }
+        
+    }
 
     @ParameterizedTest
     @CsvSource({"'th', 'privacy/privacyPolicy'",

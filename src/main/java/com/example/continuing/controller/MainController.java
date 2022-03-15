@@ -127,7 +127,7 @@ public class MainController {
 			locale = new Locale(user.getLanguage());
 		}
 		boolean isValid = meetingService.isValid(searchData, result, locale);
-		if (!result.hasErrors() && isValid) {			
+		if (isValid) {
 			Page<Meetings> meetingPage = meetingsDaoImpl.findByCriteria(searchData, pageable);
 			List<Users> userList = userService.getSearchResult(searchData);
 			
