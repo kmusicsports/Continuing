@@ -51,7 +51,7 @@ class FollowControllerTest {
     private MessageSource messageSource;
 
     @Autowired
-    FollowController followController;
+    private FollowController followController;
 
     @Captor
     private ArgumentCaptor<Locale> localeCaptor;
@@ -253,7 +253,7 @@ class FollowControllerTest {
         @Test
         @DisplayName("異常系")
         public void fail() throws Exception {
-            
+
             users.setId(operationUserId);
             users.setLanguage("ja");
 

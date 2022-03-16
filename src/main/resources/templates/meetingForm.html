@@ -42,7 +42,7 @@
                                         <div class="col-sm-10">
                                             <select class="form-select" name="topic" >
                                                 <option value="0" th:field="*{topic}" th:text="#{option.none}"></option>
-                                                <option th:each="i : ${#numbers.sequence(1,__#{definition.number.topic}__)}" th:value="${i}" th:text="#{option.topic.__${i}__}" th:field="*{topic}" th:selected="${i == topic ? 'true' : 'flase'}"></option>
+                                                <option th:each="i : ${#numbers.sequence(1, 13)}" th:value="${i}" th:text="#{option.topic.__${i}__}" th:field="*{topic}" th:selected="${i == topic ? 'true' : 'flase'}"></option>
                                             </select>
                                             <div th:if="${#fields.hasErrors('topic')}" th:errors="*{topic}" th:errorclass="invalid-feedback"></div>
                                         </div>

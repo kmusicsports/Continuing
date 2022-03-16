@@ -7,6 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,6 +17,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Locale;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -71,6 +75,8 @@ class SupportControllerTest {
     public class NestedTestContact {
 
         private final ContactData contactData = new ContactData();
+        private final Locale locale = new Locale("ja");
+        private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
 
         @Test
         @DisplayName("バリデーションエラーなし")
@@ -79,7 +85,10 @@ class SupportControllerTest {
             contactData.setEmail("test@email");
             contactData.setContents("testContents");
 
-            mockMvc.perform(post("/contact").flashAttr("contactData", contactData))
+            mockMvc.perform(post("/contact")
+                            .flashAttr("contactData", contactData)
+                            .locale(locale)
+                    )
                     .andExpect(status().isFound())
                     .andExpect(view().name("redirect:/contactForm"))
                     .andExpect(redirectedUrl("/contactForm"))
@@ -87,7 +96,9 @@ class SupportControllerTest {
                     .andExpect(flash().attributeExists("msg"));
 
             verify(userService, times(1)).sendContactEmail(contactData);
-            verify(messageSource, times(1)).getMessage(any(), any(), any());
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
         }
 
         @Test
@@ -97,7 +108,10 @@ class SupportControllerTest {
             contactData.setEmail("");
             contactData.setContents("");
 
-            mockMvc.perform(post("/contact").flashAttr("contactData", contactData))
+            mockMvc.perform(post("/contact")
+                            .flashAttr("contactData", contactData)
+                            .locale(locale)
+                    )
                     .andExpect(status().isOk())
                     .andExpect(view().name("contactForm"))
                     .andExpect(request().sessionAttribute("path", "/contactForm"))
@@ -105,7 +119,9 @@ class SupportControllerTest {
                     .andExpect(model().attribute("searchData", new SearchData()))
                     .andExpect(model().attributeExists("msg"));
 
-            verify(messageSource, atLeastOnce()).getMessage(any(), any(), any());
+            verify(messageSource, atLeastOnce()).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
         }
     }
 }
