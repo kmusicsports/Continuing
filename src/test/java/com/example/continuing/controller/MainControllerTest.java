@@ -1,6 +1,5 @@
 package com.example.continuing.controller;
 
-import com.example.continuing.dao.MeetingsDaoImpl;
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.SearchData;
@@ -23,9 +22,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -64,9 +60,6 @@ class MainControllerTest {
     @MockBean
     private MessageSource messageSource;
 
-    @MockBean
-    private MeetingsDaoImpl meetingsDaoImpl;
-
     @Autowired
     private MainController mainController;
 
@@ -103,28 +96,25 @@ class MainControllerTest {
         private List<Users> userRanking;
         private Map<Integer, Integer> rankingMap;
         private final int testUserId = 1;
-        private final int continuousDays = 2;
         private List<Users> myFollowsList;
         private List<Meetings> myJoinMeetingList;
         private SearchData searchData;
-        private Users testUser1;
-        private Users testUser2;
-        private Users testUser3;
-        private Meetings testMeeting;
 
         @BeforeEach
         public void init() {
+
             userList = new ArrayList<>();
             userRanking = new ArrayList<>();
             rankingMap = new TreeMap<>();
             myFollowsList = new ArrayList<>();
             myJoinMeetingList = new ArrayList<>();
             searchData = new SearchData();
-            testUser1 = new Users();
-            testUser2 = new Users();
-            testUser3 = new Users();
-            testMeeting = new Meetings();
+            Users testUser1 = new Users();
+            Users testUser2 = new Users();
+            Users testUser3 = new Users();
+            Meetings testMeeting = new Meetings();
 
+            int continuousDays = 2;
             testUser1.setId(1);
             testUser2.setId(2);
             testUser3.setId(3);
@@ -207,7 +197,6 @@ class MainControllerTest {
         private List<Users> userRanking;
         private Map<Integer, Integer> rankingMap;
         private final int testUserId = 1;
-        private final int continuousDays = 2;
         private List<Users> myFollowsList;
         private List<Meetings> myJoinMeetingList;
         private SearchData searchData;
@@ -215,7 +204,7 @@ class MainControllerTest {
         private Users testUser2;
         private Users testUser3;
         private Meetings testMeeting;
-        private final Locale locale = new Locale("ja");
+        private final Locale localeOfRequest = new Locale("ja");
         private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
 
         @BeforeEach
@@ -234,13 +223,12 @@ class MainControllerTest {
             testUser1.setId(1);
             testUser2.setId(2);
             testUser3.setId(3);
-            testUser2.setContinuousDays(continuousDays);
             testMeeting.setId(1);
-            userList.add(testUser1);
             userRanking.add(testUser2);
+
+            int continuousDays = 2;
+            testUser2.setContinuousDays(continuousDays);
             rankingMap.put(continuousDays, 1);
-//            myFollowsList.add(testUser3);
-//            myJoinMeetingList.add(testMeeting);
 
             when(usersRepository.findTop3By()).thenReturn(userRanking);
             when(userService.makeRankingMap(userRanking)).thenReturn(rankingMap);
@@ -249,14 +237,11 @@ class MainControllerTest {
         @Test
         @DisplayName("userId == null && isValid == false")
         public void isInvalid() throws Exception {
-
-            when(followService.getFollowsList(testUserId)).thenReturn(null);
-            when(joinService.getJoinMeetingList(testUserId)).thenReturn(null);
             when(meetingService.isValid(any(), any(), any())).thenReturn(false);
 
             mockMvc.perform(post("/search")
                             .flashAttr("searchData", searchData)
-                            .locale(locale)
+                            .locale(localeOfRequest)
                     )
                     .andExpect(status().isOk())
                     .andExpect(view().name("home"))
@@ -265,6 +250,7 @@ class MainControllerTest {
                     .andExpect(model().attributeDoesNotExist("meetingList"))
                     .andExpect(model().attributeDoesNotExist("userList"))
                     .andExpect(model().attributeExists("msgMeeting"))
+                    .andExpect(model().attributeDoesNotExist("msgAccount"))
                     .andExpect(model().attribute("myFollowsList", myFollowsList))
                     .andExpect(model().attribute("myJoinMeetingList", myJoinMeetingList))
                     .andExpect(model().attribute("searchData", searchData))
@@ -279,8 +265,47 @@ class MainControllerTest {
 
             verify(messageSource, atLeastOnce()).getMessage(any(), any(), localeCaptor.capture());
             Locale capturedLocale = localeCaptor.getValue();
-            assertThat(capturedLocale).isEqualTo(locale);
+            assertThat(capturedLocale).isEqualTo(localeOfRequest);
         }
+
+        @Test
+        @DisplayName("userId == null && isValid == true && meetingPage.getContent().size() == 0 && userList.size() != 0")
+        public void userListIsNotEmpty() throws Exception {
+            userList.add(testUser1);
+
+            when(meetingService.isValid(any(), any(), any())).thenReturn(true);
+            when(userService.getSearchResult(searchData)).thenReturn(userList);
+
+            mockMvc.perform(post("/search")
+                            .flashAttr("searchData", searchData)
+                            .locale(localeOfRequest)
+                    )
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("home"))
+                    .andExpect(request().sessionAttribute("path", "/home"))
+                    .andExpect(request().sessionAttribute("searchData", searchData))
+                    .andExpect(model().attributeExists("meetingPage"))
+                    .andExpect(model().attributeExists("meetingList"))
+                    .andExpect(model().attribute("userList", userList))
+                    .andExpect(model().attributeExists("msgMeeting"))
+                    .andExpect(model().attributeDoesNotExist("msgAccount"))
+                    .andExpect(model().attribute("myFollowsList", myFollowsList))
+                    .andExpect(model().attribute("myJoinMeetingList", myJoinMeetingList))
+                    .andExpect(model().attribute("searchData", searchData))
+                    .andExpect(model().attribute("userRanking", userRanking))
+                    .andExpect(model().attribute("rankingMap", rankingMap));
+
+            verify(userService, times(1)).getSearchResult(searchData);
+            verify(usersRepository, times(1)).findTop3By();
+            verify(userService, times(1)).makeRankingMap(userRanking);
+            verify(followService, times(1)).getFollowsList(null);
+            verify(joinService, times(1)).getJoinMeetingList(null);
+
+            verify(messageSource, atLeastOnce()).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(localeOfRequest);
+        }
+
         
     }
 
