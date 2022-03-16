@@ -306,7 +306,48 @@ class MainControllerTest {
             assertThat(capturedLocale).isEqualTo(localeOfRequest);
         }
 
-        
+        @Test
+        @DisplayName("userId != null && isValid == true && meetingPage.getContent().size() == 0 && userList.size() == 0")
+        public void userListIsEmpty() throws Exception {
+
+            testUser1.setLanguage("en");
+            myFollowsList.add(testUser3);
+            myJoinMeetingList.add(testMeeting);
+
+            when(followService.getFollowsList(testUserId)).thenReturn(myFollowsList);
+            when(joinService.getJoinMeetingList(testUserId)).thenReturn(myJoinMeetingList);
+            when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser1));
+            when(meetingService.isValid(any(), any(), any())).thenReturn(true);
+            when(userService.getSearchResult(searchData)).thenReturn(userList);
+
+            mockMvc.perform(post("/search")
+                            .flashAttr("searchData", searchData)
+                            .locale(localeOfRequest)
+                            .sessionAttr("user_id", testUserId)
+                    )
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("home"))
+                    .andExpect(request().sessionAttribute("path", "/home"))
+                    .andExpect(request().sessionAttribute("searchData", searchData))
+                    .andExpect(model().attributeExists("meetingPage"))
+                    .andExpect(model().attributeExists("meetingList"))
+                    .andExpect(model().attribute("userList", userList))
+                    .andExpect(model().attributeExists("msgMeeting"))
+                    .andExpect(model().attributeExists("msgAccount"))
+                    .andExpect(model().attribute("myFollowsList", myFollowsList))
+                    .andExpect(model().attribute("myJoinMeetingList", myJoinMeetingList))
+                    .andExpect(model().attribute("searchData", searchData))
+                    .andExpect(model().attribute("userRanking", userRanking))
+                    .andExpect(model().attribute("rankingMap", rankingMap));
+
+            verify(userService, times(1)).getSearchResult(searchData);
+            verify(usersRepository, times(1)).findTop3By();
+            verify(userService, times(1)).makeRankingMap(userRanking);
+            verify(followService, times(1)).getFollowsList(testUserId);
+            verify(joinService, times(1)).getJoinMeetingList(testUserId);
+
+            verify(messageSource, atLeastOnce()).getMessage(any(), any(), any());
+        }
     }
 
     @ParameterizedTest
