@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -84,6 +85,9 @@ class UserControllerTest {
     @Autowired
     private UserController userController;
 
+    @Captor
+    private ArgumentCaptor<Users> userCaptor;
+
     @Nested
     @DisplayName("[showUserDetailメソッドのテスト]")
     public class NestedTestShowUserDetail {
@@ -121,7 +125,7 @@ class UserControllerTest {
             verify(usersRepository, times(1)).findById(sessionUserId);
             verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
             Locale capturedLocale = localeCaptor.getValue();
-		    assertThat(capturedLocale).isEqualTo(new Locale(testUser.getLanguage()));
+            assertThat(capturedLocale).isEqualTo(new Locale(testUser.getLanguage()));
         }
 
         @Test
@@ -275,6 +279,7 @@ class UserControllerTest {
         int testUserId = 1;
         Users testUser = new Users();
         testUser.setId(testUserId);
+        testUser.setEmail("test@email");
         testUser.setLanguage("ja");
 
         when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
@@ -284,11 +289,62 @@ class UserControllerTest {
                 .andExpect(view().name("profile"))
                 .andExpect(request().sessionAttribute("path", path))
                 .andExpect(request().sessionAttribute("mode", "profile"))
-                .andExpect(model().attribute("profileData", new ProfileData()))
+                .andExpect(model().attribute("profileData", new ProfileData(testUser)))
                 .andExpect(model().attribute("searchData", new SearchData()))
-                .andExpect(model().attribute("emailData", new EmailData()));
+                .andExpect(model().attribute("emailData", new EmailData(testUser.getEmail())));
 
         verify(usersRepository, times(1)).findById(testUserId);
     }
 
+    @Nested
+    @DisplayName("[deleteProfileImageメソッドのテスト]")
+    public class NestedTestDeleteProfileImage {
+
+        private final int testUserId = 1;
+        private Users testUser;
+
+        @BeforeEach
+        public void init() {
+            testUser = new Users();
+            testUser.setId(testUserId);
+        }
+
+        @Test
+        @DisplayName("プロフィール画像が設定されている場合")
+        public void testProfileImageIsExists() throws Exception {
+            String profileImage = "testImageUrl";
+
+            testUser.setProfileImage(profileImage);
+
+            when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+
+            mockMvc.perform(get("/User/profileImage/delete").sessionAttr("user_id", testUserId))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/User/updateForm"));
+
+            verify(usersRepository, times(1)).findById(testUserId);
+            verify(storageService, times(1)).deleteFile(profileImage);
+            verify(usersRepository, times(1)).saveAndFlush(userCaptor.capture());
+            Users capturedUser = userCaptor.getValue();
+            testUser.setProfileImage(null);
+            assertThat(capturedUser).isEqualTo(testUser);
+        }
+
+        @Test
+        @DisplayName("プロフィール画像が設定されていない場合")
+        public void testProfileImageIsNotExist() throws Exception {
+            when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+
+            mockMvc.perform(get("/User/profileImage/delete").sessionAttr("user_id", testUserId))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/User/updateForm"));
+
+            verify(usersRepository, times(1)).findById(testUserId);
+            verify(storageService, never()).deleteFile(any());
+            verify(usersRepository, times(1)).saveAndFlush(userCaptor.capture());
+            Users capturedUser = userCaptor.getValue();
+            assertThat(capturedUser).isEqualTo(testUser);
+        }
+        
+    }
 }
