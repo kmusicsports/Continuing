@@ -191,7 +191,7 @@ class MainControllerTest {
 
     @Nested
     @DisplayName("[searchメソッドのテスト]")
-    public class testSearch {
+    public class NestedTestSearch {
 
         private List<Users> userList;
         private List<Users> userRanking;
@@ -307,7 +307,7 @@ class MainControllerTest {
         }
 
         @Test
-        @DisplayName("userId != null && isValid == true && meetingPage.getContent().size() == 0 && userList.size() == 0")
+        @DisplayName("userId != null && isValid == true && meetingPage.getContent().size() == 0 && userList.size() == 0") // meetingPage.getContent().size() != 0
         public void userListIsEmpty() throws Exception {
 
             testUser1.setLanguage("en");
@@ -347,6 +347,9 @@ class MainControllerTest {
             verify(joinService, times(1)).getJoinMeetingList(testUserId);
 
             verify(messageSource, atLeastOnce()).getMessage(any(), any(), any());
+//            verify(messageSource, atLeastOnce()).getMessage(any(), any(), localeCaptor.capture());
+//            Locale capturedLocale = localeCaptor.getValue();
+//            assertThat(capturedLocale).isEqualTo(new Locale(testUser1.getLanguage()));
         }
     }
 
