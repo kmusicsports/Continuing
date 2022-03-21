@@ -21,8 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.servlet.http.HttpSession;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -182,5 +180,60 @@ class UserControllerTest {
         }
     }
 
+    @Test
+    @DisplayName("[showMyPageメソッドのテスト]")
+    public void testShowMyPage() throws Exception {
+        String path = "/User/mypage";
+
+        int testUserId = 1;
+        Users testUser = new Users();
+        testUser.setId(testUserId);
+
+        Users testUser3 = new Users();
+        Users testUser4 = new Users();
+        Meetings testMeeting1 = new Meetings();
+        Meetings testMeeting2 = new Meetings();
+
+        testUser3.setId(3);
+        testUser4.setId(4);
+        testMeeting1.setId(1);
+        testMeeting1.setHost(testUser);
+        testMeeting2.setId(2);
+
+        List<Users> followsList = new ArrayList<>();
+        List<Users> followersList = new ArrayList<>();
+        List<Meetings> meetingList = new ArrayList<>();
+        List<Meetings> myJoinMeetingList = new ArrayList<>();
+
+        followsList.add(testUser3);
+        followersList.add(testUser4);
+        meetingList.add(testMeeting1);
+        myJoinMeetingList.add(testMeeting2);
+
+        when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+        when(followService.getFollowsList(testUserId)).thenReturn(followsList);
+        when(followService.getFollowersList(testUserId)).thenReturn(followersList);
+        when(meetingService.getUserMeetingList(testUser)).thenReturn(meetingList);
+        when(joinService.getJoinMeetingList(testUserId)).thenReturn(myJoinMeetingList);
+
+        mockMvc.perform(get(path).sessionAttr("user_id", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("userDetail"))
+                .andExpect(request().sessionAttribute("path", path))
+                .andExpect(model().attribute("user", testUser))
+                .andExpect(model().attribute("followsList", followsList))
+                .andExpect(model().attribute("followersList", followersList))
+                .andExpect(model().attribute("myFollowsList", followsList))
+                .andExpect(model().attribute("meetingList", meetingList))
+                .andExpect(model().attribute("myJoinMeetingList", myJoinMeetingList))
+                .andExpect(model().attribute("searchData", new SearchData()));
+
+        verify(usersRepository, times(1)).findById(testUserId);
+        verify(followService, times(1)).getFollowsList(testUserId);
+        verify(followService, times(1)).getFollowersList(testUserId);
+        verify(meetingService, times(1)).getUserMeetingList(testUser);
+        verify(followService, times(1)).getFollowsList(testUserId);
+        verify(joinService, times(1)).getJoinMeetingList(testUserId);
+    }
 
 }
