@@ -236,4 +236,32 @@ class UserControllerTest {
         verify(joinService, times(1)).getJoinMeetingList(testUserId);
     }
 
+    @Test
+    @DisplayName("[deleteUserメソッドのテスト]")
+    public void testDeleteUser() throws Exception {
+        ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
+
+        int testUserId = 1;
+        Users testUser = new Users();
+        testUser.setId(testUserId);
+        testUser.setLanguage("ja");
+
+        when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+
+        mockMvc.perform(get("/User/delete").sessionAttr("user_id", testUserId))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrl("/home"))
+                .andExpect(request().sessionAttributeDoesNotExist("user_id"))
+                .andExpect(flash().attributeExists("msg"));
+
+        verify(followsRepository, times(1)).deleteByFollowerId(testUserId);
+        verify(followsRepository, times(1)).deleteByFolloweeId(testUserId);
+        verify(deliveriesRepository, times(1)).deleteByUserId(testUserId);
+        verify(meetingsRepository, times(1)).deleteByHost(testUser);
+        verify(usersRepository, times(1)).deleteById(testUserId);
+        verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+        Locale capturedLocale = localeCaptor.getValue();
+        assertThat(capturedLocale).isEqualTo(new Locale(testUser.getLanguage()));
+    }
+
 }
