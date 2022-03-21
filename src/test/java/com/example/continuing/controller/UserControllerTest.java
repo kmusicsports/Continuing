@@ -2,6 +2,8 @@ package com.example.continuing.controller;
 
 import com.example.continuing.entity.Meetings;
 import com.example.continuing.entity.Users;
+import com.example.continuing.form.EmailData;
+import com.example.continuing.form.ProfileData;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.*;
 import com.example.continuing.service.*;
@@ -254,6 +256,7 @@ class UserControllerTest {
                 .andExpect(request().sessionAttributeDoesNotExist("user_id"))
                 .andExpect(flash().attributeExists("msg"));
 
+        verify(usersRepository, times(1)).findById(testUserId);
         verify(followsRepository, times(1)).deleteByFollowerId(testUserId);
         verify(followsRepository, times(1)).deleteByFolloweeId(testUserId);
         verify(deliveriesRepository, times(1)).deleteByUserId(testUserId);
@@ -262,6 +265,30 @@ class UserControllerTest {
         verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
         Locale capturedLocale = localeCaptor.getValue();
         assertThat(capturedLocale).isEqualTo(new Locale(testUser.getLanguage()));
+    }
+
+    @Test
+    @DisplayName("[updateProfileFormメソッドのテスト]")
+    public void testUpdateProfileForm() throws Exception {
+        String path = "/User/updateForm";
+
+        int testUserId = 1;
+        Users testUser = new Users();
+        testUser.setId(testUserId);
+        testUser.setLanguage("ja");
+
+        when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+
+        mockMvc.perform(get(path).sessionAttr("user_id", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("profile"))
+                .andExpect(request().sessionAttribute("path", path))
+                .andExpect(request().sessionAttribute("mode", "profile"))
+                .andExpect(model().attribute("profileData", new ProfileData()))
+                .andExpect(model().attribute("searchData", new SearchData()))
+                .andExpect(model().attribute("emailData", new EmailData()));
+
+        verify(usersRepository, times(1)).findById(testUserId);
     }
 
 }
