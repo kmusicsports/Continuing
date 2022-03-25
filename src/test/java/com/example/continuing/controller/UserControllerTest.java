@@ -24,10 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -345,6 +342,44 @@ class UserControllerTest {
             Users capturedUser = userCaptor.getValue();
             assertThat(capturedUser).isEqualTo(testUser);
         }
-        
+    }
+
+    @Test
+    @DisplayName("[showUserRanking]")
+    public void testShowUserRanking() throws Exception {
+
+        int testUserId = 1;
+        String path = "/User/list/ranking";
+
+        List<Users> userList = new ArrayList<>();
+        Users testUser2 = new Users();
+        testUser2.setId(2);
+        testUser2.setContinuousDays(30);
+        userList.add(testUser2);
+
+        Map<Integer, Integer> rankingMap = new TreeMap<>();
+        rankingMap.put(30, 1);
+
+        List<Users> myFollowsList = new ArrayList<>();
+        Users testUser3 = new Users();
+        testUser3.setId(3);
+        myFollowsList.add(testUser3);
+
+        when(usersRepository.findAll()).thenReturn(userList);
+        when(userService.makeRankingMap(userList)).thenReturn(rankingMap);
+        when(followService.getFollowsList(testUserId)).thenReturn(myFollowsList);
+
+        mockMvc.perform(get(path).sessionAttr("user_id", testUserId))
+                .andExpect(status().isOk())
+                .andExpect(view().name("userRanking"))
+                .andExpect(request().sessionAttribute("path", path))
+                .andExpect(model().attribute("searchData", new SearchData()))
+                .andExpect(model().attribute("userList", userList))
+                .andExpect(model().attribute("myFollowsList", myFollowsList))
+                .andExpect(model().attribute("rankingMap", rankingMap));
+
+        verify(usersRepository, times(1)).findAll();
+        verify(userService, times(1)).makeRankingMap(userList);
+        verify(followService, times(1)).getFollowsList(testUserId);
     }
 }
