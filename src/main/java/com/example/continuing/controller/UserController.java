@@ -66,6 +66,7 @@ public class UserController {
 	@GetMapping("/User/{user_id}")
 	public ModelAndView showUserDetail(@PathVariable(name = "user_id") int userId,
 			ModelAndView mv, RedirectAttributes redirectAttributes) {
+
 		Integer myId = (Integer)session.getAttribute("user_id");
 		Optional<Users> someUser = usersRepository.findById(userId);
 		someUser
@@ -94,11 +95,13 @@ public class UserController {
 				String msg = messageSource.getMessage("msg.w.user_not_found", null, locale);
 				redirectAttributes.addFlashAttribute("msg", new MessageDto("W", msg));
 			});
+
 		return mv;
 	}
 	
 	@GetMapping("/User/mypage")
 	public ModelAndView showMyPage(ModelAndView mv) {
+
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();			
 		List<Users> followsList = followService.getFollowsList(userId);
@@ -115,11 +118,13 @@ public class UserController {
 		mv.addObject("meetingList", meetingList);
 		mv.addObject("myJoinMeetingList", joinMeetingList);
 		mv.addObject("searchData", new SearchData());
+
 		return mv;
 	}
 	
 	@GetMapping("/User/delete")
 	public String deleteUser(RedirectAttributes redirectAttributes) {
+
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();
 		Locale locale = new Locale(user.getLanguage());
@@ -127,11 +132,11 @@ public class UserController {
 		followsRepository.deleteByFolloweeId(userId);
 		deliveriesRepository.deleteByUserId(userId);
 		meetingsRepository.deleteByHost(user);
-		usersRepository.deleteById(userId);		
-		// セッション情報をクリアする
-		session.invalidate();
+		usersRepository.deleteById(userId);
+		session.invalidate(); // セッション情報をクリアする
 		String msg = messageSource.getMessage("msg.s.user_deleted", null, locale);
 		redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
+
 		return "redirect:/home";
 	}
 	
@@ -201,14 +206,15 @@ public class UserController {
 	
 	@GetMapping("/User/profileImage/delete")
 	public String deleteProfileImage() {
-		Integer id = (Integer)session.getAttribute("user_id");
-		Users user = usersRepository.findById(id).get();
+		Integer userId = (Integer)session.getAttribute("user_id");
+		Users user = usersRepository.findById(userId).get();
 		String profile_image = user.getProfileImage();
 		if(profile_image != null) {
 			storageService.deleteFile(profile_image);
 		}
 		user.setProfileImage(null);
 		usersRepository.saveAndFlush(user);
+
 		return "redirect:/User/updateForm";
     }
 
@@ -226,6 +232,7 @@ public class UserController {
 		mv.addObject("userList", userList);
 		mv.addObject("myFollowsList", myFollowsList);
 		mv.addObject("rankingMap", rankingMap);
+
 		return mv;
 	}
 	
@@ -234,6 +241,7 @@ public class UserController {
 		session.setAttribute("path", "/User/setting");
 		mv.setViewName("setting");
 		mv.addObject("searchData", new SearchData());
+
 		return mv;
 	}
 	
@@ -272,8 +280,7 @@ public class UserController {
 	
 	@GetMapping("/updateEmail/email/{email}/token/{token}")
 	public String updateEmail(@PathVariable(name = "email") String email,
-			@PathVariable(name = "token") String token, ModelAndView mv,
-			Locale locale, RedirectAttributes redirectAttributes) {
+			@PathVariable(name = "token") String token, Locale locale, RedirectAttributes redirectAttributes) {
 		
 		boolean isValid = temporaryService.isValid(email, token);
 		if(isValid) {
@@ -294,6 +301,7 @@ public class UserController {
 			String msg = messageSource.getMessage("msg.e.retry_email_update", null, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 		}
+
 		return "redirect:/home";
 	}
 	
