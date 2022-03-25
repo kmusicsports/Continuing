@@ -1,6 +1,7 @@
 package com.example.continuing.controller;
 
 import com.example.continuing.entity.Meetings;
+import com.example.continuing.entity.Temporaries;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.EmailData;
 import com.example.continuing.form.ProfileData;
@@ -84,6 +85,9 @@ class UserControllerTest {
 
     @Captor
     private ArgumentCaptor<Users> userCaptor;
+
+    @Captor
+    private ArgumentCaptor<List<Temporaries>> temporaryListCaptor;
 
     @Nested
     @DisplayName("[showUserDetailメソッドのテスト]")
@@ -345,7 +349,7 @@ class UserControllerTest {
     }
 
     @Test
-    @DisplayName("[showUserRanking]")
+    @DisplayName("[showUserRankingメソッドのテスト]")
     public void testShowUserRanking() throws Exception {
 
         int testUserId = 1;
@@ -382,4 +386,81 @@ class UserControllerTest {
         verify(userService, times(1)).makeRankingMap(userList);
         verify(followService, times(1)).getFollowsList(testUserId);
     }
+
+    @Test
+    @DisplayName("[showSettingメソッドのテスト]")
+    public void testShowSetting() throws Exception {
+        String path = "/User/setting";
+
+        mockMvc.perform(get(path).sessionAttr("user_id", 1))
+                .andExpect(status().isOk())
+                .andExpect(view().name("setting"))
+                .andExpect(request().sessionAttribute("path", path))
+                .andExpect(model().attribute("searchData", new SearchData()));
+    }
+
+    @Nested
+    @DisplayName("[updateEmailメソッドのテスト]")
+    public class NestedTestUpdateEmail {
+
+        private static final String TEST_EMAIL = "test@email";
+        private static final String TEST_TOKEN = "test@email";
+        private static final String PATH = "/updateEmail/email/" + TEST_EMAIL + "/token/" + TEST_TOKEN;
+        private final Locale locale = new Locale("ja");
+        private final ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
+
+        @Test
+        @DisplayName("isValid == false")
+        public void isInvalid() throws Exception {
+            when(temporaryService.isValid(TEST_EMAIL, TEST_TOKEN)).thenReturn(false);
+
+            mockMvc.perform(get(PATH).locale(locale))
+                    .andExpect(status().isFound())
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(temporaryService, times(1)).isValid(TEST_EMAIL, TEST_TOKEN);
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
+        }
+
+        @Test
+        @DisplayName("isValid == true")
+        public void isValid() throws Exception {
+
+            Users testUser = new Users();
+            testUser.setId(1);
+
+            Temporaries temporary = new Temporaries(testUser, TEST_TOKEN);
+            List<Temporaries> temporaryList = new ArrayList<>();
+            temporaryList.add(temporary);
+
+
+            when(temporaryService.isValid(TEST_EMAIL, TEST_TOKEN)).thenReturn(true);
+            when(temporariesRepository.findByEmailOrderByCreatedAtDesc(TEST_EMAIL)).thenReturn(temporaryList);
+            when(usersRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
+
+            mockMvc.perform(get(PATH).locale(locale))
+                    .andExpect(status().isFound())
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(temporaryService, times(1)).isValid(TEST_EMAIL, TEST_TOKEN);
+            verify(temporariesRepository, times(1)).findByEmailOrderByCreatedAtDesc(TEST_EMAIL);
+            verify(usersRepository, times(1)).findById(testUser.getId());
+
+            verify(usersRepository, times(1)).saveAndFlush(userCaptor.capture());
+            Users capturedUser = userCaptor.getValue();
+            testUser.setEmail(TEST_EMAIL);
+            assertThat(capturedUser).isEqualTo(testUser);
+
+            verify(temporariesRepository, times(1)).deleteAll(temporaryListCaptor.capture());
+            List<Temporaries> capturedTemporaryList = temporaryListCaptor.getValue();
+            assertThat(capturedTemporaryList).isEqualTo(temporaryList);
+
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
+        }
+    }
+
 }
