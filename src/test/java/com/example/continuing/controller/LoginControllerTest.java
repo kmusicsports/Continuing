@@ -66,5 +66,15 @@ class LoginControllerTest {
     @Autowired
     private LoginController loginController;
 
-    
+    @Test
+    @DisplayName("[showLoginメソッドのテスト]")
+    public void testShowLogin() throws Exception {
+
+        mockMvc.perform(get("/showLogin"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("login"))
+                .andExpect(model().attribute("loginData", new LoginData()))
+                .andExpect(model().attribute("searchData", new SearchData()))
+                .andExpect(model().attribute("emailData", new EmailData()));
+    }
 }
