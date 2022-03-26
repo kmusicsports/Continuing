@@ -65,7 +65,7 @@ public class LoginController {
 	
 	@PostMapping("/login")
 	public String login(@ModelAttribute @Validated LoginData loginData,
-			BindingResult result, ModelAndView mv, HttpServletRequest request,
+			BindingResult result, HttpServletRequest request,
 			RedirectAttributes redirectAttributes, Locale locale) {
 		
 		boolean isValid = loginService.isValid(loginData, result); 
