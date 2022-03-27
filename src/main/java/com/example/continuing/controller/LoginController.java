@@ -97,9 +97,8 @@ public class LoginController {
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();
 		Locale locale = new Locale(user.getLanguage());
-		
-		// セッション情報をクリアする
-		session.invalidate();
+
+		session.invalidate(); // セッション情報をクリアする
 		String msg = messageSource.getMessage("msg.i.logout", null, locale);
 		redirectAttributes.addFlashAttribute("msg", new MessageDto("I", msg));
 		return "redirect:/showLogin";
@@ -152,9 +151,7 @@ public class LoginController {
 			Temporaries latestTemporaries = temporariesList.get(0);
 			Users user = new Users(latestTemporaries, locale);
 			usersRepository.saveAndFlush(user);
-			
-			List<Temporaries> temporaryList = temporariesRepository.findByEmailOrderByCreatedAtDesc(user.getEmail());
-			temporariesRepository.deleteAll(temporaryList);
+			temporariesRepository.deleteAll(temporariesList);
 			
 			Deliveries deliveries = new Deliveries(user.getId());
 			deliveriesRepository.saveAndFlush(deliveries);
@@ -174,11 +171,7 @@ public class LoginController {
 	@GetMapping("/terms")
 	public String showTerms(Locale locale) {
 		String language = locale.getLanguage();
-		
-		if(language == null){
-			return "terms/terms";
-	    }
-		
+
 		switch(language) {
 			case "ja":
 				return "terms/terms_ja";

@@ -1,5 +1,6 @@
 package com.example.continuing.controller;
 
+import com.example.continuing.entity.Deliveries;
 import com.example.continuing.entity.Temporaries;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.EmailData;
@@ -29,6 +30,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -81,6 +84,12 @@ class LoginControllerTest {
 
     @Captor
     ArgumentCaptor<Temporaries> temporaryCaptor;
+
+    @Captor
+    ArgumentCaptor<Users> userCaptor;
+
+    @Captor
+    ArgumentCaptor<Deliveries> deliveryCaptor;
 
     @Test
     @DisplayName("[showLoginメソッドのテスト]")
@@ -347,5 +356,81 @@ class LoginControllerTest {
         }
     }
 
+    @Nested
+    @DisplayName("[fullRegisterメソッドのテスト]")
+    public class NestedTestFullRegister {
+
+        private static final String TEST_EMAIL = "test@email";
+        private static final String TEST_TOKEN = "testToken";
+        private final Locale locale = new Locale("ja");
+
+        @Test
+        @DisplayName("isValid == false")
+        public void isInvalid() throws Exception {
+
+            when(temporaryService.isValid(TEST_EMAIL, TEST_TOKEN)).thenReturn(false);
+
+            mockMvc.perform(get("/register/email/" + TEST_EMAIL + "/token/" + TEST_TOKEN).locale(locale))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/showRegister"))
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
+        }
+
+        @Test
+        @DisplayName("isValid == true")
+        public void isValid() throws Exception {
+            ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
+
+            Temporaries testTemporary = new Temporaries();
+            testTemporary.setName("testName");
+            testTemporary.setEmail(TEST_EMAIL);
+            testTemporary.setPassword("testPass");
+
+            List<Temporaries> temporariesList = new ArrayList<>();
+            temporariesList.add(testTemporary);
+
+            when(temporaryService.isValid(TEST_EMAIL, TEST_TOKEN)).thenReturn(true);
+            when(temporariesRepository.findByEmailOrderByCreatedAtDesc(TEST_EMAIL)).thenReturn(temporariesList);
+
+            mockMvc.perform(get("/register/email/" + TEST_EMAIL + "/token/" + TEST_TOKEN).locale(locale))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/showLogin"))
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(usersRepository, times(1)).saveAndFlush(userCaptor.capture());
+            Users capturedUser = userCaptor.getValue();
+            assertThat(capturedUser.getName()).isEqualTo(testTemporary.getName());
+            assertThat(capturedUser.getEmail()).isEqualTo(TEST_EMAIL);
+            assertThat(capturedUser.getPassword()).isEqualTo(testTemporary.getPassword());
+            assertThat(capturedUser.getContinuousDays()).isEqualTo(0);
+            assertThat(capturedUser.getEmail()).isEqualTo(TEST_EMAIL);
+
+            assertThat(capturedUser.getLanguage()).isEqualTo(locale.getLanguage());
+
+            verify(temporariesRepository, times(1)).deleteAll(temporariesList);
+
+            verify(deliveriesRepository, times(1)).saveAndFlush(deliveryCaptor.capture());
+            Deliveries capturedDelivery = deliveryCaptor.getValue();
+            assertThat(capturedDelivery.getFollowed()).isEqualTo(1);
+            assertThat(capturedDelivery.getMeetingCreated()).isEqualTo(1);
+            assertThat(capturedDelivery.getMeetingDeleted()).isEqualTo(1);
+            assertThat(capturedDelivery.getMeetingJoined()).isEqualTo(1);
+            assertThat(capturedDelivery.getMeetingLeft()).isEqualTo(1);
+            assertThat(capturedDelivery.getTodayMeetings()).isEqualTo(1);
+
+            verify(loginService, times(1)).sendMail(emailCaptor.capture(), any(), any());
+            String capturedEmail = emailCaptor.getValue();
+            assertThat(capturedEmail).isEqualTo(TEST_EMAIL);
+
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
+        }
+
+    }
 
 }
