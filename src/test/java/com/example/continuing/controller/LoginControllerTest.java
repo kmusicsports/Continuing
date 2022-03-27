@@ -1,5 +1,6 @@
 package com.example.continuing.controller;
 
+import com.example.continuing.entity.Temporaries;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.EmailData;
 import com.example.continuing.form.LoginData;
@@ -77,6 +78,9 @@ class LoginControllerTest {
 
     @Captor
     ArgumentCaptor<Locale> localeCaptor;
+
+    @Captor
+    ArgumentCaptor<Temporaries> temporaryCaptor;
 
     @Test
     @DisplayName("[showLoginメソッドのテスト]")
@@ -239,4 +243,109 @@ class LoginControllerTest {
                 .andExpect(model().attribute("registerData", new RegisterData()))
                 .andExpect(model().attribute("searchData", new SearchData()));
     }
+
+    @Nested
+    @DisplayName("[temporarilyRegisterメソッドのテスト]")
+    public class NestedTestTemporarilyRegister {
+
+        private RegisterData registerData;
+        private final Locale locale = new Locale("ja");
+
+        @BeforeEach
+        public void init() {
+            registerData = new RegisterData();
+        }
+
+        @Test
+        @DisplayName("result.hasErrors() == true")
+        public void resultHasErrors() throws Exception {
+
+            registerData.setEmail("");
+            registerData.setChecked(true);
+
+            mockMvc.perform(post("/regist")
+                            .flashAttr("registerData", registerData)
+                            .locale(locale)
+                    )
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("register"))
+                    .andExpect(model().attribute("registerData", registerData))
+                    .andExpect(model().attributeHasErrors("registerData"))
+                    .andExpect(model().attribute("searchData", new SearchData()))
+                    .andExpect(model().attributeExists("msg"));
+
+            verify(messageSource, atLeastOnce()).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
+        }
+
+        @Test
+        @DisplayName("result.hasErrors() == false && isValid == false")
+        public void isInvalid() throws Exception {
+
+            registerData.setEmail("test@email");
+            registerData.setPassword("password");
+            registerData.setPasswordAgain("password");
+            registerData.setName("testName");
+            registerData.setChecked(true);
+
+            when(loginService.isValid(any(), any(), any())).thenReturn(false);
+
+            mockMvc.perform(post("/regist")
+                            .flashAttr("registerData", registerData)
+                            .locale(locale)
+                    )
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("register"))
+                    .andExpect(model().attribute("registerData", registerData))
+                    .andExpect(model().attributeHasNoErrors("registerData"))
+                    .andExpect(model().attribute("searchData", new SearchData()))
+                    .andExpect(model().attributeExists("msg"));
+
+            verify(messageSource, atLeastOnce()).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
+        }
+
+        @Test
+        @DisplayName("result.hasErrors() == false && isValid == true")
+        public void isValid() throws Exception {
+
+            ArgumentCaptor<String> emailCaptor = ArgumentCaptor.forClass(String.class);
+            String testToken = "testToken";
+
+            registerData.setEmail("test@email");
+            registerData.setPassword("password");
+            registerData.setPasswordAgain("password");
+            registerData.setName("testName");
+            registerData.setChecked(true);
+
+            when(loginService.isValid(any(), any(), any())).thenReturn(true);
+            when(loginService.sendMail(any(), any(), any())).thenReturn(testToken);
+
+            mockMvc.perform(post("/regist")
+                            .flashAttr("registerData", registerData)
+                            .locale(locale)
+                    )
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/showLogin"))
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(loginService, times(1)).sendMail(emailCaptor.capture(), any(), any());
+            String capturedEmail = emailCaptor.getValue();
+            assertThat(capturedEmail).isEqualTo(registerData.getEmail());
+
+            verify(temporariesRepository, times(1)).saveAndFlush(temporaryCaptor.capture());
+            Temporaries capturedTemporary = temporaryCaptor.getValue();
+            assertThat(capturedTemporary.getEmail()).isEqualTo(registerData.getEmail());
+            assertThat(capturedTemporary.getName()).isEqualTo(registerData.getName());
+            assertThat(capturedTemporary.getToken()).isEqualTo(testToken);
+
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
+        }
+    }
+
+
 }
