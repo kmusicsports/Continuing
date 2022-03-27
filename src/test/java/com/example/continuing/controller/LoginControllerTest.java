@@ -3,6 +3,7 @@ package com.example.continuing.controller;
 import com.example.continuing.entity.Users;
 import com.example.continuing.form.EmailData;
 import com.example.continuing.form.LoginData;
+import com.example.continuing.form.RegisterData;
 import com.example.continuing.form.SearchData;
 import com.example.continuing.repository.DeliveriesRepository;
 import com.example.continuing.repository.TemporariesRepository;
@@ -226,5 +227,16 @@ class LoginControllerTest {
         verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
         Locale capturedLocale = localeCaptor.getValue();
         assertThat(capturedLocale).isEqualTo(new Locale(testUser.getLanguage()));
+    }
+
+    @Test
+    @DisplayName("[showRegisterメソッドのテスト]")
+    public void testShowRegister() throws Exception {
+
+        mockMvc.perform(get("/showRegister"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("register"))
+                .andExpect(model().attribute("registerData", new RegisterData()))
+                .andExpect(model().attribute("searchData", new SearchData()));
     }
 }
