@@ -206,5 +206,25 @@ class LoginControllerTest {
         }
     }
 
-    
+    @Test
+    @DisplayName("[logoutメソッドのテスト]")
+    public void testLogout() throws Exception {
+        int testUserId = 1;
+
+        Users testUser = new Users();
+        testUser.setId(testUserId);
+        testUser.setLanguage("ja");
+
+        when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+
+        mockMvc.perform(get("/User/logout").sessionAttr("user_id", testUserId))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrl("/showLogin"))
+                .andExpect(request().sessionAttributeDoesNotExist("user_id"))
+                .andExpect(flash().attributeExists("msg"));
+
+        verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+        Locale capturedLocale = localeCaptor.getValue();
+        assertThat(capturedLocale).isEqualTo(new Locale(testUser.getLanguage()));
+    }
 }
