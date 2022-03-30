@@ -195,10 +195,13 @@ public class LoginController {
 				String token = loginService.sendMail(email, "reset-password", locale);
 				Temporaries temporaries = new Temporaries(user, token);
 				temporariesRepository.saveAndFlush(temporaries);
+
+				String msg = messageSource.getMessage("msg.s.send_reset_password_email", null, locale);
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
+			} else {
+				String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 			}
-			
-			String msg = messageSource.getMessage("msg.s.send_reset_password_email", null, locale);
-			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 		} else {
 			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));

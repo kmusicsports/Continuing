@@ -3,10 +3,7 @@ package com.example.continuing.controller;
 import com.example.continuing.entity.Deliveries;
 import com.example.continuing.entity.Temporaries;
 import com.example.continuing.entity.Users;
-import com.example.continuing.form.EmailData;
-import com.example.continuing.form.LoginData;
-import com.example.continuing.form.RegisterData;
-import com.example.continuing.form.SearchData;
+import com.example.continuing.form.*;
 import com.example.continuing.repository.DeliveriesRepository;
 import com.example.continuing.repository.TemporariesRepository;
 import com.example.continuing.repository.UsersRepository;
@@ -364,6 +361,7 @@ class LoginControllerTest {
 
         private static final String TEST_EMAIL = "test@email";
         private static final String TEST_TOKEN = "testToken";
+        private static final String URL_TEMPLATE = "/register/email/" + TEST_EMAIL + "/token/" + TEST_TOKEN;
         private final Locale locale = new Locale("ja");
 
         @Test
@@ -372,7 +370,7 @@ class LoginControllerTest {
 
             when(temporaryService.isValid(TEST_EMAIL, TEST_TOKEN)).thenReturn(false);
 
-            mockMvc.perform(get("/register/email/" + TEST_EMAIL + "/token/" + TEST_TOKEN).locale(locale))
+            mockMvc.perform(get(URL_TEMPLATE).locale(locale))
                     .andExpect(status().isFound())
                     .andExpect(redirectedUrl("/showRegister"))
                     .andExpect(flash().attributeExists("msg"));
@@ -398,7 +396,7 @@ class LoginControllerTest {
             when(temporaryService.isValid(TEST_EMAIL, TEST_TOKEN)).thenReturn(true);
             when(temporariesRepository.findByEmailOrderByCreatedAtDesc(TEST_EMAIL)).thenReturn(temporariesList);
 
-            mockMvc.perform(get("/register/email/" + TEST_EMAIL + "/token/" + TEST_TOKEN).locale(locale))
+            mockMvc.perform(get(URL_TEMPLATE).locale(locale))
                     .andExpect(status().isFound())
                     .andExpect(redirectedUrl("/showLogin"))
                     .andExpect(flash().attributeExists("msg"));
@@ -526,6 +524,54 @@ class LoginControllerTest {
             assertThat(capturedTemporary.getToken()).isEqualTo(testToken);
 
             verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
+        }
+    }
+
+    @Nested
+    @DisplayName("[resetPasswordFormメソッドのテスト]")
+    public class NestedTestResetPasswordForm {
+
+        private static final String TEST_EMAIL = "test@email";
+        private static final String TEST_TOKEN = "testToken";
+        private static final String URL_TEMPLATE = "/reset-password/email/" + TEST_EMAIL + "/token/" + TEST_TOKEN;
+        private final Locale locale = new Locale("ja");
+
+        @Test
+        @DisplayName("isValid == false")
+        public void isInvalid() throws Exception {
+
+            when(temporaryService.isValid(TEST_EMAIL, TEST_TOKEN)).thenReturn(false);
+
+            mockMvc.perform(get(URL_TEMPLATE).locale(locale))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/showLogin"))
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(locale);
+        }
+
+        @Test
+        @DisplayName("isValid == true")
+        public void isValid() throws Exception {
+            Users testUser = new Users();
+            testUser.setId(1);
+            testUser.setName("testName");
+            testUser.setEmail(TEST_EMAIL);
+
+            when(temporaryService.isValid(TEST_EMAIL, TEST_TOKEN)).thenReturn(true);
+            when(usersRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
+
+            mockMvc.perform(get(URL_TEMPLATE).locale(locale))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("profile"))
+                    .andExpect(request().sessionAttribute("mode", "reset-password"))
+                    .andExpect(model().attribute("profileData", new ProfileData(testUser)));
+
+            verify(messageSource, atLeastOnce()).getMessage(any(), any(), localeCaptor.capture());
             Locale capturedLocale = localeCaptor.getValue();
             assertThat(capturedLocale).isEqualTo(locale);
         }
