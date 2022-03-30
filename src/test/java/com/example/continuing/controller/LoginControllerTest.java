@@ -18,6 +18,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -430,7 +432,21 @@ class LoginControllerTest {
             Locale capturedLocale = localeCaptor.getValue();
             assertThat(capturedLocale).isEqualTo(locale);
         }
+    }
 
+    @ParameterizedTest
+    @CsvSource({"'th', 'terms/terms'",
+            "'ja', 'terms/terms_ja'",
+            "'en', 'terms/terms_en'",
+    })
+    @DisplayName("[showTermsメソッドのテスト]")
+    public void testShowTerms(String language, String viewName) throws Exception {
+        Locale locale = new Locale(language);
+
+        mockMvc.perform(get("/terms").locale(locale))
+                .andExpect(status().isOk())
+                .andExpect(view().name(viewName))
+                .andExpect(model().size(0));
     }
 
 }
