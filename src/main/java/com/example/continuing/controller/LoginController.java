@@ -232,16 +232,15 @@ public class LoginController {
 	}
 	
 	@PostMapping("/reset-password/reset")
-	public ModelAndView resetPassword(@ModelAttribute @Validated ProfileData profileData,
+	public ModelAndView resetPassword(@ModelAttribute ProfileData profileData,
 			BindingResult result, ModelAndView mv, RedirectAttributes redirectAttributes) {
 		
 		Users oldData = usersRepository.findByName(profileData.getName()).get();
 		Locale locale = new Locale(oldData.getLanguage());
 		
 		boolean isValid = userService.isValid(profileData, oldData, result, locale);
-		if(!result.hasErrors() && isValid) {
+		if(isValid) {
 			Users user = profileData.toEntity(oldData, passwordEncoder);
-			locale = new Locale(user.getLanguage());
 			usersRepository.saveAndFlush(user);
 			List<Temporaries> temporaryList = temporariesRepository.findByEmailOrderByCreatedAtDesc(user.getEmail());
 			temporariesRepository.deleteAll(temporaryList);

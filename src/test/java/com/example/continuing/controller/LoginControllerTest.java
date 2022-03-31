@@ -106,6 +106,7 @@ class LoginControllerTest {
     @DisplayName("[loginメソッドのテスト]")
     public class NestedTestLogin {
 
+        private static final String URL_TEMPLATE = "/login";
         private LoginData loginData;
         private final Locale locale = new Locale("ja");
 
@@ -119,7 +120,7 @@ class LoginControllerTest {
         public void resultHasErrors() throws Exception {
             loginData.setEmail("");
 
-            mockMvc.perform(post("/login")
+            mockMvc.perform(post(URL_TEMPLATE)
                             .flashAttr("loginData", loginData)
                             .locale(locale)
                     )
@@ -141,7 +142,7 @@ class LoginControllerTest {
 
             when(loginService.isValid(any(), any())).thenReturn(false);
 
-            mockMvc.perform(post("/login")
+            mockMvc.perform(post(URL_TEMPLATE)
                             .flashAttr("loginData", loginData)
                             .locale(locale)
                     )
@@ -181,7 +182,7 @@ class LoginControllerTest {
             @DisplayName("session.getAttribute('path') == null")
             public void sessionPathIsNull() throws Exception {
 
-                mockMvc.perform(post("/login")
+                mockMvc.perform(post(URL_TEMPLATE)
                                 .flashAttr("loginData", loginData)
                                 .locale(locale)
                         )
@@ -201,7 +202,7 @@ class LoginControllerTest {
             public void sessionPathIsNotNull() throws Exception {
                 String path = "/showLogin";
 
-                mockMvc.perform(post("/login")
+                mockMvc.perform(post(URL_TEMPLATE)
                                 .flashAttr("loginData", loginData)
                                 .sessionAttr("path", path)
                                 .locale(locale)
@@ -264,6 +265,8 @@ class LoginControllerTest {
             registerData = new RegisterData();
         }
 
+        private static final String URL_TEMPLATE = "/regist";
+
         @Test
         @DisplayName("result.hasErrors() == true")
         public void resultHasErrors() throws Exception {
@@ -271,7 +274,7 @@ class LoginControllerTest {
             registerData.setEmail("");
             registerData.setChecked(true);
 
-            mockMvc.perform(post("/regist")
+            mockMvc.perform(post(URL_TEMPLATE)
                             .flashAttr("registerData", registerData)
                             .locale(locale)
                     )
@@ -299,7 +302,7 @@ class LoginControllerTest {
 
             when(loginService.isValid(any(), any(), any())).thenReturn(false);
 
-            mockMvc.perform(post("/regist")
+            mockMvc.perform(post(URL_TEMPLATE)
                             .flashAttr("registerData", registerData)
                             .locale(locale)
                     )
@@ -331,7 +334,7 @@ class LoginControllerTest {
             when(loginService.isValid(any(), any(), any())).thenReturn(true);
             when(loginService.sendMail(any(), any(), any())).thenReturn(testToken);
 
-            mockMvc.perform(post("/regist")
+            mockMvc.perform(post(URL_TEMPLATE)
                             .flashAttr("registerData", registerData)
                             .locale(locale)
                     )
@@ -407,7 +410,7 @@ class LoginControllerTest {
             assertThat(capturedUser.getEmail()).isEqualTo(TEST_EMAIL);
             assertThat(capturedUser.getPassword()).isEqualTo(testTemporary.getPassword());
             assertThat(capturedUser.getContinuousDays()).isEqualTo(0);
-            assertThat(capturedUser.getEmail()).isEqualTo(TEST_EMAIL);
+            assertThat(capturedUser.getProfileMessage()).isEqualTo(null);
 
             assertThat(capturedUser.getLanguage()).isEqualTo(locale.getLanguage());
 
@@ -451,6 +454,8 @@ class LoginControllerTest {
     @DisplayName("[sendResetPasswordEmailメソッドのテスト]")
     public class NestedTestSendResetPasswordEmail {
 
+        private static final String URL_TEMPLATE = "/login/reset-password";
+        private static final String REDIRECTED_URL = "/showLogin";
         private EmailData emailData;
         private final Locale locale = new Locale("ja");
 
@@ -464,12 +469,12 @@ class LoginControllerTest {
         public void resultHasErrors() throws Exception {
             emailData.setEmail("");
 
-            mockMvc.perform(post("/login/reset-password")
+            mockMvc.perform(post(URL_TEMPLATE)
                             .flashAttr("emailData", emailData)
                             .locale(locale)
                     )
                     .andExpect(status().isFound())
-                    .andExpect(redirectedUrl("/showLogin"))
+                    .andExpect(redirectedUrl(REDIRECTED_URL))
                     .andExpect(flash().attributeExists("msg"));
 
             verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
@@ -482,12 +487,12 @@ class LoginControllerTest {
         public void emailUserNotFound() throws Exception {
             emailData.setEmail("test@email");
 
-            mockMvc.perform(post("/login/reset-password")
+            mockMvc.perform(post(URL_TEMPLATE)
                             .flashAttr("emailData", emailData)
                             .locale(locale)
                     )
                     .andExpect(status().isFound())
-                    .andExpect(redirectedUrl("/showLogin"))
+                    .andExpect(redirectedUrl(REDIRECTED_URL))
                     .andExpect(flash().attributeExists("msg"));
 
             verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
@@ -510,12 +515,12 @@ class LoginControllerTest {
             when(usersRepository.findByEmail(testEmail)).thenReturn(Optional.of(testUser));
             when(loginService.sendMail(any(), any(), any())).thenReturn(testToken);
 
-            mockMvc.perform(post("/login/reset-password")
+            mockMvc.perform(post(URL_TEMPLATE)
                             .flashAttr("emailData", emailData)
                             .locale(locale)
                     )
                     .andExpect(status().isFound())
-                    .andExpect(redirectedUrl("/showLogin"))
+                    .andExpect(redirectedUrl(REDIRECTED_URL))
                     .andExpect(flash().attributeExists("msg"));
 
             verify(temporariesRepository, times(1)).saveAndFlush(temporaryCaptor.capture());
@@ -577,4 +582,76 @@ class LoginControllerTest {
         }
     }
 
+    @Nested
+    @DisplayName("[resetPasswordメソッドのテスト]")
+    public class NestedTestResetPassword {
+
+        private static final String URL_TEMPLATE = "/reset-password/reset";
+        private ProfileData profileData;
+        private Users oldData;
+
+        @BeforeEach
+        public void init() {
+            String testName = "testName";
+
+            oldData = new Users();
+            oldData.setName(testName);
+            oldData.setEmail("test@email");
+            oldData.setPassword("testPassword");
+            oldData.setProfileMessage("testMessage");
+            oldData.setContinuousDays(15);
+            oldData.setLanguage("ja");
+
+            profileData = new ProfileData(oldData);
+            profileData.setNewPassword("newPassword");
+            profileData.setNewPasswordAgain("newPassword");
+
+            when(usersRepository.findByName(testName)).thenReturn(Optional.of(oldData));
+        }
+
+        @Test
+        @DisplayName("isValid == false")
+        public void isInvalid() throws Exception {
+            when(userService.isValid(any(), any(), any(), any())).thenReturn(false);
+
+            mockMvc.perform(post(URL_TEMPLATE).flashAttr("profileData", profileData))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("profile"))
+                    .andExpect(request().sessionAttribute("mode", "reset-password"))
+                    .andExpect(model().attribute("profileData", profileData))
+                    .andExpect(model().attributeExists("msg"));
+        }
+
+        @Test
+        @DisplayName("isValid == true")
+        public void isValid() throws Exception {
+            Temporaries testTemporary = new Temporaries(oldData, "testToken");
+
+            List<Temporaries> temporaryList = new ArrayList<>();
+            temporaryList.add(testTemporary);
+
+            when(userService.isValid(any(), any(), any(), any())).thenReturn(true);
+            when(temporariesRepository.findByEmailOrderByCreatedAtDesc(oldData.getEmail())).thenReturn(temporaryList);
+
+            mockMvc.perform(post(URL_TEMPLATE).flashAttr("profileData", profileData))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/showLogin"))
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(usersRepository, times(1)).saveAndFlush(userCaptor.capture());
+            Users capturedUser = userCaptor.getValue();
+            assertThat(capturedUser.getName()).isEqualTo(oldData.getName());
+            assertThat(capturedUser.getEmail()).isEqualTo(oldData.getEmail());
+            assertThat(capturedUser.getPassword()).isNotEqualTo(oldData.getPassword());
+            assertThat(capturedUser.getContinuousDays()).isEqualTo(oldData.getContinuousDays());
+            assertThat(capturedUser.getProfileMessage()).isEqualTo(oldData.getProfileMessage());
+            assertThat(capturedUser.getLanguage()).isEqualTo(oldData.getLanguage());
+
+            verify(temporariesRepository, times(1)).deleteAll(temporaryList);
+
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(new Locale(oldData.getLanguage()));
+        }
+    }
 }

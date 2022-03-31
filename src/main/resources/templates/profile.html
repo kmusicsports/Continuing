@@ -114,6 +114,7 @@
                                     <div th:if="${session.mode == 'reset-password'}">
                                         <h2 class="text-center mb-5" th:text="#{text.reset_password}"></h2>
 	                                      <input type="hidden" name="name" th:value="*{name}"/>
+	                                      <input type="hidden" name="profileMessage" th:value="*{profileMessage}"/>
                                     </div>
                                     
                                     <div class="form-group col-10 ms-auto me-auto">
