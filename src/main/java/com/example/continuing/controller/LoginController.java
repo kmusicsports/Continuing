@@ -65,7 +65,7 @@ public class LoginController {
 	
 	@PostMapping("/login")
 	public String login(@ModelAttribute @Validated LoginData loginData,
-			BindingResult result, ModelAndView mv, HttpServletRequest request,
+			BindingResult result, HttpServletRequest request,
 			RedirectAttributes redirectAttributes, Locale locale) {
 		
 		boolean isValid = loginService.isValid(loginData, result); 
@@ -97,9 +97,8 @@ public class LoginController {
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();
 		Locale locale = new Locale(user.getLanguage());
-		
-		// セッション情報をクリアする
-		session.invalidate();
+
+		session.invalidate(); // セッション情報をクリアする
 		String msg = messageSource.getMessage("msg.i.logout", null, locale);
 		redirectAttributes.addFlashAttribute("msg", new MessageDto("I", msg));
 		return "redirect:/showLogin";
@@ -152,9 +151,7 @@ public class LoginController {
 			Temporaries latestTemporaries = temporariesList.get(0);
 			Users user = new Users(latestTemporaries, locale);
 			usersRepository.saveAndFlush(user);
-			
-			List<Temporaries> temporaryList = temporariesRepository.findByEmailOrderByCreatedAtDesc(user.getEmail());
-			temporariesRepository.deleteAll(temporaryList);
+			temporariesRepository.deleteAll(temporariesList);
 			
 			Deliveries deliveries = new Deliveries(user.getId());
 			deliveriesRepository.saveAndFlush(deliveries);
@@ -174,11 +171,7 @@ public class LoginController {
 	@GetMapping("/terms")
 	public String showTerms(Locale locale) {
 		String language = locale.getLanguage();
-		
-		if(language == null){
-			return "terms/terms";
-	    }
-		
+
 		switch(language) {
 			case "ja":
 				return "terms/terms_ja";
@@ -202,10 +195,13 @@ public class LoginController {
 				String token = loginService.sendMail(email, "reset-password", locale);
 				Temporaries temporaries = new Temporaries(user, token);
 				temporariesRepository.saveAndFlush(temporaries);
+
+				String msg = messageSource.getMessage("msg.s.send_reset_password_email", null, locale);
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
+			} else {
+				String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
+				redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 			}
-			
-			String msg = messageSource.getMessage("msg.s.send_reset_password_email", null, locale);
-			redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));
 		} else {
 			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
@@ -236,16 +232,15 @@ public class LoginController {
 	}
 	
 	@PostMapping("/reset-password/reset")
-	public ModelAndView resetPassword(@ModelAttribute @Validated ProfileData profileData,
+	public ModelAndView resetPassword(@ModelAttribute ProfileData profileData,
 			BindingResult result, ModelAndView mv, RedirectAttributes redirectAttributes) {
 		
 		Users oldData = usersRepository.findByName(profileData.getName()).get();
 		Locale locale = new Locale(oldData.getLanguage());
 		
 		boolean isValid = userService.isValid(profileData, oldData, result, locale);
-		if(!result.hasErrors() && isValid) {
+		if(isValid) {
 			Users user = profileData.toEntity(oldData, passwordEncoder);
-			locale = new Locale(user.getLanguage());
 			usersRepository.saveAndFlush(user);
 			List<Temporaries> temporaryList = temporariesRepository.findByEmailOrderByCreatedAtDesc(user.getEmail());
 			temporariesRepository.deleteAll(temporaryList);
