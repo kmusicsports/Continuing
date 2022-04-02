@@ -316,4 +316,18 @@ class MainMeetingControllerTest {
         }
     }
 
+    @Test
+    @DisplayName("[cancelメソッドのテスト]")
+    public void testCancel() throws Exception {
+        String path = "/home";
+
+        Map<String, Object> sessionAttributes = new HashMap<>();
+        sessionAttributes.put("user_id", 1);
+        sessionAttributes.put("path", path);
+
+        mockMvc.perform(get("/Meeting/cancel").sessionAttrs(sessionAttributes))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrl(path));
+    }
+
 }
