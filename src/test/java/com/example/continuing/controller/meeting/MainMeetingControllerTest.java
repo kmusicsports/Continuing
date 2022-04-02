@@ -234,4 +234,86 @@ class MainMeetingControllerTest {
         }
     }
 
+    @Nested
+    @DisplayName("[leaveMeetingメソッドのテスト]")
+    public class NestedTestLeaveMeeting {
+
+        private final int testMeetingId = 1;
+        private final int testUserId = 2;
+        private final String urlTemplate = "/Meeting/leave/" + testMeetingId;
+        private Users testUser;
+
+        @BeforeEach
+        public void init() {
+
+            testUser = new Users();
+            testUser.setId(testUserId);
+            testUser.setLanguage("ja");
+        }
+
+        @Test
+        @DisplayName("指定したミーティングが見つからない場合")
+        public void meetingNotFound() throws Exception {
+            when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+
+            mockMvc.perform(get(urlTemplate).sessionAttr("user_id", testUserId))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/home"))
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(joinsRepository, never()).findById(any());
+            verify(joinsRepository, never()).deleteAll(any());
+            verify(meetingService, never()).sendMail(any(), any(), any(), any());
+
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(new Locale(testUser.getLanguage()));
+        }
+
+        @Test
+        @DisplayName("指定したミーティングが見つかった場合")
+        public void meetingFound() throws Exception {
+            String path = "/Meeting/" + testMeetingId;
+
+            Users testMeetingHost = new Users();
+            testMeetingHost.setId(3);
+            testMeetingHost.setLanguage("en");
+
+            Meetings testMeeting = new Meetings();
+            testMeeting.setId(testMeetingId);
+            testMeeting.setHost(testMeetingHost);
+
+            List<Joins> joinList = new ArrayList<>();
+            joinList.add(new Joins(testUserId, testMeeting));
+
+            when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(meetingsRepository.findById(testMeetingId)).thenReturn(Optional.of(testMeeting));
+            when(joinsRepository.findByUserIdAndMeeting(testUserId, testMeeting)).thenReturn(joinList);
+
+            Map<String, Object> sessionAttributes = new HashMap<>();
+            sessionAttributes.put("user_id", testUserId);
+            sessionAttributes.put("path", path);
+
+            mockMvc.perform(get(urlTemplate).sessionAttrs(sessionAttributes))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl(path));
+
+            verify(messageSource, never()).getMessage(any(), any(), any());
+
+            verify(joinsRepository, times(1)).deleteAll(joinList);
+
+            verify(meetingService, times(1)).sendMail(meetingCaptor.capture(), userCaptor.capture(), any(), localeCaptor.capture());
+
+            Meetings capturedMeeting = meetingCaptor.getValue();
+            assertThat(capturedMeeting).isEqualTo(testMeeting);
+
+            Users capturedUser = userCaptor.getValue();
+            assertThat(capturedUser).isEqualTo(testUser);
+
+            Locale capturedLocale = localeCaptor.getValue();
+            String expectedLang = testMeeting.getHost().getLanguage();
+            assertThat(capturedLocale).isEqualTo(new Locale(expectedLang));
+        }
+    }
+
 }
