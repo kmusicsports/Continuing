@@ -1,11 +1,9 @@
 package com.example.continuing.controller.meeting;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.context.MessageSource;
@@ -83,7 +81,7 @@ public class MainMeetingController {
 	
 	@GetMapping("/Meeting/join/{meeting_id}")
 	public String joinMeeting(@PathVariable(name = "meeting_id") int meetingId,
-			HttpServletRequest request, RedirectAttributes redirectAttributes) {	
+			RedirectAttributes redirectAttributes) {
 		
 		Integer myId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(myId).get();
@@ -105,7 +103,7 @@ public class MainMeetingController {
 	
 	@GetMapping("/Meeting/leave/{meeting_id}")
 	public String leaveMeeting(@PathVariable(name = "meeting_id") int meetingId, 
-			HttpServletRequest request, RedirectAttributes redirectAttributes) {
+			RedirectAttributes redirectAttributes) {
 		
 		Integer myId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(myId).get();
@@ -126,7 +124,7 @@ public class MainMeetingController {
 	}
 	
 	@GetMapping("/Meeting/cancel")
-	public String cancel(HttpServletRequest request) {
+	public String cancel() {
 		return "redirect:" + session.getAttribute("path");
 	}
 	
@@ -191,10 +189,8 @@ public class MainMeetingController {
     }
 	
 	@RequestMapping(value = "/redirect", method = { RequestMethod.GET, RequestMethod.POST })
-    public String callback(ModelAndView mv, @RequestParam String code, 
-    		@RequestParam String state, HttpServletRequest request, 
-    		Locale locale, RedirectAttributes redirectAttributes)
-            throws IOException {
+    public String callback(@RequestParam String code, @RequestParam String state,
+    		Locale locale, RedirectAttributes redirectAttributes) {
 		
 		String msg = messageSource.getMessage("msg.s.zoom_Integrated", null, locale);
 		redirectAttributes.addFlashAttribute("msg", new MessageDto("S", msg));

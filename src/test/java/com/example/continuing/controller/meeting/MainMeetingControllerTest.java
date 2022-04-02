@@ -194,13 +194,13 @@ class MainMeetingControllerTest {
         public void meetingFound() throws Exception {
             String path = "/Meeting/" + testMeetingId;
 
-            Users testMeetingHost = new Users();
-            testMeetingHost.setId(3);
-            testMeetingHost.setLanguage("en");
+            Users meetingHost = new Users();
+            meetingHost.setId(3);
+            meetingHost.setLanguage("en");
 
             Meetings testMeeting = new Meetings();
             testMeeting.setId(testMeetingId);
-            testMeeting.setHost(testMeetingHost);
+            testMeeting.setHost(meetingHost);
 
             when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
             when(meetingsRepository.findById(testMeetingId)).thenReturn(Optional.of(testMeeting));
@@ -275,13 +275,13 @@ class MainMeetingControllerTest {
         public void meetingFound() throws Exception {
             String path = "/Meeting/" + testMeetingId;
 
-            Users testMeetingHost = new Users();
-            testMeetingHost.setId(3);
-            testMeetingHost.setLanguage("en");
+            Users meetingHost = new Users();
+            meetingHost.setId(3);
+            meetingHost.setLanguage("en");
 
             Meetings testMeeting = new Meetings();
             testMeeting.setId(testMeetingId);
-            testMeeting.setHost(testMeetingHost);
+            testMeeting.setHost(meetingHost);
 
             List<Joins> joinList = new ArrayList<>();
             joinList.add(new Joins(testUserId, testMeeting));
@@ -328,6 +328,113 @@ class MainMeetingControllerTest {
         mockMvc.perform(get("/Meeting/cancel").sessionAttrs(sessionAttributes))
                 .andExpect(status().isFound())
                 .andExpect(redirectedUrl(path));
+    }
+
+    @Nested
+    @DisplayName("[joinCheckメソッドのテスト]")
+    public class NestedTestJoinCheck {
+
+        private final int testMeetingId = 1;
+        private final int testUserId = 2;
+        private final String urlTemplate = "/Meeting/check/" + testMeetingId;
+        private Users testUser;
+        private Meetings testMeeting;
+        private Locale expectedLocale;
+
+        @BeforeEach
+        public void init() {
+
+            testUser = new Users();
+            testUser.setId(testUserId);
+            testUser.setLanguage("ja");
+
+            testMeeting = new Meetings();
+            testMeeting.setId(testMeetingId);
+
+            expectedLocale = new Locale(testUser.getLanguage());
+        }
+
+        @Test
+        @DisplayName("指定したミーティングが見つからない場合")
+        public void meetingNotFound() throws Exception {
+            when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+
+            mockMvc.perform(get(urlTemplate).sessionAttr("user_id", testUserId))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/home"))
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(meetingService, never()).joinCheck(any(), any(), any(), any());
+
+            verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(expectedLocale);
+        }
+
+        @Test
+        @DisplayName("MeetingServiceによるチェックでエラーが有る場合")
+        public void meetingServiceWarning() throws Exception {
+            ArgumentCaptor<Integer> userIdCaptor = ArgumentCaptor.forClass(Integer.class);
+
+            when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(meetingsRepository.findById(testMeetingId)).thenReturn(Optional.of(testMeeting));
+            when(meetingService.joinCheck(any(), any(), any(), any())).thenReturn("Warning!");
+
+            mockMvc.perform(get(urlTemplate).sessionAttr("user_id", testUserId))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/Meeting/" + testMeetingId))
+                    .andExpect(flash().attributeExists("msg"));
+
+            verify(meetingService, times(1)).joinCheck(meetingCaptor.capture(), userIdCaptor.capture(), localeCaptor.capture(), any());
+
+            Meetings capturedMeeting = meetingCaptor.getValue();
+            assertThat(capturedMeeting).isEqualTo(testMeeting);
+
+            Integer capturedUserId = userIdCaptor.getValue();
+            assertThat(capturedUserId).isEqualTo(testUserId);
+
+            Locale capturedLocale = localeCaptor.getValue();
+            assertThat(capturedLocale).isEqualTo(expectedLocale);
+
+            verify(messageSource, never()).getMessage(any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("指定したミーティングの開催者が自身の場合")
+        public void meetingHostIsUser() throws Exception {
+
+            testMeeting.setHost(testUser);
+            testMeeting.setStartUrl("/testStartUrl");
+
+            when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(meetingsRepository.findById(testMeetingId)).thenReturn(Optional.of(testMeeting));
+
+            mockMvc.perform(get(urlTemplate).sessionAttr("user_id", testUserId))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl(testMeeting.getStartUrl()));
+
+            verify(messageSource, never()).getMessage(any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("指定したミーティングの開催者が自身ではない場合")
+        public void meetingHostIsNotUser() throws Exception {
+            
+            Users meetingHost = new Users();
+            meetingHost.setId(3);
+            
+            testMeeting.setHost(meetingHost);
+            testMeeting.setJoinUrl("/testJoinUrl");
+
+            when(usersRepository.findById(testUserId)).thenReturn(Optional.of(testUser));
+            when(meetingsRepository.findById(testMeetingId)).thenReturn(Optional.of(testMeeting));
+
+            mockMvc.perform(get(urlTemplate).sessionAttr("user_id", testUserId))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl(testMeeting.getJoinUrl()));
+
+            verify(messageSource, never()).getMessage(any(), any(), any());
+        }
     }
 
 }
