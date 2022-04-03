@@ -474,4 +474,14 @@ class MainMeetingControllerTest {
                 .andExpect(model().attribute("searchData", new SearchData()));
     }
 
+    @Test
+    @DisplayName("[zoomIntegrationsメソッドのテスト]")
+    public void testZoomIntegrations() throws Exception {
+
+        mockMvc.perform(get("/integrations/zoom"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("zoomIntegrations"))
+                .andExpect(model().attribute("searchData", new SearchData()));
+    }
+    
 }
