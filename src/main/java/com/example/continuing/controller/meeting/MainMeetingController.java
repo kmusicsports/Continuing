@@ -140,7 +140,7 @@ public class MainMeetingController {
 			Meetings meeting = someMeeting.get();
 			String warningMessage = meetingService.joinCheck(meeting, myId, locale, session);
 			if(warningMessage == null) {
-				if(meeting.getHost().getId() == myId) {
+				if(meeting.getHost().getId().equals(myId)) {
 					return "redirect:" +  meeting.getStartUrl();
 				} else {
 					return "redirect:" +  meeting.getJoinUrl();
