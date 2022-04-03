@@ -502,4 +502,23 @@ class MainMeetingControllerTest {
         assertThat(actual).isEqualTo(expected);
     }
 
+    @Test
+    @DisplayName("[callbackメソッドのテスト]")
+    public void testCallback() throws Exception {
+        Locale locale = new Locale("ja");
+
+        mockMvc.perform(get("/redirect")
+                        .param("code", "testCode")
+                        .param("state", "testState")
+                        .locale(locale)
+                )
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrl("/home"))
+                .andExpect(flash().attributeExists("msg"));
+
+        verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
+        Locale capturedLocale = localeCaptor.getValue();
+        assertThat(capturedLocale).isEqualTo(locale);
+    }
+
 }
