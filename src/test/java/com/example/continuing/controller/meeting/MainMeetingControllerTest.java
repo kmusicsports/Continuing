@@ -11,6 +11,7 @@ import com.example.continuing.service.FollowService;
 import com.example.continuing.service.JoinService;
 import com.example.continuing.service.MeetingService;
 import com.example.continuing.zoom.ZoomApiIntegration;
+import com.example.continuing.zoom.ZoomDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -483,5 +484,22 @@ class MainMeetingControllerTest {
                 .andExpect(view().name("zoomIntegrations"))
                 .andExpect(model().attribute("searchData", new SearchData()));
     }
-    
+
+    @Test
+    @DisplayName("[redirectメソッドのテスト]")
+    public void testRedirect() throws Exception {
+        String testAuthUrl = "/testAuthUrl";
+
+        when(zoomApiIntegration.getAuthorizationUrl(any())).thenReturn(testAuthUrl);
+
+        mockMvc.perform(get("/zoom"))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrl(testAuthUrl));
+
+        String actual = ZoomDetails.getZOOM_STATE();
+        String expected = "zoom";
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
 }
