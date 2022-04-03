@@ -157,14 +157,14 @@ public class MainMeetingController {
 	}
 	
 	@GetMapping("/Meeting/list/mine/today")
-	public ModelAndView showTodayMyMeeting(ModelAndView mv) {
+	public ModelAndView showTodayMyMeetings(ModelAndView mv) {
 		Integer myId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(myId).get();
-		List<Meetings> meetingList = meetingService.getTodayMeetingList(user);
+		List<Meetings> todayMeetingList = meetingService.getTodayMeetingList(user);
 		List<Meetings> myJoinMeetingList = joinService.getJoinMeetingList(myId);
 		
 		mv.setViewName("todayMyMeetings");
-		mv.addObject("meetingList", meetingList);
+		mv.addObject("meetingList", todayMeetingList);
 		mv.addObject("myJoinMeetingList", myJoinMeetingList);
 		mv.addObject("searchData", new SearchData());
 		return mv;

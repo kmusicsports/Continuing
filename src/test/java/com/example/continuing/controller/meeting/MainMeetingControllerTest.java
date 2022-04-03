@@ -419,10 +419,10 @@ class MainMeetingControllerTest {
         @Test
         @DisplayName("指定したミーティングの開催者が自身ではない場合")
         public void meetingHostIsNotUser() throws Exception {
-            
+
             Users meetingHost = new Users();
             meetingHost.setId(3);
-            
+
             testMeeting.setHost(meetingHost);
             testMeeting.setJoinUrl("/testJoinUrl");
 
@@ -435,6 +435,43 @@ class MainMeetingControllerTest {
 
             verify(messageSource, never()).getMessage(any(), any(), any());
         }
+    }
+
+    @Test
+    @DisplayName("[showTodayMyMeetingsメソッドのテスト]")
+    public void testShowTodayMyMeetings() throws Exception {
+        int testUserId1 = 1;
+
+        Users testUser1 = new Users();
+        testUser1.setId(testUserId1);
+
+        Users testUser2 = new Users();
+        testUser2.setId(2);
+
+        Meetings testMeeting1 = new Meetings();
+        testMeeting1.setId(1);
+        testMeeting1.setHost(testUser1);
+
+        Meetings testMeeting2 = new Meetings();
+        testMeeting2.setId(2);
+        testMeeting2.setHost(testUser2);
+
+        List<Meetings> todayMeetingList = new ArrayList<>();
+        todayMeetingList.add(testMeeting1);
+
+        List<Meetings> myJoinMeetingList = new ArrayList<>();
+        myJoinMeetingList.add(testMeeting2);
+
+        when(usersRepository.findById(testUserId1)).thenReturn(Optional.of(testUser1));
+        when(meetingService.getTodayMeetingList(testUser1)).thenReturn(todayMeetingList);
+        when(joinService.getJoinMeetingList(testUserId1)).thenReturn(myJoinMeetingList);
+
+        mockMvc.perform(get("/Meeting/list/mine/today").sessionAttr("user_id", testUserId1))
+                .andExpect(status().isOk())
+                .andExpect(view().name("todayMyMeetings"))
+                .andExpect(model().attribute("meetingList", todayMeetingList))
+                .andExpect(model().attribute("myJoinMeetingList", myJoinMeetingList))
+                .andExpect(model().attribute("searchData", new SearchData()));
     }
 
 }
