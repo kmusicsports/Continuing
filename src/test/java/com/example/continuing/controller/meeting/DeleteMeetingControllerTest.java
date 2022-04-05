@@ -209,15 +209,15 @@ class DeleteMeetingControllerTest {
         ArgumentCaptor<Users> userCaptor = ArgumentCaptor.forClass(Users.class);
         ArgumentCaptor<Meetings> meetingCaptor = ArgumentCaptor.forClass(Meetings.class);
         ArgumentCaptor<Locale> localeCaptor = ArgumentCaptor.forClass(Locale.class);
-        verify(meetingService, times(1)).sendMail(meetingCaptor.capture(), userCaptor.capture(), any(), localeCaptor.capture()); // locale2
+        verify(meetingService, times(1)).sendMail(meetingCaptor.capture(), userCaptor.capture(), any(), localeCaptor.capture());
         Meetings capturedMeeting = meetingCaptor.getValue();
         Users capturedUser = userCaptor.getValue();
+        Locale capturedLocale = localeCaptor.getValue();
         assertThat(capturedMeeting).isEqualTo(testMeeting);
         assertThat(capturedUser).isEqualTo(joinUser);
+        assertThat(capturedLocale).isEqualTo(new Locale(joinUser.getLanguage()));
 
         verify(meetingsRepository, times(1)).deleteById(idOfMeeting);
-        Locale capturedLocale = localeCaptor.getValue();
-        assertThat(capturedLocale).isEqualTo(new Locale(joinUser.getLanguage()));
 
         verify(messageSource, times(1)).getMessage(any(), any(), localeCaptor.capture());
         capturedLocale = localeCaptor.getValue();

@@ -1,10 +1,8 @@
 package com.example.continuing.controller.meeting;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.json.simple.JSONObject;
@@ -44,7 +42,7 @@ public class CreateMeetingController {
 	private final MeetingService meetingService;
 	private final HttpSession session;
 	private final MeetingsRepository meetingsRepository;
-	private MeetingData meetingData = new MeetingData(); 
+	public MeetingData meetingData = new MeetingData();
 	private final ZoomApiIntegration zoomApiIntegration;
 	private final UsersRepository usersRepository;
 	private final FollowService followService;
@@ -63,8 +61,7 @@ public class CreateMeetingController {
 	// call
 	@PostMapping("/Meeting/create")
 	public ModelAndView createRedirect(@ModelAttribute @Validated MeetingData meetingData, 
-			BindingResult result, HttpServletResponse response,
-			ModelAndView mv) {
+			BindingResult result, ModelAndView mv) {
 		
 		// エラーチェック
 		Integer userId = (Integer)session.getAttribute("user_id");
@@ -80,13 +77,8 @@ public class CreateMeetingController {
 			
 			String zoomAuthUrl = zoomApiIntegration.getAuthorizationUrl(session);
 			System.out.println("ZoomAuthUrl: " + zoomAuthUrl);
-			try {
-				response.sendRedirect(zoomAuthUrl);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			
-			return null;
+
+			mv.setViewName("redirect:" + zoomAuthUrl);
 		} else {
 			String msg = messageSource.getMessage("msg.e.input_something_wrong", null, locale);
 			
@@ -94,15 +86,14 @@ public class CreateMeetingController {
 			mv.setViewName("meetingForm");
 			mv.addObject("searchData", new SearchData());
 			mv.addObject("msg", new MessageDto("E", msg));
-			return mv;
 		}
+		return mv;
 	}
 	
 	// callback
 	@RequestMapping(value = "/create/meeting/redirect", method = { RequestMethod.GET, RequestMethod.POST })
-	public String createMeeting(@RequestParam String code,
-			@RequestParam String state, ModelAndView mv, 
-			RedirectAttributes redirectAttributes) throws IOException {
+	public String createMeeting(@RequestParam String code, @RequestParam String state,
+			RedirectAttributes redirectAttributes) {
 		
 		Integer userId = (Integer)session.getAttribute("user_id");
 		Users user = usersRepository.findById(userId).get();
@@ -134,7 +125,7 @@ public class CreateMeetingController {
 			String msg = messageSource.getMessage("msg.e.meeting_create_failed", null, locale);
 			redirectAttributes.addFlashAttribute("msg", new MessageDto("E", msg));
 			return "redirect:" + session.getAttribute("path");
-		} 
+		}
 	}
 
 }
