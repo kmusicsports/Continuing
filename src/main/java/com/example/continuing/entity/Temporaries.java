@@ -1,7 +1,6 @@
 package com.example.continuing.entity;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.example.continuing.common.Utils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -48,10 +48,7 @@ public class Temporaries {
 		this.email = user.getEmail();
 		this.password = user.getPassword();
 		this.token = token;
-		
-		Date date = new Date();
-		Timestamp timestamp = new Timestamp(date.getTime());
-		this.createdAt = timestamp;
+		this.createdAt = Utils.timestampNow();
 	}
 	
 	public Temporaries(String email, Users user, String token) {
@@ -60,10 +57,7 @@ public class Temporaries {
 		this.email = email;
 		this.password = user.getPassword();
 		this.token = token;
-		
-		Date date = new Date();
-		Timestamp timestamp = new Timestamp(date.getTime());
-		this.createdAt = timestamp;
+		this.createdAt = Utils.timestampNow();
 	}
 	
 }
