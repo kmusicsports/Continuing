@@ -106,5 +106,9 @@ public class Utils {
 
         return dateTime;
     }
-    
+
+    public static Timestamp timestampNow() {
+        java.util.Date date = new java.util.Date();
+        return new Timestamp(date.getTime());
+    }
 }
