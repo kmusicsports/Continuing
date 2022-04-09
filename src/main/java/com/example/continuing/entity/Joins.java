@@ -1,7 +1,6 @@
 package com.example.continuing.entity;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.example.continuing.common.Utils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -41,10 +41,6 @@ public class Joins {
 		
 		this.userId = userId;
 		this.meeting = meeting;
-		
-		Date date= new Date();
-        Timestamp timestamp = new Timestamp(date.getTime());
-        
-        this.createdAt = timestamp;
+        this.createdAt = Utils.timestampNow();
 	}
 }

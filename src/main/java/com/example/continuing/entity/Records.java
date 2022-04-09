@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.example.continuing.common.Utils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -47,9 +48,8 @@ public class Records {
 		this.user = user;
 		this.topic = topic;
 		this.days = 0;
-		
-		Date date= new Date();
-        Timestamp timestamp = new Timestamp(date.getTime());
+
+        Timestamp timestamp = Utils.timestampNow();
 		this.createdAt = timestamp;
 		this.updatedAt = timestamp;
 	}

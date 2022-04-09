@@ -2,7 +2,6 @@ package com.example.continuing.entity;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -16,6 +15,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
+import com.example.continuing.common.Utils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -73,10 +73,8 @@ public class Users {
     	this.password = temporary.getPassword();
     	this.continuousDays = 0;
     	this.language = locale.getLanguage();
-    	
-    	Date date= new Date();
-        Timestamp timestamp = new Timestamp(date.getTime());
 
+        Timestamp timestamp = Utils.timestampNow();
         this.createdAt = timestamp;
         this.updatedAt = timestamp;
     }
