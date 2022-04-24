@@ -66,7 +66,7 @@ public class MeetingService {
 			answer = false;
 		}
 		
-		int duration = Utils.string2Int(meetingData.getEndTime()) - Utils.string2Int(meetingData.getStartTime());
+		int duration = Utils.strToInt(meetingData.getEndTime()) - Utils.strToInt(meetingData.getStartTime());
 		if(meetingData.getNumberPeople() == 2 && (duration < 15 || duration > 40)) {
 			// 複数人でのミーティングにおいて、ミーティング時間が15分以上40分以下でない
 			FieldError fieldError = new FieldError(
@@ -184,7 +184,7 @@ public class MeetingService {
 		if(localDate.isEqual(localToday)) {
 			String strStartTime = stf.format(meeting.getStartTime());
 			String strNow = stf.format(new java.util.Date());
-			int duration = Utils.string2Int(strStartTime) - Utils.string2Int(strNow);
+			int duration = Utils.strToInt(strStartTime) - Utils.strToInt(strNow);
 			if(duration >= 0 && duration <= 15) {
 				Users user = usersRepository.findById(userId).get();
 				Optional<Records> someRecord = recordsRepository.findByUserAndTopic(user, meeting.getTopic());
@@ -195,7 +195,7 @@ public class MeetingService {
 				if (session.getAttribute(strStartTime) == null) {
 					System.out.println("Join");
 					session.setAttribute(strStartTime, "first join in this meeting");
-					session.setMaxInactiveInterval(24 * 60 - Utils.string2Int(strNow));
+					session.setMaxInactiveInterval(24 * 60 - Utils.strToInt(strNow));
 					record.setDays(record.getDays() + 1);
 					
 					java.util.Date date = new java.util.Date();

@@ -39,7 +39,7 @@ public class Utils {
         return true;
     }
     
-    public static int string2Int(String time) {
+    public static int strToInt(String time) {
     	int hour = Integer.valueOf(time.substring(0, 2));
     	int minute = Integer.valueOf(time.substring(3, 5));
     	return hour * 60 + minute;
@@ -102,9 +102,8 @@ public class Utils {
         } catch (ParseException e){
             e.printStackTrace();
         }
-        Timestamp dateTime = new Timestamp(ms);
 
-        return dateTime;
+        return new Timestamp(ms);
     }
 
     public static Timestamp timestampNow() {

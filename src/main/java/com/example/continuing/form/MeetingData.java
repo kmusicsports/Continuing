@@ -75,7 +75,7 @@ public class MeetingData {
 		meetingDto.setTopic(topicName);
 		meetingDto.setStartTime(date.replace("/", "-") + "T" + startTime + ":00");
 		
-		int duration = Utils.string2Int(endTime) - Utils.string2Int(startTime);
+		int duration = Utils.strToInt(endTime) - Utils.strToInt(startTime);
 		meetingDto.setDuration(duration);
 		
 		meetingDto.setPassword(password);
