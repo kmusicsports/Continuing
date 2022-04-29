@@ -14,8 +14,8 @@ public class MeetingsComparator implements Comparator<Meetings> {
 	@Override
     public int compare(Meetings meeting1, Meetings meeting2) {
 
-		Timestamp timestamp1 = Utils.dateAndTime2Timestamp(meeting1.getDate(), meeting1.getStartTime());
-		Timestamp timestamp2 = Utils.dateAndTime2Timestamp(meeting1.getDate(), meeting1.getStartTime());
+		Timestamp timestamp1 = Utils.dateAndTimeToTimestamp(meeting1.getDate(), meeting1.getStartTime());
+		Timestamp timestamp2 = Utils.dateAndTimeToTimestamp(meeting1.getDate(), meeting1.getStartTime());
         return timestamp1.compareTo(timestamp2);
     }
 }

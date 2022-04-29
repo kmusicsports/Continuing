@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -100,7 +99,7 @@ public class MeetingService {
 		}
 		
 		String date = meetingData.getDate().replace("/", "-");
-        LocalDate localeDate = null;
+        LocalDate localeDate;
         try {
         	LocalDate today = LocalDate.now();
         	localeDate = LocalDate.parse(date);
@@ -178,7 +177,7 @@ public class MeetingService {
 		
 		LocalDate localDate = LocalDate.parse(meeting.getDate().toString());
 		LocalDate localToday = LocalDate.now();
-		if(meeting.getHost().getId() == userId && meeting.getJoinList().isEmpty()) {
+		if(meeting.getHost().getId().equals(userId) && meeting.getJoinList().isEmpty()) {
 			return messageSource.getMessage("msg.w.no_join", null, locale);
 		}
 		if(localDate.isEqual(localToday)) {
@@ -221,10 +220,10 @@ public class MeetingService {
 	}
 	
 	public void sendMail(Meetings meeting, Users user, String type, Locale locale) {
-		Deliveries deliveries = null;
+		Deliveries deliveries;
 		Users meetingHost = meeting.getHost();
 		String username = user.getName();
-		String subject = null;
+		String subject;
 		String messageText = "<html><head></head><body>";
 		String meetingInfo = "<br>"
 				+ messageSource.getMessage("mail.msg.meeting_host", null, locale)
@@ -234,9 +233,9 @@ public class MeetingService {
 				+ messageSource.getMessage("option.topic." + meeting.getTopic(), null, locale) 
 				+ "<br>"
 				+ messageSource.getMessage("mail.msg.meeting_date", null, locale)
-				+ " : " + Utils.date2str(meeting.getDate()) + "<br>"
+				+ " : " + Utils.dateToStr(meeting.getDate()) + "<br>"
 				+ messageSource.getMessage("mail.msg.meeting_time", null, locale)
-				+ " : " + Utils.time2str(meeting.getStartTime()) + "～" + Utils.time2str(meeting.getEndTime()) + "<br>"
+				+ " : " + Utils.timeToStr(meeting.getStartTime()) + "～" + Utils.timeToStr(meeting.getEndTime()) + "<br>"
 				+ "<br>";
 		
 		if(type == null) {
@@ -315,41 +314,39 @@ public class MeetingService {
 	}
 	
 	public List<Meetings> getUserMeetingList(Users user) {
-		List<Meetings> userMeetingList = new ArrayList<>();
 		Date today = new Date(System.currentTimeMillis());
 		LocalDate localToday = LocalDate.now();
 		
 		List<Meetings> hostMeetingList = meetingsRepository.findByHostAndDateGreaterThanEqual(user, today);
 		List<Meetings> joinMeetingList = joinService.getJoinMeetingList(user.getId());
-		userMeetingList.addAll(hostMeetingList);
+		List<Meetings> userMeetingList = new ArrayList<>(hostMeetingList);
 		for(Meetings meeting : joinMeetingList) {
 			LocalDate localDate = LocalDate.parse(meeting.getDate().toString());
 			if(!localDate.isBefore(localToday)) {
 				userMeetingList.add(meeting);
 			}
 		}
-		Collections.sort(userMeetingList, new MeetingsComparator());
+		userMeetingList.sort(new MeetingsComparator());
 		
 		return userMeetingList;
 		
 	}
 	
 	public List<Meetings> getTodayMeetingList(Users user) {
-		List<Meetings> todayMeetingList = new ArrayList<>();
 		Date today = new Date(System.currentTimeMillis());
 		LocalDate localToday = LocalDate.now();
 		
 		List<Meetings> todayHostMeetingList = meetingsRepository.findByHostAndDate(user, today);
-		List<Meetings> joinMeetingList = joinService.getJoinMeetingList(user.getId());  
-		
-		todayMeetingList.addAll(todayHostMeetingList);
+		List<Meetings> joinMeetingList = joinService.getJoinMeetingList(user.getId());
+
+		List<Meetings> todayMeetingList = new ArrayList<>(todayHostMeetingList);
 		for(Meetings meeting : joinMeetingList) {
 			LocalDate localDate = LocalDate.parse(meeting.getDate().toString());
 			if(localDate.isEqual(localToday)) {
 				todayMeetingList.add(meeting);
 			}
 		}
-		Collections.sort(todayMeetingList, new MeetingsComparator());
+		todayMeetingList.sort(new MeetingsComparator());
 		
 		return todayMeetingList;
 		

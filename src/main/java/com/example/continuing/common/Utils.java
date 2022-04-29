@@ -45,7 +45,7 @@ public class Utils {
     	return hour * 60 + minute;
     }
     
-    public static Date str2date(String s) {
+    public static Date strToDate(String s) {
     	Date date = null;
         try {
             long ms = sdf.parse(s).getTime();
@@ -69,7 +69,7 @@ public class Utils {
         }
     }
     
-    public static Time str2time(String s) {
+    public static Time strToTime(String s) {
     	Time time = null;
     	try {
             long ms = stf.parse(s).getTime();
@@ -85,15 +85,15 @@ public class Utils {
         return time;
     }
     
-    public static String date2str(Date date) {
+    public static String dateToStr(Date date) {
     	return sdf2.format(date);
     }
     
-    public static String time2str(Time time) {
+    public static String timeToStr(Time time) {
     	return stf.format(time);
     }
     
-    public static Timestamp dateAndTime2Timestamp(Date date, Time time) {
+    public static Timestamp dateAndTimeToTimestamp(Date date, Time time) {
     	String datetime = date + " " + time;
         
     	long ms = new Date(System.currentTimeMillis()).getTime(); 
