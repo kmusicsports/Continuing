@@ -70,4 +70,24 @@ class UtilsTest {
         int actual = Utils.strToInt("09:30");
         assertThat(actual).isEqualTo(570);
     }
+
+    @Nested
+    @DisplayName("[checkTimeFormatメソッドのテスト]")
+    public class NestedTestCheckTimeFormat {
+
+        @Test
+        @DisplayName("正常系")
+        public void success() {
+            boolean actual = Utils.checkTimeFormat("09:30");
+            assertTrue(actual);
+        }
+
+        @Test
+        @DisplayName("異常系")
+        public void fail() {
+            boolean actual = Utils.checkTimeFormat("");
+            assertFalse(actual);
+        }
+    }
+
 }
