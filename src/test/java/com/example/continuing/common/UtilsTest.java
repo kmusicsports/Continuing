@@ -6,9 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.Calendar;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class UtilsTest {
 
@@ -69,6 +70,31 @@ class UtilsTest {
     public void testStrToInt() {
         int actual = Utils.strToInt("09:30");
         assertThat(actual).isEqualTo(570);
+    }
+
+    @Nested
+    @DisplayName("[strToDateメソッドのテスト]")
+    public class NestedTestStrToDate {
+
+        @Test
+        @DisplayName("正常系")
+        public void success() {
+            java.sql.Date actual = Utils.strToDate("2022-04-30");
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.clear();
+            calendar.set(2022, Calendar.APRIL, 30);
+
+            java.sql.Date expected = new java.sql.Date(calendar.getTimeInMillis());
+            assertThat(actual).isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("異常系")
+        public void fail() {
+            java.sql.Date actual = Utils.strToDate("");
+            assertNull(actual);
+        }
     }
 
     @Nested
