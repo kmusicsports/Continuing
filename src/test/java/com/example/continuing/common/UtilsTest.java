@@ -116,4 +116,30 @@ class UtilsTest {
         }
     }
 
+    @Nested
+    @DisplayName("[strToTimeメソッドのテスト]")
+    public class NestedTestStrToTime {
+
+        @Test
+        @DisplayName("正常系")
+        public void success() {
+            java.sql.Time actual = Utils.strToTime("09:30");
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.clear();
+            calendar.set(Calendar.HOUR_OF_DAY, 9);
+            calendar.set(Calendar.MINUTE, 30);
+
+            java.sql.Time expected = new java.sql.Time(calendar.getTimeInMillis());
+            assertThat(actual).isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("異常系")
+        public void fail() {
+            java.sql.Time actual = Utils.strToTime("");
+            assertNull(actual);
+        }
+    }
+    
 }
