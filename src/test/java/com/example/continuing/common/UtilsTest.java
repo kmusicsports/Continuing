@@ -141,5 +141,18 @@ class UtilsTest {
             assertNull(actual);
         }
     }
-    
+
+    @Test
+    public void testDateToStr() {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        calendar.set(2022, Calendar.APRIL, 30);
+
+        java.sql.Date sqlDate = new java.sql.Date(calendar.getTimeInMillis());
+
+        String actual = Utils.dateToStr(sqlDate);
+        String expected = "2022/04/30";
+        assertThat(actual).isEqualTo(expected);
+    }
 }
