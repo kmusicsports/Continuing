@@ -155,4 +155,20 @@ class UtilsTest {
         String expected = "2022/04/30";
         assertThat(actual).isEqualTo(expected);
     }
+
+    @Test
+    public void testTimeToStr() {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        calendar.set(Calendar.HOUR_OF_DAY, 9);
+        calendar.set(Calendar.MINUTE, 30);
+
+        java.sql.Time sqlTime = new java.sql.Time(calendar.getTimeInMillis());
+
+        String actual = Utils.timeToStr(sqlTime);
+        String expected = "09:30";
+        assertThat(actual).isEqualTo(expected);
+    }
+    
 }
