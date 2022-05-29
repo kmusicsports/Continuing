@@ -11,7 +11,6 @@ public class Utils {
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd");
 	private static final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
-	private static final SimpleDateFormat sdtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	public static boolean isAllDoubleSpace(String s) {
         if (s == null || s.equals("")) {
@@ -55,6 +54,7 @@ public class Utils {
         } catch (ParseException e) {
             // 変換できなかった場合
             // date は null のまま
+            e.printStackTrace();
         }
         
         return date;
@@ -62,7 +62,7 @@ public class Utils {
     
     public static boolean checkTimeFormat(String s) {
         try {
-            stf.parse(s).getTime();
+            stf.parse(s);
             return true;
         } catch (ParseException e) {
             return false;
@@ -94,16 +94,8 @@ public class Utils {
     }
     
     public static Timestamp dateAndTimeToTimestamp(Date date, Time time) {
-    	String datetime = date + " " + time;
-        
-    	long ms = new Date(System.currentTimeMillis()).getTime(); 
-        try {
-        	ms = sdtf.parse(datetime).getTime();
-        } catch (ParseException e){
-            e.printStackTrace();
-        }
-
-        return new Timestamp(ms);
+    	String datetime = date.toString() + " " + time.toString();
+        return Timestamp.valueOf(datetime);
     }
 
     public static Timestamp timestampNow() {
