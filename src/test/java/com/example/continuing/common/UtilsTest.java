@@ -170,5 +170,27 @@ class UtilsTest {
         String expected = "09:30";
         assertThat(actual).isEqualTo(expected);
     }
-    
+
+    @Test
+    @DisplayName("[dateAndTimeToTimestampメソッドのテスト]")
+    public void testDateAndTimeToTimestamp() {
+        Calendar calendarDate = Calendar.getInstance();
+        calendarDate.clear();
+        calendarDate.set(2022, Calendar.APRIL, 30);
+        long msDate = calendarDate.getTimeInMillis();
+        java.sql.Date sqlDate = new java.sql.Date(msDate);
+
+        Calendar calendarTime = Calendar.getInstance();
+        calendarTime.clear();
+        calendarTime.set(Calendar.HOUR_OF_DAY, 9);
+        calendarTime.set(Calendar.MINUTE, 30);
+        long msTime = calendarTime.getTimeInMillis();
+        java.sql.Time sqlTime = new java.sql.Time(msTime);
+
+        java.sql.Timestamp actual = Utils.dateAndTimeToTimestamp(sqlDate, sqlTime);
+        java.sql.Timestamp expected = java.sql.Timestamp.valueOf("2022-04-30 09:30:00");
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
 }
