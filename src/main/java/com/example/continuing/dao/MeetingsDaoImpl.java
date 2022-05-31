@@ -37,7 +37,7 @@ public class MeetingsDaoImpl implements MeetingsDao {
         List<Predicate> predicates = new ArrayList<>();
         
         // keyword
-        String keyword = "";
+        String keyword;
         if(searchData.getKeyword().length() > 0) {
         	keyword = "%" + searchData.getKeyword() + "%";
         } else {
@@ -67,7 +67,7 @@ public class MeetingsDaoImpl implements MeetingsDao {
                 .add(builder
                     .and(builder
                         .equal(root.get(Meetings_.DATE),
-                            Utils.str2date(searchData.getDate().replace("/", "-")))));
+                            Utils.strToDate(searchData.getDate().replace("/", "-")))));
         } else {
         	predicates
             .add(builder
@@ -81,7 +81,7 @@ public class MeetingsDaoImpl implements MeetingsDao {
                 .add(builder
                     .and(builder
                         .greaterThanOrEqualTo(root.get(Meetings_.START_TIME),
-                            Utils.str2time(searchData.getStartTime()))));
+                            Utils.strToTime(searchData.getStartTime()))));
         }
         
         // endTime
@@ -90,7 +90,7 @@ public class MeetingsDaoImpl implements MeetingsDao {
                 .add(builder
                     .and(builder
                         .lessThanOrEqualTo(root.get(Meetings_.END_TIME),
-                            Utils.str2time(searchData.getEndTime()))));
+                            Utils.strToTime(searchData.getEndTime()))));
         }
         
         // SELECT作成
@@ -107,9 +107,7 @@ public class MeetingsDaoImpl implements MeetingsDao {
         // １ページあたりの件数
         typedQuery.setMaxResults(pageable.getPageSize());
 
-        Page<Meetings> page = new PageImpl<Meetings>(typedQuery.getResultList(), pageable, totalRows);
-        
-        return page;
+        return new PageImpl<>(typedQuery.getResultList(), pageable, totalRows);
 	}
 
 }

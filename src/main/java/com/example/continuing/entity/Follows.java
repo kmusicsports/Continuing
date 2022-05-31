@@ -1,7 +1,6 @@
 package com.example.continuing.entity;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.example.continuing.common.Utils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -33,14 +33,9 @@ public class Follows {
 	@Column(name = "created_at")
 	private Timestamp createdAt;
 	
-	
 	public Follows(Integer follower_id, Integer followee_id) {
 		this.followerId = follower_id;
 		this.followeeId = followee_id;
-		
-		Date date= new Date();
-        Timestamp timestamp = new Timestamp(date.getTime());
-        
-        this.createdAt = timestamp;
+        this.createdAt = Utils.timestampNow();
 	}
 }

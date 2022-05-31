@@ -11,7 +11,6 @@ public class Utils {
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 	private static final SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy/MM/dd");
 	private static final SimpleDateFormat stf = new SimpleDateFormat("HH:mm");
-	private static final SimpleDateFormat sdtf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	public static boolean isAllDoubleSpace(String s) {
         if (s == null || s.equals("")) {
@@ -39,13 +38,13 @@ public class Utils {
         return true;
     }
     
-    public static int string2Int(String time) {
+    public static int strToInt(String time) {
     	int hour = Integer.valueOf(time.substring(0, 2));
     	int minute = Integer.valueOf(time.substring(3, 5));
     	return hour * 60 + minute;
     }
     
-    public static Date str2date(String s) {
+    public static Date strToDate(String s) {
     	Date date = null;
         try {
             long ms = sdf.parse(s).getTime();
@@ -55,6 +54,7 @@ public class Utils {
         } catch (ParseException e) {
             // 変換できなかった場合
             // date は null のまま
+            e.printStackTrace();
         }
         
         return date;
@@ -62,14 +62,14 @@ public class Utils {
     
     public static boolean checkTimeFormat(String s) {
         try {
-            stf.parse(s).getTime();
+            stf.parse(s);
             return true;
         } catch (ParseException e) {
             return false;
         }
     }
     
-    public static Time str2time(String s) {
+    public static Time strToTime(String s) {
     	Time time = null;
     	try {
             long ms = stf.parse(s).getTime();
@@ -85,26 +85,17 @@ public class Utils {
         return time;
     }
     
-    public static String date2str(Date date) {
+    public static String dateToStr(Date date) {
     	return sdf2.format(date);
     }
     
-    public static String time2str(Time time) {
+    public static String timeToStr(Time time) {
     	return stf.format(time);
     }
     
-    public static Timestamp dateAndTime2Timestamp(Date date, Time time) {
-    	String datetime = date + " " + time;
-        
-    	long ms = new Date(System.currentTimeMillis()).getTime(); 
-        try {
-        	ms = sdtf.parse(datetime).getTime();
-        } catch (ParseException e){
-            e.printStackTrace();
-        }
-        Timestamp dateTime = new Timestamp(ms);
-
-        return dateTime;
+    public static Timestamp dateAndTimeToTimestamp(Date date, Time time) {
+    	String datetime = date.toString() + " " + time.toString();
+        return Timestamp.valueOf(datetime);
     }
 
     public static Timestamp timestampNow() {

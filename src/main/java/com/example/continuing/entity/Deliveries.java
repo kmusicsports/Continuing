@@ -1,7 +1,6 @@
 package com.example.continuing.entity;
 
 import java.sql.Timestamp;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.example.continuing.common.Utils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -51,7 +51,6 @@ public class Deliveries {
 	@Column(name = "updated_at")
 	private Timestamp updatedAt;
 	
-	
 	public Deliveries(Integer userId) {
 		this.userId = userId;
 		this.followed = 1;
@@ -60,13 +59,9 @@ public class Deliveries {
 		this.meetingJoined = 1;
 		this.meetingLeft = 1;
 		this.todayMeetings = 1;
-		
-		Date date = new Date();
-		Timestamp timestamp = new Timestamp(date.getTime());
-		
+
+		Timestamp timestamp = Utils.timestampNow();
 		this.createdAt = timestamp;
 		this.updatedAt = timestamp;
-		
 	}
-	
 }

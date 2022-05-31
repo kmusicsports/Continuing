@@ -75,7 +75,7 @@ public class MeetingData {
 		meetingDto.setTopic(topicName);
 		meetingDto.setStartTime(date.replace("/", "-") + "T" + startTime + ":00");
 		
-		int duration = Utils.string2Int(endTime) - Utils.string2Int(startTime);
+		int duration = Utils.strToInt(endTime) - Utils.strToInt(startTime);
 		meetingDto.setDuration(duration);
 		
 		meetingDto.setPassword(password);
@@ -91,9 +91,9 @@ public class MeetingData {
 		meeting.setMeetingId(jsonObject.get("id").toString());
 		meeting.setUuid(jsonObject.get("uuid").toString());
 		meeting.setTopic(topic);
-		meeting.setDate(Utils.str2date(date.replace("/", "-")));
-		meeting.setStartTime(Utils.str2time(startTime));
-		meeting.setEndTime(Utils.str2time(endTime));
+		meeting.setDate(Utils.strToDate(date.replace("/", "-")));
+		meeting.setStartTime(Utils.strToTime(startTime));
+		meeting.setEndTime(Utils.strToTime(endTime));
 		meeting.setPassword(password);
 		meeting.setAgenda(agenda);
 		meeting.setStartUrl(jsonObject.get("start_url").toString());
@@ -110,9 +110,9 @@ public class MeetingData {
 	public Meetings toEntity(Meetings meeting) {
 		meeting.setTopic(topic);
 		meeting.setNumberPeople(numberPeople);
-		meeting.setDate(Utils.str2date(date.replace("/", "-")));
-		meeting.setStartTime(Utils.str2time(startTime));
-		meeting.setEndTime(Utils.str2time(endTime));
+		meeting.setDate(Utils.strToDate(date.replace("/", "-")));
+		meeting.setStartTime(Utils.strToTime(startTime));
+		meeting.setEndTime(Utils.strToTime(endTime));
 		meeting.setPassword(password);
 		meeting.setAgenda(agenda);
 		

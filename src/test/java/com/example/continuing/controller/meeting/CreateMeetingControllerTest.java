@@ -328,9 +328,9 @@ class CreateMeetingControllerTest {
             assertThat(capturedMeeting.getHost()).isEqualTo(testUser);
             assertThat(capturedMeeting.getTopic()).isEqualTo(testMeetingData.getTopic());
             assertThat(capturedMeeting.getNumberPeople()).isEqualTo(testMeetingData.getNumberPeople());
-            assertThat(capturedMeeting.getDate()).isEqualTo(Utils.str2date(testMeetingData.getDate()));
-            assertThat(capturedMeeting.getStartTime()).isEqualTo(Utils.str2time(testMeetingData.getStartTime()));
-            assertThat(capturedMeeting.getEndTime()).isEqualTo(Utils.str2time(testMeetingData.getEndTime()));
+            assertThat(capturedMeeting.getDate()).isEqualTo(Utils.strToDate(testMeetingData.getDate()));
+            assertThat(capturedMeeting.getStartTime()).isEqualTo(Utils.strToTime(testMeetingData.getStartTime()));
+            assertThat(capturedMeeting.getEndTime()).isEqualTo(Utils.strToTime(testMeetingData.getEndTime()));
             assertThat(capturedMeeting.getPassword()).isEqualTo(testMeetingData.getPassword());
             assertThat(capturedMeeting.getAgenda()).isEqualTo(testMeetingData.getAgenda());
 
