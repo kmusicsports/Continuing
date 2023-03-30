@@ -3,7 +3,7 @@
 
 **URL :** ~~https://initdomain.site/home~~
 
-※公開停止中
+※公開終了
 
 ## アプリ使用時の画面
 ![アプリ使用時の画面](https://user-images.githubusercontent.com/62631497/156865794-ee88e5d9-31e8-429f-8361-5890cea14fa4.png)
